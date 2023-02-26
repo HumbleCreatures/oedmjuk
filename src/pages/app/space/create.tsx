@@ -1,13 +1,28 @@
 import { type NextPage } from "next";
 import AppLayout from "../../../components/AppLayout";
+import { useForm } from '@mantine/form';
+import { TextInput, Button } from '@mantine/core';
 
-const AppStart: NextPage = () => {
-  
+const CreateSpace: NextPage = () => {
+  const form = useForm({
+    initialValues: {
+      name: '',
+    },
+    validate: {
+      name: (value) => (value.length < 2 ? 'Name must have at least 2 letters' : null),
+    },
+  });
+
   return (
     <AppLayout>
-     <div>Settings!</div>
+     <form onSubmit={form.onSubmit(console.log)}>
+      <TextInput label="Name" placeholder="Name" {...form.getInputProps('name')} />
+      <Button type="submit" mt="sm">
+        Submit
+      </Button>
+    </form>
     </AppLayout>
   );
 };
 
-export default AppStart;
+export default CreateSpace;

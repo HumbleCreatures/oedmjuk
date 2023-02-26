@@ -18,6 +18,7 @@ import {
   IconPlus,
   IconSelector,
 } from "@tabler/icons";
+import Link from "next/link";
 import { UserButton } from "./UserButton";
 
 const useStyles = createStyles((theme) => ({
@@ -44,7 +45,7 @@ const useStyles = createStyles((theme) => ({
     marginRight: -theme.spacing.md,
     marginBottom: theme.spacing.md,
     flexGrow: 1,
-    flex: 'none',
+    flex: "none",
   },
 
   searchCode: {
@@ -204,9 +205,11 @@ export function NavbarSearch() {
             Spaces
           </Text>
           <Tooltip label="Create space" withArrow position="right">
-            <ActionIcon variant="default" size={18}>
-              <IconPlus size={12} stroke={1.5} />
-            </ActionIcon>
+            <Link href="/app/space/create">
+              <ActionIcon variant="default" size={18}>
+                <IconPlus size={12} stroke={1.5} />
+              </ActionIcon>
+            </Link>
           </Tooltip>
         </Group>
         <div className={classes.collections}>{collectionLinks}</div>
