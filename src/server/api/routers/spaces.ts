@@ -28,6 +28,11 @@ export const spaceRouter = createTRPCRouter({
   getAllSpaces: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.space.findMany();
   }),
+  getSpace: protectedProcedure
+  .input(z.object({ spaceId: z.string() }))
+  .query(({ ctx, input }) => { 
+    return ctx.prisma.space.findUnique({where:{ id:input.spaceId }});
+  }),
 
   /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
     return ctx.prisma.space.findMany();

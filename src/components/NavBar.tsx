@@ -19,6 +19,7 @@ import {
   IconSelector,
 } from "@tabler/icons";
 import Link from "next/link";
+import { NavbarSpaceList } from "./NavBarSpaceList";
 import { UserButton } from "./UserButton";
 
 const useStyles = createStyles((theme) => ({
@@ -198,22 +199,8 @@ export function NavbarSearch() {
       <Navbar.Section className={classes.section}>
         <div className={classes.mainLinks}>{mainLinks}</div>
       </Navbar.Section>
+      <NavbarSpaceList />
 
-      <Navbar.Section className={classes.sectionSpaces} grow={true}>
-        <Group className={classes.collectionsHeader} position="apart">
-          <Text size="xs" weight={500} color="dimmed">
-            Spaces
-          </Text>
-          <Tooltip label="Create space" withArrow position="right">
-            <Link href="/app/space/create">
-              <ActionIcon variant="default" size={18}>
-                <IconPlus size={12} stroke={1.5} />
-              </ActionIcon>
-            </Link>
-          </Tooltip>
-        </Group>
-        <div className={classes.collections}>{collectionLinks}</div>
-      </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>
         <UserButton
