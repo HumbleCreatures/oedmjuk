@@ -7,6 +7,9 @@ import {
     createStyles,
   } from '@mantine/core';
   import { IconChevronRight } from '@tabler/icons';
+import Link from 'next/link';
+
+  import { api } from "../utils/api";
   
   const useStyles = createStyles((theme) => ({
     user: {
@@ -22,32 +25,32 @@ import {
   }));
   
   interface UserButtonProps extends UnstyledButtonProps {
-    image: string;
     name: string;
-    email: string;
-    icon?: React.ReactNode;
+    userId: string;
+  }
+
+  export function UserButtonWithData ({userId}: {userId: string}) {
+    const user = api.space.getUser.useQuery({userId}).data;
+    if(!user) return (<div>loading...</div>);
+    return <UserButton name={user.name as string} userId={userId} />
   }
   
-  export function UserButton({ image, name, email, icon, ...others }: UserButtonProps) {
+  export function UserButton({ name, userId }: UserButtonProps) {
     const { classes } = useStyles();
   
     return (
-      <UnstyledButton className={classes.user} {...others}>
+      <Link href={`/app/user/${userId}`}>
+      <UnstyledButton className={classes.user} >
         <Group>
-          <Avatar src={image} radius="xl" />
-  
+          
           <div style={{ flex: 1 }}>
             <Text size="sm" weight={500}>
               {name}
             </Text>
-  
-            <Text color="dimmed" size="xs">
-              {email}
-            </Text>
           </div>
   
-          {icon || <IconChevronRight size={14} stroke={1.5} />}
+         <IconChevronRight size={14} stroke={1.5} />
         </Group>
-      </UnstyledButton>
+      </UnstyledButton></Link>
     );
   }

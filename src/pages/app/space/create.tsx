@@ -4,6 +4,7 @@ import { useForm } from "@mantine/form";
 import { TextInput, Button, Container, Title, Alert } from "@mantine/core";
 import { api } from "../../../utils/api";
 import { IconAlertCircle } from '@tabler/icons';
+import { useRouter } from "next/router";
 
 const CreateSpace: NextPage = () => {
   const form = useForm({
@@ -16,7 +17,15 @@ const CreateSpace: NextPage = () => {
     },
   });
 
-  const mutation = api.space.createSpace.useMutation();
+  const router = useRouter();
+
+  const mutation = api.space.createSpace.useMutation({
+    onSuccess(data) {
+      void utils.space.getAllSpaces.invalidate();
+      void router.push(`/app/space/${data.id}`);
+    },
+  });
+
   const utils = api.useContext();
   return (
     <AppLayout>
@@ -26,7 +35,6 @@ const CreateSpace: NextPage = () => {
         <form
           onSubmit={form.onSubmit((values) => {
             mutation.mutate(values);
-            void utils.space.invalidate();
           })}
         >
           <TextInput

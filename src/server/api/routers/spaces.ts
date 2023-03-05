@@ -6,7 +6,7 @@ export const spaceRouter = createTRPCRouter({
   createSpace: protectedProcedure
   .input(z.object({ name: z.string() }))
   .mutation(async ({ctx, input}) => {
-    await ctx.prisma.$transaction([ 
+    const space = await ctx.prisma.$transaction([ 
       ctx.prisma.space.create({
         data: {
           name: input.name,
@@ -18,12 +18,8 @@ export const spaceRouter = createTRPCRouter({
         }
       })
     ]);
-    const space = await ctx.prisma.space.create({
-      data: {
-        name: input.name,
-      }
-    });
-    return space;
+
+    return space[0];
   }),
   getAllSpaces: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.space.findMany();
@@ -31,8 +27,16 @@ export const spaceRouter = createTRPCRouter({
   getSpace: protectedProcedure
   .input(z.object({ spaceId: z.string() }))
   .query(({ ctx, input }) => { 
-    return ctx.prisma.space.findUnique({where:{ id:input.spaceId }});
+    return ctx.prisma.space.findUnique({where:{ id:input.spaceId }, include: {
+      spaceMembers: true,
+    },});
   }),
+  getUser: protectedProcedure
+  .input(z.object({ userId: z.string() }))
+  .query(({ ctx, input }) => { 
+    return ctx.prisma.user.findUnique({where:{ id:input.userId }});
+  }),
+
 
   /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
     return ctx.prisma.space.findMany();
