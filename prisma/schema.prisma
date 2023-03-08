@@ -48,14 +48,16 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String?       @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  spaceMember   SpaceMember[]
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  spaceMember    SpaceMember[]
+  Content        Content[]
+  CalendarEvents CalendarEvent[]
 }
 
 model VerificationToken {
@@ -67,11 +69,13 @@ model VerificationToken {
 }
 
 model Space {
-  id          String        @id @default(cuid())
-  name        String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  spaceMembers SpaceMember[]
+  id             String          @id @default(cuid())
+  name           String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  spaceMembers   SpaceMember[]
+  Content        Content[]
+  CalendarEvents CalendarEvent[]
 }
 
 model SpaceMember {
@@ -83,4 +87,30 @@ model SpaceMember {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   leftAt    DateTime?
+}
+
+model Content {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  body      String
+  space     Space    @relation(fields: [spaceId], references: [id])
+  spaceId   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+}
+
+model CalendarEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  body      String
+  startAt   DateTime
+  endAt     DateTime
+  space     Space    @relation(fields: [spaceId], references: [id])
+  spaceId   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
 }

@@ -3,7 +3,6 @@ import { type NextPage } from "next";
 import AppLayout from "../../../components/AppLayout";
 import { Container, Title } from "@mantine/core";
 import { api } from "../../../utils/api";
-import { UserButtonWithData } from '../../../components/UserButton';
 
 function UserView({userId}: {userId: string}) {
   const user = api.space.getUser.useQuery({userId}).data;
