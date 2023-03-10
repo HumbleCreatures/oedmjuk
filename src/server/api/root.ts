@@ -1,6 +1,8 @@
 import { createTRPCRouter } from "./trpc";
-import { exampleRouter } from "./routers/example";
-import { spaceRouter } from "./routers/spaces";
+import { spaceRouter } from "./routers/spaceRouter";
+import { contentRouter } from "./routers/contentRouter";
+import { userRouter } from "./routers/user";
+import { calendarEventRouter } from "./routers/calendarEventRouter";
 
 /**
  * This is the primary router for your server.
@@ -8,8 +10,11 @@ import { spaceRouter } from "./routers/spaces";
  * All routers added in /api/routers should be manually added here
  */
 export const appRouter = createTRPCRouter({
-  example: exampleRouter,
-  space: spaceRouter
+  space: spaceRouter,
+  content: contentRouter,
+  user: userRouter,
+  calendarEvents: calendarEventRouter
+
 });
 
 // export type definition of API

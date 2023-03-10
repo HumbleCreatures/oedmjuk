@@ -5,7 +5,7 @@ import { Container, Title } from "@mantine/core";
 import { api } from "../../../utils/api";
 
 function UserView({userId}: {userId: string}) {
-  const user = api.space.getUser.useQuery({userId}).data;
+  const user = api.user.getUser.useQuery({userId}).data;
   if(!user) return (<div>loading...</div>)
 
   return (

@@ -58,6 +58,7 @@ model User {
   spaceMember    SpaceMember[]
   Content        Content[]
   CalendarEvents CalendarEvent[]
+  UserCalendar   UserCalendar[]
 }
 
 model VerificationToken {
@@ -76,6 +77,19 @@ model Space {
   spaceMembers   SpaceMember[]
   Content        Content[]
   CalendarEvents CalendarEvent[]
+  SpaceFeedItem  SpaceFeedItem[]
+}
+
+model SpaceFeedItem {
+  id              String         @id @default(cuid())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  space           Space          @relation(fields: [spaceId], references: [id])
+  spaceId         String
+  content         Content?       @relation(fields: [contentId], references: [id])
+  contentId       String?
+  calendarEvent   CalendarEvent? @relation(fields: [calendarEventId], references: [id])
+  calendarEventId String?
 }
 
 model SpaceMember {
@@ -90,27 +104,42 @@ model SpaceMember {
 }
 
 model Content {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String
-  body      String
-  space     Space    @relation(fields: [spaceId], references: [id])
-  spaceId   String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+  id            String          @id @default(cuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  title         String
+  body          String
+  space         Space           @relation(fields: [spaceId], references: [id])
+  spaceId       String
+  author        User            @relation(fields: [authorId], references: [id])
+  authorId      String
+  spaceFeedItem SpaceFeedItem[]
 }
 
 model CalendarEvent {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String
-  body      String
-  startAt   DateTime
-  endAt     DateTime
-  space     Space    @relation(fields: [spaceId], references: [id])
-  spaceId   String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+  id            String          @id @default(cuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  title         String
+  body          String
+  startAt       DateTime
+  endAt         DateTime
+  space         Space           @relation(fields: [spaceId], references: [id])
+  spaceId       String
+  author        User            @relation(fields: [authorId], references: [id])
+  authorId      String
+  spaceFeedItem SpaceFeedItem[]
+  userCalendar  UserCalendar[]
+}
+
+model UserCalendar {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  startAt         DateTime
+  endAt           DateTime
+  calendarEvent   CalendarEvent @relation(fields: [calendarEventId], references: [id])
+  calendarEventId String
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String
 }

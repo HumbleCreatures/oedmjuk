@@ -55,9 +55,13 @@ const useStyles = createStyles((theme) => ({
 
 export function NavbarSpaceList() {
   const { classes } = useStyles();
-  const spaces = api.space.getAllSpaces.useQuery().data;
-  if (!spaces) return null;
-  const spaceLinks = spaces.map((space) => (
+  const spaceResult = api.space.getAllSpaces.useQuery();
+
+  if(spaceResult.isLoading) {
+    return <div>...Loading</div>
+  }
+
+  const spaceLinks = spaceResult.data && spaceResult.data.map((space) => (
     <Link key={space.id} href={`/app/space/${space.id}`}>
       <div className={classes.collectionLink}>
         <span style={{ marginRight: 9, fontSize: 16 }}>🍱</span> {space.name}
