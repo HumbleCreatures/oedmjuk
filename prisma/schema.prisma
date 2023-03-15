@@ -114,6 +114,29 @@ model Content {
   author        User            @relation(fields: [authorId], references: [id])
   authorId      String
   spaceFeedItem SpaceFeedItem[]
+  order         Int
+}
+
+model ContentHistory {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  body      String
+  content   Content  @relation(fields: [contentId], references: [id])
+  contentId String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  body      String
+  content   Content  @relation(fields: [contentId], references: [id])
+  contentId String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
 }
 
 model CalendarEvent {
@@ -130,6 +153,18 @@ model CalendarEvent {
   authorId      String
   spaceFeedItem SpaceFeedItem[]
   userCalendar  UserCalendar[]
+  proposals     Proposal[]
+}
+
+model CalendarEventAttendee {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  calendarEvent   CalendarEvent @relation(fields: [calendarEventId], references: [id])
+  calendarEventId String
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String
+  isAttending     Boolean
 }
 
 model UserCalendar {
@@ -142,4 +177,111 @@ model UserCalendar {
   calendarEventId String
   user            User          @relation(fields: [userId], references: [id])
   userId          String
+}
+
+model Proposal {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  body      String
+  space     Space    @relation(fields: [spaceId], references: [id])
+  spaceId   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  status    String @default("Created")
+  proposalType    String @default("Internal")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  proposal  Proposal @relation(fields: [proposalId], references: [id])
+  proposalId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  yes       Boolean
+  myPick    User?     @relation(fields: [myPickId], references: [id])
+  myPickId  String
+}
+
+model Objection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  proposal  Proposal @relation(fields: [proposalId], references: [id])
+  proposalId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  body      String
+  resolved  DateTime?
+  resolvedBy User?     @relation(fields: [resolvedById], references: [id])
+  resolvedById String
+}
+
+model FeedbackRound {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creator      User     @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  title     String
+  body      String
+  columns  String[]
+}
+
+model FeedbackItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  feedbackRound FeedbackRound @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId String
+  body      String
+  creator      User     @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  column    String @default("Created")
+  order     Int
+  finished  Boolean @default(false)
+  finishedAt DateTime?
+  finishedBy User?     @relation(fields: [finishedById], references: [id])
+  finishedById String
+}
+
+model Selection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  body      String
+  status    String @default("Created")
+}
+
+model SelectionAlternatives {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  selection Selection @relation(fields: [selectionId], references: [id])
+  selectionId String
+  creator      User     @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  title     String
+  body      String
+  order     Int
+}
+
+
+model SelectionVoteEntry {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  selection Selection @relation(fields: [selectionId], references: [id])
+  selectionId String
+  value     Int
+  alternative SelectionAlternatives @relation(fields: [alternativeId], references: [id])
+  alternativeId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
 }
