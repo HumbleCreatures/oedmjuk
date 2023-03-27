@@ -3,6 +3,7 @@ import { spaceRouter } from "./routers/spaceRouter";
 import { contentRouter } from "./routers/contentRouter";
 import { userRouter } from "./routers/user";
 import { calendarEventRouter } from "./routers/calendarEventRouter";
+import { proposalRouter } from "./routers/proposalRouter";
 
 /**
  * This is the primary router for your server.
@@ -13,8 +14,8 @@ export const appRouter = createTRPCRouter({
   space: spaceRouter,
   content: contentRouter,
   user: userRouter,
-  calendarEvents: calendarEventRouter
-
+  calendarEvents: calendarEventRouter,
+  proposal: proposalRouter
 });
 
 // export type definition of API

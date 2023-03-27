@@ -1,19 +1,31 @@
-import { RichTextEditor, Link } from '@mantine/tiptap';
-import { useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 
-function Demo() {
+import { useEditor } from '@tiptap/react';
+import { StarterKit } from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import { RichTextEditor } from '@mantine/tiptap';
+import { MutableRefObject, useEffect } from 'react';
+
+export type VoidFunc = () => void;
+
+export function  ARichTextEditor({ onUpdate, clearForm }: { onUpdate: (html: string) => void, clearForm?: MutableRefObject<VoidFunc> | undefined }) {
+
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Link,
-    ],
+    extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],
     content: '',
+    onUpdate({ editor }) {
+      onUpdate(editor.getHTML());
+    },
   });
 
-  return (
-    <RichTextEditor editor={editor} >
-      <RichTextEditor.Toolbar sticky stickyOffset={60}>
+  useEffect(() => {
+    if(clearForm) {
+      clearForm.current = () => {
+      editor?.commands.clearContent();
+      }
+    }
+  }, [clearForm,editor ])
+  return (<RichTextEditor editor={editor}>
+          <RichTextEditor.Toolbar sticky stickyOffset={60}>
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />
           <RichTextEditor.Italic />
@@ -39,8 +51,9 @@ function Demo() {
 
 
       </RichTextEditor.Toolbar>
+            <RichTextEditor.Content />
+          </RichTextEditor>
 
-      <RichTextEditor.Content />
-    </RichTextEditor>
   );
-}
+} 
+

@@ -63,7 +63,7 @@ model User {
   proposalObjectionResolves Objection[]             @relation("ProposalObjectionResolves")
   feedbackItems             FeedbackItem[]          @relation("FeedbackItem")
   feedbackResolves          FeedbackItem[]          @relation("FeedbackResolves")
-  ContentHistory            ContentHistory[]
+  ContentVersion            ContentVersion[]
   Comment                   Comment[]
   CalendarEvent             CalendarEvent[]
   CalendarEventAttendee     CalendarEventAttendee[]
@@ -74,6 +74,7 @@ model User {
   SelectionAlternatives     SelectionAlternatives[]
   SelectionVoteEntry        SelectionVoteEntry[]
   DataIndex                 DataIndex[]
+  ContentSignature          ContentSignature[]
 }
 
 model VerificationToken {
@@ -101,12 +102,15 @@ model SpaceFeedItem {
   id              String         @id @default(cuid())
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  feedEventType   String
   space           Space          @relation(fields: [spaceId], references: [id])
   spaceId         String
   content         Content?       @relation(fields: [contentId], references: [id])
   contentId       String?
   calendarEvent   CalendarEvent? @relation(fields: [calendarEventId], references: [id])
   calendarEventId String?
+  proposal        Proposal?      @relation(fields: [proposalId], references: [id])
+  proposalId      String?
 }
 
 model SpaceMember {
@@ -132,19 +136,30 @@ model Content {
   authorId       String
   spaceFeedItem  SpaceFeedItem[]
   order          Int
-  ContentHistory ContentHistory[]
+  ContentVersion ContentVersion[]
   Comment        Comment[]
 }
 
-model ContentHistory {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  body      String
-  content   Content  @relation(fields: [contentId], references: [id])
-  contentId String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+model ContentVersion {
+  id               String             @id @default(cuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  body             String
+  content          Content            @relation(fields: [contentId], references: [id])
+  contentId        String
+  author           User               @relation(fields: [authorId], references: [id])
+  authorId         String
+  ContentSignature ContentSignature[]
+}
+
+model ContentSignature {
+  id               String         @id @default(cuid())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  contentVersion   ContentVersion @relation(fields: [contentVersionId], references: [id])
+  contentVersionId String
+  signatory        User           @relation(fields: [signatoryId], references: [id])
+  signatoryId      String
 }
 
 model Comment {
@@ -200,21 +215,22 @@ model UserCalendar {
 }
 
 model Proposal {
-  id              String         @id @default(cuid())
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id              String          @id @default(cuid())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   title           String
   body            String
-  space           Space          @relation(fields: [spaceId], references: [id])
+  space           Space           @relation(fields: [spaceId], references: [id])
   spaceId         String
-  author          User           @relation(fields: [authorId], references: [id])
+  author          User            @relation(fields: [authorId], references: [id])
   authorId        String
-  status          String         @default("Created")
-  proposalType    String         @default("Internal")
+  proposalState   String          @default("ProposalCreated")
+  proposalType    String          @default("Internal")
   votes           ProposalVote[]
   objections      Objection[]
-  CalendarEvent   CalendarEvent? @relation(fields: [calendarEventId], references: [id])
+  calendarEvent   CalendarEvent?  @relation(fields: [calendarEventId], references: [id])
   calendarEventId String?
+  spaceFeedItem   SpaceFeedItem[]
 }
 
 model ProposalVote {
@@ -231,17 +247,18 @@ model ProposalVote {
 }
 
 model Objection {
-  id           String    @id @default(cuid())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  proposal     Proposal  @relation(fields: [proposalId], references: [id])
-  proposalId   String
-  user         User      @relation(name: "ProposalObjection", fields: [userId], references: [id])
-  userId       String
-  body         String
-  resolved     DateTime?
-  resolvedBy   User?     @relation(name: "ProposalObjectionResolves", fields: [resolvedById], references: [id])
-  resolvedById String
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  proposal        Proposal  @relation(fields: [proposalId], references: [id])
+  proposalId      String
+  author            User      @relation(name: "ProposalObjection", fields: [authorId], references: [id])
+  authorId          String
+  body            String
+  resolvedAt        DateTime?
+  resolvedBy      User?     @relation(name: "ProposalObjectionResolves", fields: [resolvedById], references: [id])
+  resolvedById    String?
+  resolvedComment String?
 }
 
 model FeedbackRound {

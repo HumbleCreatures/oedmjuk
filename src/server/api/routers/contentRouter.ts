@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -12,30 +13,25 @@ export const contentRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const space = await ctx.prisma.$transaction([
-        ctx.prisma.content.create({
+        return ctx.prisma.content.create({
           data: {
             title: input.title,
             body: input.body,
             spaceId: input.spaceId,
             authorId: ctx.session.user.id,
+            order: 0,
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
+                feedEventType: FeedEventTypes.ContentCreated,
               },
-            },
-            
+            },            
           },
-        }),
-      ]);
-
-      return space[0];
+        })
     }),
   getContent: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
-      console.log('--------------------------------------');
-      console.log(input.itemId);
       const content = await ctx.prisma.content.findUnique({
         where: { id: input.itemId }
       });

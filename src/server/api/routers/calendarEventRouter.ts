@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { FeedEventTypes } from "../../../utils/enums";
 
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const calendarEventRouter = createTRPCRouter({
   createCalendarEvent: protectedProcedure
@@ -14,7 +15,7 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const space = await ctx.prisma.$transaction([
+      const items = await ctx.prisma.$transaction([
         ctx.prisma.calendarEvent.create({
           data: {
             title: input.title,
@@ -26,6 +27,7 @@ export const calendarEventRouter = createTRPCRouter({
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
+                feedEventType: FeedEventTypes.CalendarEventCreated,
               },
             },
             userCalendar: {
@@ -39,7 +41,7 @@ export const calendarEventRouter = createTRPCRouter({
         }),
       ]);
 
-      return space[0];
+      return items[0];
     }),
   getCalendarEvent: protectedProcedure
     .input(z.object({ itemId: z.string() }))
@@ -53,24 +55,5 @@ export const calendarEventRouter = createTRPCRouter({
       
       return calendarEvent;
     })
-  /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
 
-  getMySpaces: protectedProcedure
-  .query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getSpace: protectedProcedure
-  .input(z.object({ id: z.string() }))
-  .query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getSpaceMembers: protectedProcedure
-  .input(z.object({ spaceId: z.string() }))
-  .query(({ ctx }) => { 
-    return ctx.prisma.spaceMembership.findMany();
-  }),*/
 });

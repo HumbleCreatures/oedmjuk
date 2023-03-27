@@ -30,7 +30,7 @@ import Link from 'next/link';
   }
 
   export function UserButtonWithData ({userId}: {userId: string}) {
-    const user = api.space.getUser.useQuery({userId}).data;
+    const user = api.user.getUser.useQuery({userId}).data;
     if(!user) return (<div>loading...</div>);
     return <UserButton name={user.name as string} userId={userId} />
   }

@@ -4,6 +4,8 @@ import { api } from "../utils/api";
 
 export function SpaceFeed({spaceId}: {spaceId: string }) {
     const feedItems = api.space.getSpaceFeed.useQuery({spaceId:spaceId}).data;
+
+    console.log(feedItems);
     
     const itemCards = feedItems?.map((item) => {
         if(item.content){
@@ -14,11 +16,7 @@ export function SpaceFeed({spaceId}: {spaceId: string }) {
                 <Text fz="lg" fw={500}>
                     {item.content.title }
                 </Text>
-                
                 </Group>
-                <Text fz="sm" mt="xs">
-                <div dangerouslySetInnerHTML={{__html: item.content.body}} />
-                </Text>
             </Card.Section>
             </Card>
             </Link>
@@ -43,6 +41,21 @@ export function SpaceFeed({spaceId}: {spaceId: string }) {
                 <Text fz="sm" mt="xs">
                 <div dangerouslySetInnerHTML={{__html: item.calendarEvent.body}} />
                 </Text>
+            </Card.Section>
+            </Card>
+            </Link>
+        }
+
+        if(item.proposal){
+            return <Link href={`/app/space/${item.spaceId}/proposal/${item.proposal.id}`} key={item.id}>
+                <Card withBorder shadow="sm" radius="md" >
+                <Card.Section mt="md" inheritPadding py="xs">
+                <Group position="apart">
+                <Text fz="lg" fw={500}>
+                    {item.proposal.title }
+                </Text>
+        
+                </Group>
             </Card.Section>
             </Card>
             </Link>
