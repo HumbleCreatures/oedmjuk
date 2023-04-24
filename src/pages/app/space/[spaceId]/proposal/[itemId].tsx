@@ -6,7 +6,8 @@ import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import { ObjectionEditor } from "../../../../../components/ObjectionEditor";
 import { ListOfObjections } from "../../../../../components/ObjectionList";
-import { Button } from "@mantine/core";
+import { Button, Radio, Group } from "@mantine/core";
+import { ProposalStates } from "../../../../../utils/enums";
 
 function ProposalView({
   spaceId,
@@ -17,6 +18,11 @@ function ProposalView({
 }) {
   const data = api.space.getSpace.useQuery({ spaceId }).data;
   const proposalResult = api.proposal.getProposal.useQuery({ proposalId });
+  const closeObjectionRound = api.proposal.closeObjectionRound.useMutation({
+    onSuccess: () => {
+      void proposalResult.refetch();
+    }
+  });
   if (!data || !data.space) return <div>loading...</div>;
   const { space, isMember } = data;
 
@@ -45,11 +51,31 @@ function ProposalView({
         )}
       </Container>
       <Container size="xs">
-        <ObjectionEditor proposalId={proposalId} />
-        <ListOfObjections objections={proposalResult.data?.objections || []} />
-        {proposalResult.data?.objections.filter(o => !o.resolvedAt).length === 0 ? <Button>Start voting round</Button> : <Button disabled={true}>Start voting round</Button>}
-        
+        {proposalResult.data?.proposalState === ProposalStates.ProposalCreated && <ObjectionEditor proposalId={proposalId} /> }
+        <ListOfObjections objections={proposalResult.data?.objections || []} /> 
+        {proposalResult.data?.objections.filter(o => !o.resolvedAt).length === 0 ? 
+          <Button onClick={() => closeObjectionRound.mutate({proposalId})}>Start voting round</Button> : 
+          <Button disabled={true}>Start voting round</Button>}        
       </Container>
+      
+      {proposalResult.data?.proposalState === ProposalStates.ObjectionsResolved && <Container size="xs">
+        <Text fz="lg" fw={500}> 
+        The voting round is now open.
+        <Radio.Group
+      name="favoriteFramework"
+      label="Vote to accept or deny the proposal"
+      description="Make your voice heard"
+    >
+      <Group mt="xs">
+        <Radio value="Accept" label="Accept" />
+        <Radio value="Deny" label="Deny" />
+        <Radio value="Ignore" label="Ignore" />
+      </Group>
+    </Radio.Group>
+    <Button>Vote</Button>
+        </Text>      
+      </Container> }
+
     </AppLayout>
   );
 }

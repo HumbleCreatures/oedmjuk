@@ -74,7 +74,7 @@ export const proposalRouter = createTRPCRouter({
     closeObjectionRound: protectedProcedure
     .input(
       z.object({
-        comment: z.string(),
+        comment: z.string().optional(),
         proposalId: z.string(),
       })
     )
@@ -88,7 +88,6 @@ export const proposalRouter = createTRPCRouter({
 
       const openObjections = proposal.objections.filter(o => !o.resolvedAt);
       if(openObjections.length > 0) throw new Error("There are still open objections");
-
 
       return await ctx.prisma.proposal.update({
         where: { 
