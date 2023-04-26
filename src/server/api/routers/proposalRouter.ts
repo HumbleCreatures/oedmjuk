@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeedEventTypes, ProposalStates } from "../../../utils/enums";
+import { FeedEventTypes, ProposalStates, VoteValue } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -89,14 +89,61 @@ export const proposalRouter = createTRPCRouter({
       const openObjections = proposal.objections.filter(o => !o.resolvedAt);
       if(openObjections.length > 0) throw new Error("There are still open objections");
 
+      const allSpaceUsers = await ctx.prisma.spaceMember.findMany({
+        where: {
+          spaceId: proposal.spaceId,
+        }
+       });
+
       return await ctx.prisma.proposal.update({
         where: { 
           id: input.proposalId
         },
         data: {
-          proposalState: ProposalStates.ObjectionsResolved, 
+          proposalState: ProposalStates.ObjectionsResolved,
+          participants: {
+            create: allSpaceUsers.map(u => ({ participantId: u.userId }))
+          }
         },
       });
+    }),
+    castVote: protectedProcedure
+    .input(
+      z.object({
+        proposalId: z.string(),
+        voteValue: z.enum([VoteValue.Accept, VoteValue.Reject, VoteValue.Abstain]),
+        myPickId: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const proposal = await ctx.prisma.proposal.findUnique({
+        where: { id: input.proposalId },
+        include: { participants: true }
+      });
+
+      if(!proposal) throw new Error("Objection not found");
+
+      if(proposal.proposalState !== ProposalStates.ObjectionsResolved) throw new Error("Proposal not in votable state");
+      if(input.myPickId && !proposal.participants.some(p => p.participantId === input.myPickId)) throw new Error("Your myPick is invalid.");
+      
+      return await ctx.prisma.proposalVote.create({
+        data: {
+          proposalId: input.proposalId,
+          myPickId: input.myPickId,
+          userId: ctx.session.user.id,
+          accept: input.voteValue === VoteValue.Abstain ? undefined : input.voteValue === VoteValue.Accept,
+        }
+      });
+    }),
+    getUserVote: protectedProcedure
+    .input(z.object({ proposalId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.prisma.proposalVote.findMany({
+        where: { proposalId: input.proposalId, userId: ctx.session.user.id },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return result[0];
     }),
     getSpaceProposals: protectedProcedure
     .input(z.object({ spaceId: z.string() }))
@@ -114,7 +161,7 @@ export const proposalRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.proposal.findUnique({
         where: { id: input.proposalId },
-        include: { objections: true }
+        include: { objections: true, participants:true }
       });
     }),
 

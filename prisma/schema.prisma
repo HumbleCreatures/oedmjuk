@@ -75,6 +75,7 @@ model User {
   SelectionVoteEntry        SelectionVoteEntry[]
   DataIndex                 DataIndex[]
   ContentSignature          ContentSignature[]
+  ProposalParticipant       ProposalParticipant[]
 }
 
 model VerificationToken {
@@ -215,22 +216,33 @@ model UserCalendar {
 }
 
 model Proposal {
-  id              String          @id @default(cuid())
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id              String                @id @default(cuid())
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
   title           String
   body            String
-  space           Space           @relation(fields: [spaceId], references: [id])
+  space           Space                 @relation(fields: [spaceId], references: [id])
   spaceId         String
-  author          User            @relation(fields: [authorId], references: [id])
+  author          User                  @relation(fields: [authorId], references: [id])
   authorId        String
-  proposalState   String          @default("ProposalCreated")
-  proposalType    String          @default("Internal")
+  proposalState   String                @default("ProposalCreated")
+  proposalType    String                @default("Internal")
   votes           ProposalVote[]
+  participants    ProposalParticipant[]
   objections      Objection[]
-  calendarEvent   CalendarEvent?  @relation(fields: [calendarEventId], references: [id])
+  calendarEvent   CalendarEvent?        @relation(fields: [calendarEventId], references: [id])
   calendarEventId String?
   spaceFeedItem   SpaceFeedItem[]
+}
+
+model ProposalParticipant {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  proposal      Proposal @relation(fields: [proposalId], references: [id])
+  proposalId    String
+  participant   User     @relation(fields: [participantId], references: [id])
+  participantId String
 }
 
 model ProposalVote {
@@ -241,9 +253,9 @@ model ProposalVote {
   proposalId String
   user       User     @relation(name: "ProposalVote", fields: [userId], references: [id])
   userId     String
-  yes        Boolean
+  accept     Boolean?
   myPick     User?    @relation(name: "ProposalPick", fields: [myPickId], references: [id])
-  myPickId   String
+  myPickId   String?
 }
 
 model Objection {
@@ -252,10 +264,10 @@ model Objection {
   updatedAt       DateTime  @updatedAt
   proposal        Proposal  @relation(fields: [proposalId], references: [id])
   proposalId      String
-  author            User      @relation(name: "ProposalObjection", fields: [authorId], references: [id])
-  authorId          String
+  author          User      @relation(name: "ProposalObjection", fields: [authorId], references: [id])
+  authorId        String
   body            String
-  resolvedAt        DateTime?
+  resolvedAt      DateTime?
   resolvedBy      User?     @relation(name: "ProposalObjectionResolves", fields: [resolvedById], references: [id])
   resolvedById    String?
   resolvedComment String?

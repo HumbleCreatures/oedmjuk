@@ -10,3 +10,9 @@ export enum ProposalStates {
     VoteClosed = 'ProposalEventCreated',
     ProposalClosed = 'ProposalClosed',
 }
+
+export enum VoteValue {
+    Accept = 'Accept',
+    Reject = 'Reject',
+    Abstain = 'Abstain',
+}
