@@ -8,7 +8,7 @@ export enum FeedEventTypes {
 export enum ProposalStates { 
     ProposalCreated = 'ProposalCreated',
     ObjectionsResolved = 'ObjectionsResolved',
-    VoteClosed = 'ProposalEventCreated',
+    VoteClosed = 'VoteClosed',
     ProposalClosed = 'ProposalClosed',
 }
 

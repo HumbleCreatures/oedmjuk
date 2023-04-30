@@ -114,7 +114,7 @@ model SpaceFeedItem {
   calendarEventId String?
   proposal        Proposal?      @relation(fields: [proposalId], references: [id])
   proposalId      String?
-  Selection       Selection?     @relation(fields: [selectionId], references: [id])
+  selection       Selection?     @relation(fields: [selectionId], references: [id])
   selectionId     String?
 }
 

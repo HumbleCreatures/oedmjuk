@@ -60,6 +60,21 @@ export function SpaceFeed({spaceId}: {spaceId: string }) {
             </Card>
             </Link>
         }
+
+        if(item.selection){
+            return <Link href={`/app/space/${item.spaceId}/selection/${item.selection.id}`} key={item.id}>
+                <Card withBorder shadow="sm" radius="md" >
+                <Card.Section mt="md" inheritPadding py="xs">
+                <Group position="apart">
+                <Text fz="lg" fw={500}>
+                    {item.selection.title }
+                </Text>
+        
+                </Group>
+            </Card.Section>
+            </Card>
+            </Link>
+        }
     });
 
     return <>{itemCards}</>

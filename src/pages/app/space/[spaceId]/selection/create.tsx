@@ -29,7 +29,7 @@ function SelectionEditorComponent({spaceId}: {spaceId: string}) {
   const mutation = api.selection.createSelection.useMutation({
     onSuccess(data) {
       void utils.proposal.getSpaceProposals.invalidate();
-      void router.push(`/app/space/${space.id}/proposal/${data.id}`);
+      void router.push(`/app/space/${space.id}/selection/${data.id}`);
     },
   });
 

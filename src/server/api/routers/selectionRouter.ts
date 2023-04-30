@@ -1,13 +1,10 @@
 import { z } from "zod";
 import {
   FeedEventTypes,
-  ProposalStates,
   SelectionStates,
 } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-
-
 
 export const selectionRouter = createTRPCRouter({
   createSelection: protectedProcedure
@@ -53,7 +50,7 @@ export const selectionRouter = createTRPCRouter({
         },
       });
     }),
-  
+
   startBuyingRound: protectedProcedure
     .input(
       z.object({
@@ -69,7 +66,6 @@ export const selectionRouter = createTRPCRouter({
 
       if (!selection) throw new Error("Selection not found");
 
-    
       if (selection.alternatives.length < 3)
         throw new Error("A selection needs at least 3 alternatives");
 
@@ -85,7 +81,7 @@ export const selectionRouter = createTRPCRouter({
         },
         data: {
           status: SelectionStates.BuyingStarted,
-          votingCapital: selection.alternatives.length ^ 2,
+          votingCapital: Math.pow(selection.alternatives.length, 2),
           participants: {
             create: allSpaceUsers.map((u) => ({ participantId: u.userId })),
           },
@@ -95,62 +91,88 @@ export const selectionRouter = createTRPCRouter({
   buyVotes: protectedProcedure
     .input(
       z.object({
-        selectionId: z.string(),
         alternativeId: z.string(),
         numberOfVotes: z.number(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const selection = await ctx.prisma.selection.findUnique({
-        where: { id: input.selectionId },
-        include: { participants: true },
+      const alternative = await ctx.prisma.selectionAlternative.findUnique({
+        where: { id: input.alternativeId },
+        include: {
+          selection: {
+            include: { participants: true },
+          },
+        },
       });
 
-      if (!selection) throw new Error("Selection not found");
+      if (!alternative) throw new Error("Alternative not found");
 
-      if (selection.status !== SelectionStates.BuyingStarted) throw new Error("Selection not in buying vote s state");
+      if (alternative.selection.status !== SelectionStates.BuyingStarted)
+        throw new Error("Selection not in buying vote s state");
 
-      const isParticipant = selection.participants.some(p => p.participantId === ctx.session.user.id);
-      if(!isParticipant) throw new Error("You are not a participant of this selection");
+      const isParticipant = alternative.selection.participants.some(
+        (p) => p.participantId === ctx.session.user.id
+      );
+      if (!isParticipant)
+        throw new Error("You are not a participant of this selection");
+
+      if (!alternative.selection.votingCapital) {
+        throw new Error("Voting capital is not set");
+      }
 
       const myVotes = await ctx.prisma.selectionVoteEntry.findMany({
-        where: { 
-          selectionId: input.selectionId,
+        where: {
+          alternativeId: input.alternativeId,
           userId: ctx.session.user.id,
+        },
+      });
+
+      const voteOnAlternative = myVotes.find(
+        (v) => v.alternativeId === input.alternativeId
+      );
+      const currentSpending = myVotes.reduce(
+        (acc, vote) => acc + Math.pow(vote.numberOfVotes, 2),
+        0
+      );
+
+      if (voteOnAlternative) {       
+
+        const voteDifference = Math.pow(input.numberOfVotes, 2) - Math.pow(voteOnAlternative.numberOfVotes,2);
+
+        const voteBalanceResult =
+          alternative.selection.votingCapital -
+          currentSpending -
+          voteDifference;
+        if (voteBalanceResult < 0) {
+          throw new Error("Not enough vote capital" +  Math.pow(voteDifference, 2).toString() + " " + input.numberOfVotes.toString());
         }
-       });
 
-       if(!selection.votingCapital) {
-        throw new Error("Voting capital is not set");
-       }
-
-       const currentSpending = myVotes.reduce((acc, vote) => acc + vote.numberOfVotes^2, 0);
-       const voteBalanceResult = selection.votingCapital - currentSpending - input.numberOfVotes^2;
-       if(voteBalanceResult < 0) {
-          throw new Error("Not enough vote capital");
-       }
-
-       const voteOnAlternative = myVotes.find(v => v.alternativeId === input.alternativeId);
-       if(voteOnAlternative) { 
-          return await ctx.prisma.selectionVoteEntry.update({
-            where: {
-              id: voteOnAlternative.id
-            },
-            data: {
-              numberOfVotes: voteOnAlternative.numberOfVotes + input.numberOfVotes
-            }
-          })
-       }
-
-       return await ctx.prisma.selectionVoteEntry.create({
+        return await ctx.prisma.selectionVoteEntry.update({
+          where: {
+            id: voteOnAlternative.id,
+          },
           data: {
-            selectionId: input.selectionId,
-            alternativeId: input.alternativeId,
-            userId: ctx.session.user.id,
-            numberOfVotes: input.numberOfVotes
-          }
+            numberOfVotes: input.numberOfVotes,
+          },
         });
-       
+      }
+
+      const voteBalanceResult =
+        alternative.selection.votingCapital -
+        currentSpending -
+        Math.pow(input.numberOfVotes, 2);
+      if (voteBalanceResult < 0) {
+        throw new Error("Not enough vote capital");
+      }
+
+      return await ctx.prisma.selectionVoteEntry.create({
+        data: {
+          selectionId: alternative.selectionId,
+          alternativeId: input.alternativeId,
+          userId: ctx.session.user.id,
+          numberOfVotes: input.numberOfVotes,
+        },
+      });
     }),
   endVoting: protectedProcedure
     .input(
@@ -171,7 +193,7 @@ export const selectionRouter = createTRPCRouter({
           id: input.selectionId,
         },
         data: {
-          status: ProposalStates.VoteClosed,
+          status: SelectionStates.VoteClosed,
         },
       });
     }),
@@ -184,31 +206,40 @@ export const selectionRouter = createTRPCRouter({
       });
 
       if (!selection) throw new Error("Selection not found");
-      
-      const isParticipant = selection.participants.some(p => p.participantId === ctx.session.user.id);
-      if(!isParticipant) {
-        return {canBuyVotes: false}
+
+      const isParticipant = selection.participants.some(
+        (p) => p.participantId === ctx.session.user.id
+      );
+      if (!isParticipant) {
+        return { canBuyVotes: false };
       }
-      
 
       const votes = await ctx.prisma.selectionVoteEntry.findMany({
         where: { selectionId: input.selectionId, userId: ctx.session.user.id },
         orderBy: { createdAt: "desc" },
       });
-      const spentOnVoting = votes.reduce((acc, vote) => acc + vote.numberOfVotes^2, 0);
+      const spentOnVoting = votes.reduce(
+        (acc, vote) => acc + Math.pow(vote.numberOfVotes,2),
+        0
+      );
+      const leftToSpend = selection.votingCapital
+        ? selection.votingCapital - spentOnVoting
+        : 0;
 
-      return {canBuyVotes: false, votes, spentOnVoting};
-
+      return { canBuyVotes: true, data: { votes, spentOnVoting, leftToSpend } };
     }),
-  
+
   getSelection: protectedProcedure
     .input(z.object({ selectionId: z.string() }))
     .query(async ({ ctx, input }) => {
       const selection = await ctx.prisma.selection.findUnique({
         where: { id: input.selectionId },
-        include: { alternatives: {
-          include: { votes: true }
-        }, participants: true },
+        include: {
+          alternatives: {
+            include: { votes: true },
+          },
+          participants: true,
+        },
       });
 
       if (!selection) throw new Error("Proposal not found");

@@ -94,6 +94,7 @@ export const spaceRouter = createTRPCRouter({
         content: true,
         calendarEvent: true,
         proposal: true,
+        selection: true,
       }
      });
   }),
