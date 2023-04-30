@@ -133,8 +133,12 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Objection not found");
 
+      const isParticipant = proposal.participants.some(p => p.participantId === ctx.session.user.id);
+      if(!isParticipant) throw new Error("You are not a participant of this proposal");
+
       if (proposal.proposalState !== ProposalStates.ObjectionsResolved)
         throw new Error("Proposal not in votable state");
+
       if (
         input.myPickId &&
         !proposal.participants.some((p) => p.participantId === input.myPickId)
