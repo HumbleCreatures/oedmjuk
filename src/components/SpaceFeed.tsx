@@ -75,6 +75,21 @@ export function SpaceFeed({spaceId}: {spaceId: string }) {
             </Card>
             </Link>
         }
+
+        if(item.feedbackRound){
+            return <Link href={`/app/space/${item.spaceId}/feedback/${item.feedbackRound.id}`} key={item.id}>
+                <Card withBorder shadow="sm" radius="md" >
+                <Card.Section mt="md" inheritPadding py="xs">
+                <Group position="apart">
+                <Text fz="lg" fw={500}>
+                    {item.feedbackRound.title }
+                </Text>
+        
+                </Group>
+            </Card.Section>
+            </Card>
+            </Link>
+        }
     });
 
     return <>{itemCards}</>

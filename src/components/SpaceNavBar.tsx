@@ -105,6 +105,11 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
             {isMember && <Link href={`/app/space/${space.id}/selection/create`} className={classes.link}>
             Create Selection
             </Link> }
+
+            {isMember && <Link href={`/app/space/${space.id}/feedback/create`} className={classes.link}>
+            Create feedback round
+            </Link> }
+
             <Link href={`/app/space/${space.id}/members`} className={classes.link}>
             Members
             </Link>
