@@ -3,6 +3,8 @@ export enum FeedEventTypes {
     CalendarEventCreated = 'CalendarEventCreated',
     ProposalEventCreated = 'ProposalEventCreated',
     SelectionCreated = 'SelectionCreated',
+    FeedbackRoundCreated = 'FeedbackRoundCreated',
+    DataIndexCreated = 'DataIndexCreated',
 }
 
 export enum ProposalStates { 

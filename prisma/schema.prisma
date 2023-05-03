@@ -62,21 +62,22 @@ model User {
   proposalObjections        Objection[]             @relation("ProposalObjection")
   proposalObjectionResolves Objection[]             @relation("ProposalObjectionResolves")
   feedbackItems             FeedbackItem[]          @relation("FeedbackItem")
-  feedbackResolves          FeedbackItem[]          @relation("FeedbackResolves")
-  ContentVersion            ContentVersion[]
-  Comment                   Comment[]
-  CalendarEvent             CalendarEvent[]
-  CalendarEventAttendee     CalendarEventAttendee[]
-  UserCalendar              UserCalendar[]
-  Proposal                  Proposal[]
-  FeedbackRound             FeedbackRound[]
-  Selection                 Selection[]
-  SelectionAlternatives     SelectionAlternative[]
-  SelectionVoteEntry        SelectionVoteEntry[]
-  DataIndex                 DataIndex[]
-  ContentSignature          ContentSignature[]
-  ProposalParticipant       ProposalParticipant[]
-  SelectionParticipant      SelectionParticipant[]
+  contentVersion            ContentVersion[]
+  comment                   Comment[]
+  calendarEvent             CalendarEvent[]
+  calendarEventAttendee     CalendarEventAttendee[]
+  userCalendar              UserCalendar[]
+  proposal                  Proposal[]
+  feedbackRound             FeedbackRound[]
+  selection                 Selection[]
+  selectionAlternatives     SelectionAlternative[]
+  selectionVoteEntry        SelectionVoteEntry[]
+  dataIndex                 DataIndex[]
+  contentSignature          ContentSignature[]
+  proposalParticipant       ProposalParticipant[]
+  selectionParticipant      SelectionParticipant[]
+  feedbackNote              FeedbackNote[]
+  feedbackMovement           FeedbackMovement[]
 }
 
 model VerificationToken {
@@ -93,12 +94,13 @@ model Space {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   spaceMembers   SpaceMember[]
-  Content        Content[]
-  CalendarEvents CalendarEvent[]
-  SpaceFeedItem  SpaceFeedItem[]
-  Proposal       Proposal[]
-  DataIndex      DataIndex[]
-  Selection      Selection[]
+  content        Content[]
+  calendarEvents CalendarEvent[]
+  spaceFeedItem  SpaceFeedItem[]
+  proposal       Proposal[]
+  dataIndex      DataIndex[]
+  selection      Selection[]
+  feedbackRound  FeedbackRound[]
 }
 
 model SpaceFeedItem {
@@ -116,6 +118,8 @@ model SpaceFeedItem {
   proposalId      String?
   selection       Selection?     @relation(fields: [selectionId], references: [id])
   selectionId     String?
+  feedbackRound   FeedbackRound? @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId String?
 }
 
 model SpaceMember {
@@ -141,8 +145,8 @@ model Content {
   authorId       String
   spaceFeedItem  SpaceFeedItem[]
   order          Int
-  ContentVersion ContentVersion[]
-  Comment        Comment[]
+  contentVersion ContentVersion[]
+  comment        Comment[]
 }
 
 model ContentVersion {
@@ -193,8 +197,8 @@ model CalendarEvent {
   spaceFeedItem         SpaceFeedItem[]
   userCalendar          UserCalendar[]
   proposals             Proposal[]
-  CalendarEventAttendee CalendarEventAttendee[]
-  Selection             Selection[]
+  calendarEventAttendee CalendarEventAttendee[]
+  selection             Selection[]
 }
 
 model CalendarEventAttendee {
@@ -289,32 +293,71 @@ model Objection {
 }
 
 model FeedbackRound {
-  id           String         @id @default(cuid())
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  creator      User           @relation(fields: [creatorId], references: [id])
-  creatorId    String
-  title        String
-  body         String
-  columns      String         @default("[\"Discussing\", \"Done\"]")
-  FeedbackItem FeedbackItem[]
+  id             String           @id @default(cuid())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  creator        User             @relation(fields: [creatorId], references: [id])
+  creatorId      String
+  title          String
+  body           String
+  space          Space            @relation(fields: [spaceId], references: [id])
+  spaceId        String
+  feedbackItem   FeedbackItem[]
+  feedbackColumn FeedbackColumn[]
+  spaceFeedItem   SpaceFeedItem[]
+}
+
+model FeedbackColumn {
+  id              String            @id @default(cuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  title           String
+  wipLimit        Int?
+  order           Int
+  feedbackRound   FeedbackRound     @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId String
+  feedbackItems   FeedbackItem[]
+  feedbackMovement FeedbackMovement[]
+}
+
+model FeedbackMovement {
+  id               String         @id @default(cuid())
+  createdAt        DateTime       @default(now())
+  feedbackItem     FeedbackItem   @relation(fields: [feedbackItemId], references: [id])
+  feedbackItemId   String
+  feedbackColumn   FeedbackColumn @relation(fields: [feedbackColumnId], references: [id])
+  feedbackColumnId String
+  mover            User           @relation(fields: [moverId], references: [id])
+  moverId          String
 }
 
 model FeedbackItem {
-  id              String        @id @default(cuid())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  feedbackRound   FeedbackRound @relation(fields: [feedbackRoundId], references: [id])
-  feedbackRoundId String
-  title        String
-  body            String
-  author         User          @relation(name: "FeedbackItem", fields: [authorId], references: [id])
+  id                    String            @id @default(cuid())
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  feedbackRound         FeedbackRound     @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId       String
+  title                 String
+  body                  String
+  author                User              @relation(name: "FeedbackItem", fields: [authorId], references: [id])
+  authorId              String
+  column                FeedbackColumn?   @relation(fields: [columnId], references: [id])
+  columnId              String?
+  order                 Int
+  createdByExternalUser Boolean
+  feedbackNotes         FeedbackNote[]
+  feedbackMovement       FeedbackMovement[]
+}
+
+model FeedbackNote {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  feedbackItem   FeedbackItem @relation(fields: [feedbackItemId], references: [id])
+  feedbackItemId String
+  author         User         @relation(fields: [authorId], references: [id])
   authorId       String
-  column          String?
-  order           Int
-  resolvedAt      DateTime?
-  resolvedBy      User?         @relation(name: "FeedbackResolves", fields: [resolvedById], references: [id])
-  resolvedById    String
+  body           String
 }
 
 model Selection {
@@ -330,24 +373,24 @@ model Selection {
   status          String                 @default("Created")
   calendarEvent   CalendarEvent?         @relation(fields: [calendarEventId], references: [id])
   calendarEventId String?
-  votingCapital   Int?                    
+  votingCapital   Int?
   spaceFeedItem   SpaceFeedItem[]
   alternatives    SelectionAlternative[]
   votes           SelectionVoteEntry[]
-  participants     SelectionParticipant[]
+  participants    SelectionParticipant[]
 }
 
 model SelectionAlternative {
-  id                 String               @id @default(cuid())
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  selection          Selection            @relation(fields: [selectionId], references: [id])
-  selectionId        String
-  author             User                 @relation(fields: [authorId], references: [id])
-  authorId           String
-  title              String
-  body               String
-  votes SelectionVoteEntry[]
+  id          String               @id @default(cuid())
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  selection   Selection            @relation(fields: [selectionId], references: [id])
+  selectionId String
+  author      User                 @relation(fields: [authorId], references: [id])
+  authorId    String
+  title       String
+  body        String
+  votes       SelectionVoteEntry[]
 }
 
 model SelectionVoteEntry {
@@ -373,6 +416,8 @@ model DataIndex {
   spaceId         String
   author          User             @relation(fields: [authorId], references: [id])
   authorId        String
+  urlToSource     String?
+  nameOfSource    String?
   dataIndexPoints DataIndexPoint[]
 }
 
