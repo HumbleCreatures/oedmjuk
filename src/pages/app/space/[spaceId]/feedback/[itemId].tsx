@@ -4,6 +4,7 @@ import AppLayout from "../../../../../components/AppLayout";
 import { Container, Text, Title } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
+import { FeedbackItemEditor } from "../../../../../components/FeedbackItemEditor";
 
 
 function FeedbackView({
@@ -40,6 +41,24 @@ function FeedbackView({
             <div dangerouslySetInnerHTML={{ __html: body }} />
           </Text>
         </>
+      </Container>
+      <Container size="xs">
+        {/*<FeedbackColumns feedbackRoundId={feedbackRoundId} /> */}
+      </Container>
+
+      <Container size="xs">
+          <Text >
+            <Title>My items</Title>
+          </Text>
+        {/*<ListOfFeedbackItems />*/}
+        <FeedbackItemEditor />
+      </Container>
+      <Container size="xs">
+        <Text >
+            <Title>External feedback items</Title>
+          </Text>
+        {/*<ListOfMyFeedbackItems />*/}
+        
       </Container>
 
     </AppLayout>
