@@ -51,7 +51,7 @@ function FeedbackView({
             <Title>My items</Title>
           </Text>
         {/*<ListOfFeedbackItems />*/}
-        <FeedbackItemEditor />
+        <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
       </Container>
       <Container size="xs">
         <Text >

@@ -77,7 +77,7 @@ model User {
   proposalParticipant       ProposalParticipant[]
   selectionParticipant      SelectionParticipant[]
   feedbackNote              FeedbackNote[]
-  feedbackMovement           FeedbackMovement[]
+  feedbackMovement          FeedbackMovement[]
 }
 
 model VerificationToken {
@@ -304,19 +304,19 @@ model FeedbackRound {
   spaceId        String
   feedbackItem   FeedbackItem[]
   feedbackColumn FeedbackColumn[]
-  spaceFeedItem   SpaceFeedItem[]
+  spaceFeedItem  SpaceFeedItem[]
 }
 
 model FeedbackColumn {
-  id              String            @id @default(cuid())
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  title           String
-  wipLimit        Int?
-  order           Int
-  feedbackRound   FeedbackRound     @relation(fields: [feedbackRoundId], references: [id])
-  feedbackRoundId String
-  feedbackItems   FeedbackItem[]
+  id               String             @id @default(cuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  title            String
+  wipLimit         Int?
+  order            Int
+  feedbackRound    FeedbackRound      @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId  String
+  feedbackItems    FeedbackItem[]
   feedbackMovement FeedbackMovement[]
 }
 
@@ -332,21 +332,21 @@ model FeedbackMovement {
 }
 
 model FeedbackItem {
-  id                    String            @id @default(cuid())
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  feedbackRound         FeedbackRound     @relation(fields: [feedbackRoundId], references: [id])
+  id                    String             @id @default(cuid())
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  feedbackRound         FeedbackRound      @relation(fields: [feedbackRoundId], references: [id])
   feedbackRoundId       String
   title                 String
   body                  String
-  author                User              @relation(name: "FeedbackItem", fields: [authorId], references: [id])
+  author                User               @relation(name: "FeedbackItem", fields: [authorId], references: [id])
   authorId              String
-  column                FeedbackColumn?   @relation(fields: [columnId], references: [id])
+  column                FeedbackColumn?    @relation(fields: [columnId], references: [id])
   columnId              String?
   order                 Int
   createdByExternalUser Boolean
   feedbackNotes         FeedbackNote[]
-  feedbackMovement       FeedbackMovement[]
+  feedbackMovement      FeedbackMovement[]
 }
 
 model FeedbackNote {
@@ -406,6 +406,16 @@ model SelectionVoteEntry {
   userId        String
 }
 
+model DataIndexType {
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  name        String
+  description String?
+  unitName    String
+  dataIndex   DataIndex[]
+}
+
 model DataIndex {
   id              String           @id @default(cuid())
   createdAt       DateTime         @default(now())
@@ -418,6 +428,8 @@ model DataIndex {
   authorId        String
   urlToSource     String?
   nameOfSource    String?
+  type            DataIndexType    @relation(fields: [typeId], references: [id])
+  typeId          String
   dataIndexPoints DataIndexPoint[]
 }
 

@@ -4,8 +4,9 @@ import { useForm } from "@mantine/form";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { api } from "../utils/api";
 
-export function FeedbackItemEditor() {
+export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string}) {
   const form = useForm({
     initialValues: {
       title: "",
@@ -25,10 +26,21 @@ export function FeedbackItemEditor() {
     },
   });
 
+  const utils = api.useContext();
+  const mutation = api.feedback.createFeedbackItem.useMutation({
+    onSuccess() {
+      void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId});
+    },
+  });
+
   return (
     <Container>
         <div>Create feedback item</div>
-      <form>
+        <form
+        onSubmit={form.onSubmit((values) => {
+          mutation.mutate({ ...values, feedbackRoundId })
+        })}
+      >
         <TextInput
           label="Title"
           placeholder="Title"
