@@ -6,14 +6,13 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { api } from "../utils/api";
 
-export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string}) {
+export function FeedbackNoteEditor({feedbackRoundId, feedbackItemId}: {feedbackRoundId: string, feedbackItemId:string}) {
   const form = useForm({
     initialValues: {
-      title: "",
       body: "",
     },
     validate: {
-      title: (value) =>
+      body: (value) =>
         value.length < 2 ? "Name must have at least 2 letters" : null,
     },
   });
@@ -27,27 +26,22 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
   });
 
   const utils = api.useContext();
-  const mutation = api.feedback.createFeedbackItem.useMutation({
+  const mutation = api.feedback.addFeedbackNote.useMutation({
     onSuccess() {
       void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId});
-      void utils.feedback.getMyFeedbackItems.invalidate({ itemId: feedbackRoundId});
-      void utils.feedback.getExternalFeedbackItems.invalidate({ itemId: feedbackRoundId});
+      void utils.feedback.getFeedbackItem.invalidate({ itemId: feedbackItemId});
     },
   });
 
   return (
     <Container>
-        <div>Create feedback note</div>
+        <div>Create feedback item</div>
         <form
         onSubmit={form.onSubmit((values) => {
-          mutation.mutate({ ...values, feedbackRoundId })
+          mutation.mutate({ ...values, feedbackItemId })
         })}
       >
-        <TextInput
-          label="Title"
-          placeholder="Title"
-          {...form.getInputProps("title")}
-        />
+        
         <div>Body</div>
         <RichTextEditor editor={editor}>
           <RichTextEditor.Toolbar sticky stickyOffset={60}>

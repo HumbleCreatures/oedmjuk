@@ -5,6 +5,9 @@ import { Container, Text, Title } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import { FeedbackItemEditor } from "../../../../../components/FeedbackItemEditor";
+import { ExternalFeedbackItemCardList } from "../../../../../containers/ExternalFeedbackItemCardList";
+import { MyFeedbackItemCardList } from "../../../../../containers/MyFeedbackItemCardList";
+import { FeedbackColumns } from "../../../../../components/FeedbackColumns";
 
 
 function FeedbackView({
@@ -17,7 +20,6 @@ function FeedbackView({
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const feedbackResult = api.feedback.getFeedbackRound.useQuery({ itemId: feedbackRoundId });
 
-
   if (feedbackResult.isLoading || spaceResult.isLoading)
     return <div>loading...</div>;
 
@@ -26,7 +28,7 @@ function FeedbackView({
 
   if (!feedbackResult.data) return <div>Could not load feedback round</div>;
   const feedbackRound = feedbackResult.data;
-  const { title, body, } = feedbackRound;
+  const { title, body } = feedbackRound;
 
   return (
     <AppLayout>
@@ -35,7 +37,7 @@ function FeedbackView({
 
         <>
           <Text fz="lg" fw={500}>
-            <Title order={2}>Selection: {title}</Title>
+            <Title order={2}>Feedback: {title}</Title>
           </Text>
           <Text>
             <div dangerouslySetInnerHTML={{ __html: body }} />
@@ -43,21 +45,24 @@ function FeedbackView({
         </>
       </Container>
       <Container size="xs">
-        {/*<FeedbackColumns feedbackRoundId={feedbackRoundId} /> */}
+      <Title order={4}>My feedback items</Title>
+        
       </Container>
+      <FeedbackColumns feedbackColumns={feedbackRound.feedbackColumns} feedbackRound={feedbackRound}  />
 
       <Container size="xs">
           <Text >
             <Title>My items</Title>
+            <MyFeedbackItemCardList feedbackRoundId={feedbackRoundId} feedbackColumns={feedbackRound.feedbackColumns} feedbackRound={feedbackRound} />
           </Text>
-        {/*<ListOfFeedbackItems />*/}
+        
         <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
       </Container>
       <Container size="xs">
         <Text >
             <Title>External feedback items</Title>
           </Text>
-        {/*<ListOfMyFeedbackItems />*/}
+        <ExternalFeedbackItemCardList feedbackRoundId={feedbackRoundId} feedbackColumns={feedbackRound.feedbackColumns} feedbackRound={feedbackRound}/>
         
       </Container>
 

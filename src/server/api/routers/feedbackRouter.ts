@@ -19,7 +19,7 @@ export const feedbackRouter = createTRPCRouter({
           body: input.body,
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
-          feedbackColumn: {
+          feedbackColumns: {
             create: [
               {
                 title: "Ongoing",
@@ -47,7 +47,7 @@ export const feedbackRouter = createTRPCRouter({
       const content = await ctx.prisma.feedbackRound.findUnique({
         where: { id: input.itemId },
         include: {
-          feedbackColumn: {
+          feedbackColumns: {
             include: {
               feedbackItems: true
             }
@@ -56,6 +56,53 @@ export const feedbackRouter = createTRPCRouter({
       });
 
       return content;
+    }),
+    getFeedbackItem: protectedProcedure
+    .input(z.object({ itemId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const content = await ctx.prisma.feedbackItem.findUnique({
+        where: { id: input.itemId },
+        include: {
+          column:true,
+          feedbackRound: true,
+          feedbackMovement: {
+            include: {
+              feedbackColumn: true,
+            }
+          },          
+          feedbackNotes: {
+            include: {
+              author: true
+            }
+          }
+        }
+      });
+
+      if(!content) {return content;}
+
+      if(content.createdByExternalUser || content.columnId || content.authorId === ctx.session.user.id) {
+        return content;
+      }
+
+      return content;
+    }),
+    getMyFeedbackItems: protectedProcedure
+    .input(z.object({ itemId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const feedbackItems = await ctx.prisma.feedbackItem.findMany({
+        where: { feedbackRoundId: input.itemId, authorId: ctx.session.user.id, createdByExternalUser: false, columnId: null },
+      });
+
+      return feedbackItems;
+    }),
+    getExternalFeedbackItems: protectedProcedure
+    .input(z.object({ itemId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const feedbackItems = await ctx.prisma.feedbackItem.findMany({
+        where: { feedbackRoundId: input.itemId, createdByExternalUser: true },
+      });
+
+      return feedbackItems;
     }),
   createFeedbackItem: protectedProcedure
     .input(
@@ -178,6 +225,7 @@ export const feedbackRouter = createTRPCRouter({
           return ctx.prisma.feedbackItem.update({
             where: { id: input.feedbackItemId },
             data: {
+              columnId: input.feedbackColumnId,
               order,
               feedbackMovement: {
                 create: { 

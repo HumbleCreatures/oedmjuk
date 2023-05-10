@@ -303,7 +303,7 @@ model FeedbackRound {
   space          Space            @relation(fields: [spaceId], references: [id])
   spaceId        String
   feedbackItem   FeedbackItem[]
-  feedbackColumn FeedbackColumn[]
+  feedbackColumns FeedbackColumn[]
   spaceFeedItem  SpaceFeedItem[]
 }
 
