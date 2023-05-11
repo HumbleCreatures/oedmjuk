@@ -6,6 +6,7 @@ import { calendarEventRouter } from "./routers/calendarEventRouter";
 import { proposalRouter } from "./routers/proposalRouter";
 import { selectionRouter } from "./routers/selectionRouter";
 import { feedbackRouter } from "./routers/feedbackRouter";
+import { dataIndexRouter } from "./routers/dataIndexRouter";
 
 /**
  * This is the primary router for your server.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   proposal: proposalRouter,
   selection: selectionRouter,
   feedback: feedbackRouter,
+  dataIndex: dataIndexRouter
 });
 
 // export type definition of API

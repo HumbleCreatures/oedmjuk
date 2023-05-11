@@ -120,6 +120,8 @@ model SpaceFeedItem {
   selectionId     String?
   feedbackRound   FeedbackRound? @relation(fields: [feedbackRoundId], references: [id])
   feedbackRoundId String?
+  dataIndex       DataIndex?     @relation(fields: [dataIndexId], references: [id])
+  dataIndexId     String?
 }
 
 model SpaceMember {
@@ -293,18 +295,18 @@ model Objection {
 }
 
 model FeedbackRound {
-  id             String           @id @default(cuid())
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  creator        User             @relation(fields: [creatorId], references: [id])
-  creatorId      String
-  title          String
-  body           String
-  space          Space            @relation(fields: [spaceId], references: [id])
-  spaceId        String
-  feedbackItem   FeedbackItem[]
+  id              String           @id @default(cuid())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  creator         User             @relation(fields: [creatorId], references: [id])
+  creatorId       String
+  title           String
+  body            String
+  space           Space            @relation(fields: [spaceId], references: [id])
+  spaceId         String
+  feedbackItem    FeedbackItem[]
   feedbackColumns FeedbackColumn[]
-  spaceFeedItem  SpaceFeedItem[]
+  spaceFeedItem   SpaceFeedItem[]
 }
 
 model FeedbackColumn {
@@ -428,17 +430,18 @@ model DataIndex {
   authorId        String
   urlToSource     String?
   nameOfSource    String?
-  type            DataIndexType    @relation(fields: [typeId], references: [id])
-  typeId          String
+  unitType            DataIndexType    @relation(fields: [unitTypeId], references: [id])
+  unitTypeId          String
   dataIndexPoints DataIndexPoint[]
+  spaceFeedItem   SpaceFeedItem[]
 }
 
 model DataIndexPoint {
   id          String    @id @default(cuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  value       Float
-  dateStamp   DateTime
+  value       Int
+  datestamp   DateTime
   dataIndex   DataIndex @relation(fields: [dataIndexId], references: [id])
   dataIndexId String
 }
