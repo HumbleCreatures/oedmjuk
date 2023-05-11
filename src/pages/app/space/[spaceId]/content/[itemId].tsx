@@ -4,7 +4,7 @@ import AppLayout from "../../../../../components/AppLayout";
 import { Container, Text, Title } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
-import { SpaceFeed } from '../../../../../components/SpaceFeed';
+
 
 function ContentView({spaceId, itemId}: {spaceId: string, itemId: string}) {
   const data = api.space.getSpace.useQuery({spaceId}).data;

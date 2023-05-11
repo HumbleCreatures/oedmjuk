@@ -154,9 +154,9 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const links = [
-  { icon: IconBulb, label: "Activity", notifications: 3 },
-  { icon: IconCheckbox, label: "Tasks", notifications: 4 },
-  { icon: IconUser, label: "Contacts" },
+  { icon: IconBulb, label: "Activity", notifications: 3, href: "/app/settings/dataIndexTypes" },
+  { icon: IconCheckbox, label: "Tasks", notifications: 4, href: "/app/settings/dataIndexTypes" },
+  { icon: IconUser, label: "Data Index Types", href: "/app/settings/dataIndexTypes" },
 ];
 
 const collections = [
@@ -171,23 +171,16 @@ export function NavbarSearch() {
 
   const mainLinks = links.map((link) => (
     <UnstyledButton key={link.label} className={classes.mainLink}>
-      <div className={classes.mainLinkInner}>
+      <Link href={link.href} className={classes.mainLinkInner}>
         <link.icon size={20} className={classes.mainLinkIcon} stroke={1.5} />
         <span>{link.label}</span>
-      </div>
+      </Link>
       {link.notifications && (
         <Badge size="sm" variant="filled" className={classes.mainLinkBadge}>
           {link.notifications}
         </Badge>
       )}
     </UnstyledButton>
-  ));
-
-  const collectionLinks = collections.map((collection) => (
-    <div key={collection.label} className={classes.collectionLink}>
-      <span style={{ marginRight: 9, fontSize: 16 }}>{collection.emoji}</span>{" "}
-      {collection.label}
-    </div>
   ));
 
   return (

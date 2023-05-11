@@ -8,8 +8,8 @@ export const dataIndexRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        description: z.string(),
-        unitName: z.string(),
+        description: z.string().optional(),
+        unitName: z.string().max(10),
       })
     )
     .mutation(async ({ ctx, input }) => {

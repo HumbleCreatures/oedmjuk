@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { type NextPage } from "next";
 import AppLayout from "../../../../../components/AppLayout";
-import { Alert, Button, Container, TextInput, Title } from "@mantine/core";
+import { Alert, Button, Container, Select, TextInput, Title } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
 import { useForm } from '@mantine/form';
@@ -15,14 +15,18 @@ import { RichTextEditor } from '@mantine/tiptap';
 
 function SpaceView({spaceId}: {spaceId: string}) {
   const data = api.space.getSpace.useQuery({spaceId}).data;
+  const indexTypeQuery = api.dataIndex.getAllIndexTypes.useQuery();
+
   const form = useForm({
     initialValues: {
-      title: "",
-      body: "",
+      name: "",
+      description: "",
+      dataIndexTypeId: "",
     },
     validate: {
-      title: (value) =>
+      name: (value) =>
         value.length < 2 ? "Name must have at least 2 letters" : null,
+        dataIndexTypeId: (value) => !value ? "Please select a index type" : null,
     },
   });
   const utils = api.useContext();
@@ -45,7 +49,10 @@ function SpaceView({spaceId}: {spaceId: string}) {
   if(!data || !data.space) return (<div>loading...</div>)
   const {space, isMember} = data;
 
- 
+  if(indexTypeQuery.isLoading) return (<div>loading...</div>);
+  if(!indexTypeQuery.data) return (<div>could not load types...</div>);
+
+  const indexTypes = indexTypeQuery.data.map((indexType) => { return { label: indexType.name, value: indexType.id }});
   
   return (
     <AppLayout>
@@ -60,10 +67,18 @@ function SpaceView({spaceId}: {spaceId: string}) {
           })}
         >
           <TextInput
-            label="Title"
-            placeholder="Title"
-            {...form.getInputProps("title")}
+            label="Name"
+            placeholder="Name"
+            {...form.getInputProps("name")}
           />
+          <Select
+            label="Select index type"
+            placeholder="Pick one"
+            searchable
+            nothingFound="No options"
+            data={indexTypes}
+          />
+
           <div>Body</div>
           <RichTextEditor editor={editor}>
           <RichTextEditor.Toolbar sticky stickyOffset={60}>
