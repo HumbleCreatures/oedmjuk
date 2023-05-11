@@ -96,6 +96,7 @@ export const spaceRouter = createTRPCRouter({
         proposal: true,
         selection: true,
         feedbackRound: true,
+        dataIndex: true
       }
      });
   }),
@@ -115,25 +116,5 @@ export const spaceRouter = createTRPCRouter({
     const isMember = space.spaceMembers && space.spaceMembers.some((member) => member.userId === ctx.session.user.id)
     return {space, isMember };
   })
-  /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getMySpaces: protectedProcedure
-  .query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getSpace: protectedProcedure
-  .input(z.object({ id: z.string() }))
-  .query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getSpaceMembers: protectedProcedure
-  .input(z.object({ spaceId: z.string() }))
-  .query(({ ctx }) => { 
-    return ctx.prisma.spaceMembership.findMany();
-  }),*/
-
+  
 });

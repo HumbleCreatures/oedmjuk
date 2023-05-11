@@ -57,9 +57,18 @@ export const dataIndexRouter = createTRPCRouter({
       const content = await ctx.prisma.dataIndex.findUnique({
         where: { id: input.itemId },
         include: {
-          dataIndexPoints: true,
           unitType: true,
         }
+      });
+      
+      return content;
+    }),
+    getDataPointForIndex: protectedProcedure
+    .input(z.object({ dataIndexId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const content = await ctx.prisma.dataIndexPoint.findMany({
+        where: { dataIndexId: input.dataIndexId },
+        orderBy: { datestamp: 'asc' },
       });
       
       return content;
@@ -73,7 +82,14 @@ export const dataIndexRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-        const fixedDatestamp = new Date(new Date().toDateString());
+        const offset = input.datestamp.getTimezoneOffset()
+        const offsetDate = new Date(input.datestamp.getTime() - (offset*60*1000))
+        const resultingDate = offsetDate.toISOString().split('T')[0]
+
+        if(!resultingDate) {
+          throw new Error('Invalid datestamp');
+        }
+        const fixedDatestamp = new Date(resultingDate);
         const currentDataIndexPoint = await ctx.prisma.dataIndexPoint.findFirst({
           where: {
             dataIndexId: input.dataIndexId,

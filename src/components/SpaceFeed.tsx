@@ -90,6 +90,21 @@ export function SpaceFeed({spaceId}: {spaceId: string }) {
             </Card>
             </Link>
         }
+
+        if(item.dataIndex){
+            return <Link href={`/app/space/${item.spaceId}/dataIndex/${item.dataIndex.id}`} key={item.id}>
+                <Card withBorder shadow="sm" radius="md" >
+                <Card.Section mt="md" inheritPadding py="xs">
+                <Group position="apart">
+                <Text fz="lg" fw={500}>
+                    {item.dataIndex.title }
+                </Text>
+        
+                </Group>
+            </Card.Section>
+            </Card>
+            </Link>
+        }
     });
 
     return <>{itemCards}</>

@@ -13,27 +13,27 @@ import { RichTextEditor } from '@mantine/tiptap';
 
 
 
-function SpaceView({spaceId}: {spaceId: string}) {
+function DataIndexEditorView({spaceId}: {spaceId: string}) {
   const data = api.space.getSpace.useQuery({spaceId}).data;
   const indexTypeQuery = api.dataIndex.getAllIndexTypes.useQuery();
 
   const form = useForm({
     initialValues: {
-      name: "",
+      title: "",
       description: "",
-      dataIndexTypeId: "",
+      unitTypeId: "",
     },
     validate: {
-      name: (value) =>
+      title: (value) =>
         value.length < 2 ? "Name must have at least 2 letters" : null,
-        dataIndexTypeId: (value) => !value ? "Please select a index type" : null,
+        unitTypeId: (value) => value.length === 0 ? "Please select a index type" : null,
     },
   });
   const utils = api.useContext();
-  const mutation = api.content.createContent.useMutation({
+  const mutation = api.dataIndex.createDataIndex.useMutation({
     onSuccess(data) {
       void utils.space.getSpace.invalidate();
-      void router.push(`/app/space/${space.id}/content/${data.id}`);
+      void router.push(`/app/space/${space.id}/dataIndex/${data.id}`);
     },
   });
 
@@ -43,7 +43,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
     extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],
     content: '',
     onUpdate({ editor }) {
-      form.setFieldValue('body', editor.getHTML())
+      form.setFieldValue('description', editor.getHTML())
     },
   });
   if(!data || !data.space) return (<div>loading...</div>)
@@ -63,13 +63,14 @@ function SpaceView({spaceId}: {spaceId: string}) {
 
         <form
           onSubmit={form.onSubmit((values) => {
+            console.log(values);
             mutation.mutate({...values, spaceId: space.id});
           })}
         >
           <TextInput
-            label="Name"
-            placeholder="Name"
-            {...form.getInputProps("name")}
+            label="Title"
+            placeholder="Title"
+            {...form.getInputProps("title")}
           />
           <Select
             label="Select index type"
@@ -77,6 +78,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
             searchable
             nothingFound="No options"
             data={indexTypes}
+            {...form.getInputProps("unitTypeId")}
           />
 
           <div>Body</div>
@@ -112,6 +114,8 @@ function SpaceView({spaceId}: {spaceId: string}) {
           <Button type="submit" mt="sm">
             Submit
           </Button>
+
+          {form.errors && <div>{JSON.stringify(form.errors)}</div> }
             
           {mutation.error && 
            <Alert icon={<IconAlertCircle size={16} />} title="Bummer!" color="red">Something went wrong! {mutation.error.message}</Alert>}
@@ -123,7 +127,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
     </AppLayout>
   );
 } 
-const LoadingSpaceView: NextPage = () => {
+const DataIndexEditorPage: NextPage = () => {
   const router = useRouter()
   
   const { spaceId } = router.query;
@@ -131,8 +135,8 @@ const LoadingSpaceView: NextPage = () => {
 
   
   return (
-    <SpaceView spaceId={spaceId as string} />
+    <DataIndexEditorView spaceId={spaceId as string} />
   );
 };
 
-export default LoadingSpaceView;
+export default DataIndexEditorPage;
