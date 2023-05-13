@@ -5,18 +5,21 @@ import {
   rem,
   Title,
   Button,
+  Menu,
+  SimpleGrid,
+  Flex
 } from "@mantine/core";
 import { Space } from "@prisma/client";
 import Link from "next/link";
 import { api } from "../utils/api";
+import { IconAlignBoxLeftMiddle, IconArrowsLeftRight, IconCalendar, IconCalendarEvent, IconChartBar, IconColorSwatch, IconMessageCircle, IconNotebook, IconPhoto, IconPlus, IconRecycle, IconSettings, IconTrash } from "@tabler/icons";
+import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
   header: {
-    backgroundColor: theme.fn.variant({
-      variant: "filled",
-      color: theme.primaryColor,
-    }).background,
+    backgroundColor: theme.colors.earth[9],
     borderBottom: 0,
+    borderRadius: theme.radius.md,
   },
 
   inner: {
@@ -39,6 +42,7 @@ const useStyles = createStyles((theme) => ({
   },
   spaceTitle: {
     color: theme.white,
+    fontSize: theme.fontSizes.xl,
   },
 
   link: {
@@ -63,6 +67,12 @@ const useStyles = createStyles((theme) => ({
   linkLabel: {
     marginRight: rem(5),
   },
+
+  topRow: {
+    width: "100%",
+  }
+
+  
 }));
 
 interface HeaderSearchProps {
@@ -90,44 +100,86 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
 
   return (
     <Container className={classes.header}>
-      <Title order={1} className={classes.spaceTitle}>Space {space.name}</Title>
+      <div className={classes.inner}>
+      <SimpleGrid cols={2} className={classes.topRow} >
+        <div>
+          <Title order={1} className={classes.spaceTitle}>Space {space.name}</Title>
+        </div>
+
+        <Flex
+          gap="sm"
+          justify="flex-end"
+          align="flex-start"
+          direction="row"
+          wrap="wrap"
+        >
+          
+        {isMember  && <CreationMenu spaceId={space.id} /> }
+        {isMember ?
+            <Button size="xs" onClick={() => { leaveMutation.mutate({spaceId: space.id}) }} className={classes.link}>
+            Leave space
+            </Button> :
+            <Button size="xs" onClick={() => { joinMutation.mutate({spaceId: space.id}) }} className={classes.link}>
+            Join space
+            </Button>
+        }
+        </Flex>
+
+      </SimpleGrid>
+      </div>
+      
+       
+
       <div className={classes.inner}>
         <Group spacing={5} className={classes.links}>
-        {isMember && <Link href={`/app/space/${space.id}/content/create`} className={classes.link}>
-            Create content
-            </Link> }
-            {isMember && <Link href={`/app/space/${space.id}/calendarEvent/create`} className={classes.link}>
-            Create calendar event
-            </Link> }
-            {isMember && <Link href={`/app/space/${space.id}/proposal/create`} className={classes.link}>
-            Create proposal
-            </Link> }
-            {isMember && <Link href={`/app/space/${space.id}/selection/create`} className={classes.link}>
-            Create Selection
-            </Link> }
 
-            {isMember && <Link href={`/app/space/${space.id}/dataIndex/create`} className={classes.link}>
-            Create Data Index
-            </Link> }
+          <Link href={`/app/space/${space.id}/`} className={classes.link}>
+            Feed
+            </Link>
 
-            {isMember && <Link href={`/app/space/${space.id}/feedback/create`} className={classes.link}>
-            Create feedback round
-            </Link> }
+            <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
+            Calendar
+            </Link>
+
+            <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
+            Content
+            </Link>
+
+            <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
+            Data
+            </Link>
 
             <Link href={`/app/space/${space.id}/members`} className={classes.link}>
             Members
             </Link>
-            {isMember ?
-            <Button onClick={() => { leaveMutation.mutate({spaceId: space.id}) }} className={classes.link}>
-            Leave space
-            </Button> :
-            <Button onClick={() => { joinMutation.mutate({spaceId: space.id}) }} className={classes.link}>
-            Join space
-            </Button>
-        }
+            
 
         </Group>
       </div>
     </Container>
   );
+}
+
+function CreationMenu({ spaceId }: { spaceId: string}) {
+  const router = useRouter();
+
+  return <Menu shadow="md" width={200}>
+      <Menu.Target>
+        <Button size="xs" leftIcon={<IconPlus />}>Create</Button>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        <Menu.Label>Create</Menu.Label>
+        <Menu.Item icon={<IconAlignBoxLeftMiddle size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/content/create`)}>Create content</Menu.Item>
+        <Menu.Item icon={<IconCalendarEvent size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/calendarEvent/create`)}>Create calendar event</Menu.Item>
+        <Menu.Item icon={<IconNotebook size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/proposal/create`)}>Create proposal</Menu.Item>
+        <Menu.Item icon={<IconColorSwatch size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/selection/create`)}>Create selection</Menu.Item>
+        <Menu.Item icon={<IconRecycle size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/feedback/create`)}>Create feedback round</Menu.Item>
+        <Menu.Item icon={<IconChartBar size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/dataIndex/create`)}>Create data index</Menu.Item>
+        
+
+  
+
+      </Menu.Dropdown>
+    </Menu>
 }

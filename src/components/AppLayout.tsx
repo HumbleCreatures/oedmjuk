@@ -11,6 +11,9 @@ const useStyles = createStyles((theme) => ({
       border: 'none',
       color: theme.colors.gray[0],
       fontWeight: 700,
+      marginLeft: theme.spacing.sm,
+      marginTop: theme.spacing.xs,
+      fontSize: theme.fontSizes.lg,
     },
     navbar: {
       background: 'none',

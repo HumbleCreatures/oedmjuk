@@ -17,6 +17,8 @@ import {
   IconSearch,
   IconPlus,
   IconSelector,
+  IconCalendar,
+  IconSettings,
 } from "@tabler/icons";
 import Link from "next/link";
 import { NavbarSpaceList } from "./NavBarSpaceList";
@@ -33,7 +35,7 @@ const useStyles = createStyles((theme) => ({
     marginLeft: -theme.spacing.md,
     marginRight: -theme.spacing.md,
     marginBottom: theme.spacing.md,
-    backgroundColor: theme.colors.earth[1],
+    backgroundColor: 'rgba(255,255,255,0.4)',
     borderRadius : theme.radius.md,
     padding: theme.spacing.md,
   },
@@ -59,30 +61,21 @@ const useStyles = createStyles((theme) => ({
   },
 
   mainLinks: {
-    paddingLeft: theme.spacing.md - theme.spacing.xs,
-    paddingRight: theme.spacing.md - theme.spacing.xs,
-    paddingBottom: theme.spacing.md,
+    padding: 0,
   },
 
   mainLink: {
     display: "flex",
     alignItems: "center",
     width: "100%",
-    fontSize: theme.fontSizes.xs,
-    padding: `8px ${theme.spacing.xs}px`,
+    fontSize: theme.fontSizes.sm,
+    padding: theme.spacing.xs,
     borderRadius: theme.radius.sm,
     fontWeight: 500,
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[0]
-        : theme.colors.gray[7],
+    color: theme.colors.earth[9],
 
     "&:hover": {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[6]
-          : theme.colors.gray[0],
-      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+      backgroundColor: theme.colors.gray[0],
     },
   },
 
@@ -94,10 +87,7 @@ const useStyles = createStyles((theme) => ({
 
   mainLinkIcon: {
     marginRight: theme.spacing.sm,
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[2]
-        : theme.colors.gray[6],
+    color: theme.colors.earth[9],
   },
 
   mainLinkBadge: {
@@ -105,18 +95,8 @@ const useStyles = createStyles((theme) => ({
     width: 20,
     height: 20,
     pointerEvents: "none",
-  },
-
-  collections: {
-    paddingLeft: theme.spacing.md - 6,
-    paddingRight: theme.spacing.md - 6,
-    paddingBottom: theme.spacing.md,
-  },
-
-  collectionsHeader: {
-    paddingLeft: theme.spacing.md + 2,
-    paddingRight: theme.spacing.md,
-    marginBottom: 5,
+    backgroundColor: theme.colors.earth[0],
+    color: theme.colors.earth[9],
   },
 
   footer: {
@@ -151,16 +131,8 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const links = [
-  { icon: IconBulb, label: "Activity", notifications: 3, href: "/app/settings/dataIndexTypes" },
-  { icon: IconCheckbox, label: "Tasks", notifications: 4, href: "/app/settings/dataIndexTypes" },
-  { icon: IconUser, label: "Data Index Types", href: "/app/settings/dataIndexTypes" },
-];
-
-const collections = [
-  { emoji: "🍱", label: "Space 1" },
-  { emoji: "🍱", label: "Space 2" },
-  { emoji: "🍱", label: "Space 3" },
-  { emoji: "🍱", label: "Space 4" },
+  { icon: IconCalendar, label: "My Calendar", notifications: 3, href: "/app/settings/dataIndexTypes" },
+  { icon: IconSettings, label: "Settings", href: "/app/settings/dataIndexTypes" },
 ];
 
 export function NavbarSearch() {

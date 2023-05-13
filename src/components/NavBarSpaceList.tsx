@@ -8,41 +8,37 @@ import {
   Tooltip,
 } from "@mantine/core";
 import Link from "next/link";
-import { IconPlus } from "@tabler/icons";
+import { IconPlus, IconBox } from "@tabler/icons";
 
 const useStyles = createStyles((theme) => ({
+
   collections: {
-    paddingLeft: theme.spacing.md - 6,
-    paddingRight: theme.spacing.md - 6,
-    paddingBottom: theme.spacing.md,
+    padding: 0,
   },
 
   collectionsHeader: {
-    paddingLeft: theme.spacing.md + 2,
-    paddingRight: theme.spacing.md,
+    paddingLeft: theme.spacing.sm,
+    paddingRight: 0,
     marginBottom: 5,
   },
 
   collectionLink: {
-    display: "block",
-    padding: `8px ${theme.spacing.xs}px`,
-    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    fontSize: theme.fontSizes.sm,
+    padding: theme.spacing.xs,
     borderRadius: theme.radius.sm,
-    fontSize: theme.fontSizes.xs,
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[0]
-        : theme.colors.gray[7],
-    lineHeight: 1,
     fontWeight: 500,
+    color: theme.colors.earth[9],
 
     "&:hover": {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[6]
-          : theme.colors.gray[0],
-      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+      backgroundColor: theme.colors.gray[0],
     },
+  },
+  mainLinkIcon: {
+    marginRight: theme.spacing.sm,
+    color: theme.colors.earth[9],
   },
   sectionSpaces: {
     marginLeft: -theme.spacing.md,
@@ -51,6 +47,9 @@ const useStyles = createStyles((theme) => ({
     flexGrow: 1,
     flex: "none",
   },
+  addButtonIcon: {
+    color: theme.colors.earth[9],
+  }
 }));
 
 export function NavbarSpaceList() {
@@ -64,7 +63,7 @@ export function NavbarSpaceList() {
   const spaceLinks = spaceResult.data && spaceResult.data.map((space) => (
     <Link key={space.id} href={`/app/space/${space.id}`}>
       <div className={classes.collectionLink}>
-        <span style={{ marginRight: 9, fontSize: 16 }}>🍱</span> {space.name}
+        <IconBox size={20} className={classes.mainLinkIcon} stroke={1.5} /> {space.name}
       </div>
     </Link>
   ));
@@ -72,13 +71,13 @@ export function NavbarSpaceList() {
   return (
     <Navbar.Section className={classes.sectionSpaces} grow={true}>
       <Group className={classes.collectionsHeader} position="apart">
-        <Text size="xs" weight={500} color="dimmed">
+        <Text size="md" weight={500}>
           Spaces
         </Text>
-        <Tooltip label="Create space" withArrow position="right">
+        <Tooltip label="Find or create spaces" withArrow position="right">
           <Link href="/app/space/create">
-            <ActionIcon variant="default" size={18}>
-              <IconPlus size={12} stroke={1.5} />
+            <ActionIcon size={22}>
+              <IconPlus size={18} className={classes.addButtonIcon}/>
             </ActionIcon>
           </Link>
         </Tooltip>
