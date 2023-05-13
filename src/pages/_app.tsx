@@ -26,8 +26,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
         withGlobalStyles
         withNormalizeCSS
         theme={{
-          /** Put your mantine theme override here */
-          colorScheme: "light",
+          colors: {
+            earth: ['#ecf39e', '#d2db8d', '#bac57e', '#a2af6f', '#8a995f', '#728250', '#5b6c41', '#435632', '#2b4022', '#132a13'],
+          },
+          primaryColor: 'earth',
         }}
       >
         <SessionProvider session={session}>
@@ -39,3 +41,14 @@ const MyApp: AppType<{ session: Session | null }> = ({
 };
 
 export default api.withTRPC(MyApp);
+
+
+import { Tuple, DefaultMantineColor } from '@mantine/core';
+
+type ExtendedCustomColors = 'earth'| DefaultMantineColor;
+
+declare module '@mantine/core' {
+  export interface MantineThemeColorsOverride {
+    colors: Record<ExtendedCustomColors, Tuple<string, 10>>;
+  }
+}
