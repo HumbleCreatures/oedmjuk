@@ -1,8 +1,40 @@
-import { Card, Group, Text, Select } from "@mantine/core";
+import { Card, Group, Text, Select, createStyles } from "@mantine/core";
 import { SelectionAlternative, SelectionVoteEntry } from "@prisma/client";
-import { UserButtonWithData } from "./UserButton";
+import { UserButtonWithData, UserLinkWithData } from "./UserButton";
 import { forwardRef } from "react";
 import { api } from "../utils/api";
+import { DateTime } from "luxon";
+
+
+const useStyles = createStyles((theme) => ({
+  area: {
+    backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  bodyArea: {
+    backgroundColor: theme.white,
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.xs,
+  },
+  mainTitle: {
+    color: theme.white,
+    fontSize: theme.fontSizes.xxl,
+    marginTop: theme.spacing.xl,
+  },
+  editorWrapper: {
+    marginTop: theme.spacing.md,
+  },
+  inlineText: {
+    display: "inline",
+  },
+}));
 
 type AlternativeListItemProps = {
   alternative: SelectionAlternative & {
@@ -21,7 +53,7 @@ export function AlternativeListItem({
   vote,
   showResults,
 }: AlternativeListItemProps) {
-
+  const { classes } = useStyles();
     const utils = api.useContext();
     const mutation = api.selection.buyVotes.useMutation({
         onSuccess() {
@@ -52,25 +84,36 @@ export function AlternativeListItem({
 
 
   return (
-    <Card withBorder shadow="sm" radius="md" style={{minHeight: 400}}>
+    <Card withBorder shadow="sm" radius="md" style={{overflow: 'visible'}}>
+      <Card.Section withBorder inheritPadding py="xs">
+        <Text fz="sm" fw={300}>
+            Created{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              {DateTime.fromJSDate(alternative.createdAt)
+                .setLocale("en")
+                .toRelative()}
+            </Text>{" "}
+            by{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              <UserLinkWithData userId={alternative.authorId} />
+            </Text>
+          </Text>
+      </Card.Section>
       <Card.Section mt="md" inheritPadding py="xs">
-        <Group position="apart">
+        
           <Text fz="lg" fw={500}>
             {alternative.title}
           </Text>
-          <Text fz="lg" fw={500}>
-            {alternative.body}
-          </Text>
-          <div>
-            By: <UserButtonWithData userId={alternative.authorId} />
-          </div>
-        </Group>
+          <div dangerouslySetInnerHTML={{__html:alternative.body }} />
+          
+          </Card.Section>
+          <Card.Section withBorder mt="md" inheritPadding py="xs">
         <Group position="apart">
             {showResults && <Text fz="lg" fw={500}>
                 Total number of votes: {alternative.votes.reduce((acc, vote) => acc + vote.numberOfVotes, 0)}
             </Text>}
           {canVote && !showResults && <Select
-            label="But votes"
+            label="Buy votes"
             placeholder="Pick one"
             itemComponent={SelectItem}
             data={voteData}

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { type NextPage } from "next";
 import AppLayout from "../../../../../components/AppLayout";
-import { Alert, Button, Container, Select, TextInput, Title } from "@mantine/core";
+import { Alert, Button, Container, Select, TextInput, Title, createStyles, Text } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
 import { useForm } from '@mantine/form';
@@ -11,9 +11,27 @@ import { StarterKit } from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { RichTextEditor } from '@mantine/tiptap';
 
-
+const useStyles = createStyles((theme) => ({
+  area: {
+    backgroundColor: theme.colors.gray[0],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.md,
+  },
+  editorWrapper: {
+    marginTop: theme.spacing.md,
+  },
+  fullWidth: {
+    width: "100%",
+  },
+}));
 
 function DataIndexEditorView({spaceId}: {spaceId: string}) {
+  const { classes } = useStyles();
   const data = api.space.getSpace.useQuery({spaceId}).data;
   const indexTypeQuery = api.dataIndex.getAllIndexTypes.useQuery();
 
@@ -56,10 +74,12 @@ function DataIndexEditorView({spaceId}: {spaceId: string}) {
   
   return (
     <AppLayout>
-      <Container size="xs">
+      <Container size="sm">
       <SpaceNavBar space={space} isMember={isMember}/>
-      <Container size="xs">
-        <Title order={1}>Create a new space</Title>
+      <Container size="sm" className={classes.area}>
+          <Title className={classes.areaTitle} order={2}>
+            Create a new data index 
+          </Title>
 
         <form
           onSubmit={form.onSubmit((values) => {
@@ -73,6 +93,7 @@ function DataIndexEditorView({spaceId}: {spaceId: string}) {
             {...form.getInputProps("title")}
           />
           <Select
+            className={classes.editorWrapper}
             label="Select index type"
             placeholder="Pick one"
             searchable
@@ -81,7 +102,10 @@ function DataIndexEditorView({spaceId}: {spaceId: string}) {
             {...form.getInputProps("unitTypeId")}
           />
 
-          <div>Body</div>
+<div className={classes.editorWrapper}>
+              <Text fz="sm" fw={500}>
+                Body
+              </Text>
           <RichTextEditor editor={editor}>
           <RichTextEditor.Toolbar sticky stickyOffset={60}>
         <RichTextEditor.ControlsGroup>
@@ -110,19 +134,15 @@ function DataIndexEditorView({spaceId}: {spaceId: string}) {
 
       </RichTextEditor.Toolbar>
             <RichTextEditor.Content />
-          </RichTextEditor>
+          </RichTextEditor></div>
           <Button type="submit" mt="sm">
-            Submit
+            Create
           </Button>
-
-          {form.errors && <div>{JSON.stringify(form.errors)}</div> }
             
           {mutation.error && 
            <Alert icon={<IconAlertCircle size={16} />} title="Bummer!" color="red">Something went wrong! {mutation.error.message}</Alert>}
         </form>
       </Container>
-
-
       </Container>
     </AppLayout>
   );

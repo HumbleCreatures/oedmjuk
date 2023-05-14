@@ -304,6 +304,7 @@ model FeedbackRound {
   body            String
   space           Space            @relation(fields: [spaceId], references: [id])
   spaceId         String
+  status          String           @default("Created")
   feedbackItem    FeedbackItem[]
   feedbackColumns FeedbackColumn[]
   spaceFeedItem   SpaceFeedItem[]

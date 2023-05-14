@@ -1,15 +1,43 @@
 import { type NextPage } from "next";
 import AppLayout from "../../../components/AppLayout";
 import { useForm } from "@mantine/form";
-import { TextInput, Button, Container, Title, Alert, Text } from "@mantine/core";
+import { TextInput, Button, Container, Title, Alert, Text, createStyles, Accordion } from "@mantine/core";
 import { api } from "../../../utils/api";
 import { IconAlertCircle } from '@tabler/icons';
 import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { RichTextEditor } from '@mantine/tiptap';
+import { SettingsNavBar } from "../../../components/SettingsNavBar";
+
+const useStyles = createStyles((theme) => ({
+  area: {
+    backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  editArea: {
+    backgroundColor: theme.colors.gray[0],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.md,
+  },
+  editorWrapper: {
+    marginTop: theme.spacing.md,
+  },
+  fullWidth: {
+    width: "100%",
+  },
+}));
 
 const DataIndexTypesPage: NextPage = () => {
+  const { classes } = useStyles();
   const form = useForm({
     initialValues: {
       name: "",
@@ -50,19 +78,25 @@ const DataIndexTypesPage: NextPage = () => {
 
   return (
     <AppLayout>
-      <Container size="xs">
-        <Text>Data Index Types</Text>
+      <Container size="sm">
+      <SettingsNavBar />
+      <Container size="sm" className={classes.area}>
+      <Title className={classes.areaTitle} order={2}>Data index types</Title>
+      <Accordion variant="filled" >
+      
+
       {query.data.map((indexType) =>{
         return (
-          <div key={indexType.id}>
-            <div>{indexType.name}</div>
-            <div>{indexType.unitName}</div>
-            <div>{indexType.description}</div>
-          </div>
+
+          <Accordion.Item key={indexType.id} value={indexType.id}>
+          <Accordion.Control><Text>{indexType.name}</Text> <Text size="sm" color="dimmed" weight={400}>{indexType.unitName}</Text></Accordion.Control>
+          <Accordion.Panel><div dangerouslySetInnerHTML={{__html: indexType.description ? indexType.description : ''}}></div></Accordion.Panel>
+        </Accordion.Item>
         )
       })}
+      </Accordion>
       </Container>
-      <Container size="xs">
+      <Container size="sm" className={classes.editArea}>
         <Title order={1}>Create a new space</Title>
 
         <form
@@ -117,6 +151,7 @@ const DataIndexTypesPage: NextPage = () => {
           {mutation.error && 
            <Alert icon={<IconAlertCircle size={16} />} title="Bummer!" color="red">Something went wrong! {mutation.error.message}</Alert>}
         </form>
+      </Container>
       </Container>
     </AppLayout>
   );

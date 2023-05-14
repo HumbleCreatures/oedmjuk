@@ -96,7 +96,11 @@ export const spaceRouter = createTRPCRouter({
         proposal: true,
         selection: true,
         feedbackRound: true,
-        dataIndex: true
+        dataIndex: {
+          include: {
+            unitType: true,
+          }
+        }
       }
      });
   }),

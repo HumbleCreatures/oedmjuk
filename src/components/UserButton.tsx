@@ -34,6 +34,13 @@ import Link from 'next/link';
     if(!user) return (<div>loading...</div>);
     return <UserButton name={user.name as string} userId={userId} />
   }
+  export function UserLinkWithData ({userId}: {userId: string}) {
+    const user = api.user.getUser.useQuery({userId}).data;
+    if(!user) return (<div>loading...</div>);
+    return <Link href={`/app/user/${userId}`}>
+      {user.name as string}
+    </Link>
+  }
   
   export function UserButton({ name, userId }: UserButtonProps) {
     const { classes } = useStyles();

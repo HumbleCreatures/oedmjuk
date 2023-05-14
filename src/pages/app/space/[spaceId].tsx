@@ -31,7 +31,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
       <Container size="sm">
       <SpaceNavBar space={space} isMember={isMember}/>
       <div className={classes.area}>
-        <Title order={2} className={classes.areaTitle}>Feed goes here</Title>
+        <Title order={2} className={classes.areaTitle}>Feed</Title>
         <SimpleGrid cols={1}>
         <SpaceFeed spaceId={space.id} />
         </SimpleGrid>

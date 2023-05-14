@@ -1,11 +1,43 @@
-import { Alert, Button, TextInput, Title } from "@mantine/core";
+import { Alert, Button, TextInput, Title, createStyles, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
 import { api } from "../utils/api";
 import { ARichTextEditor, VoidFunc } from "./RichTextEditor";
 import { useRef } from "react";
 
+const useStyles = createStyles((theme) => ({
+  area: {
+    backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  bodyArea: {
+    backgroundColor: theme.white,
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.xs,
+  },
+  mainTitle: {
+    color: theme.white,
+    fontSize: theme.fontSizes.xxl,
+    marginTop: theme.spacing.xl,
+  },
+  editorWrapper: {
+    marginTop: theme.spacing.md,
+  },
+  inlineText: {
+    display: "inline",
+  },
+}));
+
+
 export function AlternativeEditor({ selectionId }: { selectionId: string }) {
+  const { classes } = useStyles();
   const clearForm = useRef<VoidFunc>();
 
   const form = useForm({
@@ -29,24 +61,30 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
 
   
   return (
-    <div>
       <form
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, selectionId });
           clearForm.current?.();
         })}
       >
-        <h1>Create objection</h1>
+        <Title order={2} className={classes.areaTitle}>
+          Create alternative
+        </Title>
         <TextInput
             label="Title"
             placeholder="Title"
             {...form.getInputProps("title")}
           />
           
+          <div className={classes.editorWrapper}>
+              <Text fz="sm" fw={500}>
+                Body
+              </Text>
         {clearForm  !== undefined && <ARichTextEditor
           onUpdate={(html) => form.setFieldValue("body", html)}
           clearForm={clearForm}
         /> }
+        </div>
 
         <Button type="submit" mt="sm">
           Create alternative
@@ -62,6 +100,5 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
           </Alert>
         )}
       </form>
-    </div>
   );
 }
