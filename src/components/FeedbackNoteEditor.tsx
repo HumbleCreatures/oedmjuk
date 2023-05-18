@@ -1,5 +1,5 @@
 import { RichTextEditor } from "@mantine/tiptap";
-import { Button, Container, TextInput } from "@mantine/core";
+import { Button, Container, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -35,14 +35,15 @@ export function FeedbackNoteEditor({feedbackRoundId, feedbackItemId}: {feedbackR
 
   return (
     <Container>
-        <div>Create feedback item</div>
         <form
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, feedbackItemId })
         })}
       >
         
-        <div>Body</div>
+        <Text fz="sm" fw={500}>
+                Body
+              </Text>
         <RichTextEditor editor={editor}>
           <RichTextEditor.Toolbar sticky stickyOffset={60}>
             <RichTextEditor.ControlsGroup>

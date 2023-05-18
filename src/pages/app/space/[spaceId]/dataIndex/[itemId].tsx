@@ -1,15 +1,51 @@
 import { useRouter } from 'next/router'
 import { type NextPage } from "next";
 import AppLayout from "../../../../../components/AppLayout";
-import { Container, Text, Title } from "@mantine/core";
+import { Container, Text, Title, createStyles, Group, ThemeIcon } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
 import { DataPointEditor } from '../../../../../components/DataPointEditor';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { DateTime } from "luxon";
+import { UserLinkWithData } from "../../../../../components/UserButton";
+import { IconChartBar } from '@tabler/icons';
 
+const useStyles = createStyles((theme) => ({
+  area: {
+    backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  bodyArea: {
+    backgroundColor: theme.white,
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.xs,
+  },
+  mainTitle: {
+    color: theme.white,
+    fontSize: theme.fontSizes.xxl,
+    marginTop: theme.spacing.xl,
+  },
+  editorWrapper: {
+    marginTop: theme.spacing.md,
+  },
+  inlineText: {
+    display: "inline",
+  },
+  pointsText: {
+    marginBottom: theme.spacing.md,
+  },
+}));
 
 
 function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
+  const { classes } = useStyles();
   const data = api.space.getSpace.useQuery({spaceId}).data;
   const dataIndexResult = api.dataIndex.getDataIndex.useQuery({itemId});
   const dataPointsResult = api.dataIndex.getDataPointForIndex.useQuery({dataIndexId: itemId});
@@ -20,42 +56,67 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
   if(!dataPointsResult.data) return (<div>could not load item...</div>)
 
   const {space, isMember} = data;
-  const {title, description, unitType} = dataIndexResult.data;
-
+  const {title, description, unitType, createdAt, updatedAt, authorId} = dataIndexResult.data;
+  
   return (
     <AppLayout>
-      <Container size="xs">
+      <Container size="sm">
       <SpaceNavBar space={space} isMember={isMember}/>
-        
-        {dataIndexResult.isLoading &&
-            <div>Loading...</div>
-        }
+      <Container size="sm">
+          <Title order={2} className={classes.mainTitle}>
+            {title}
+          </Title>
+        </Container>
 
-{!dataIndexResult.isLoading && !dataIndexResult.data && <div>Content not found</div> }
-
-            
-            <><Text fz="lg" fw={500}>
-                <Title order={2}>{title}</Title>
+        <Container size="sm" className={classes.area}>
+          <Group position="apart">
+            <Title order={2} className={classes.areaTitle}>
+              Data index
+            </Title>
+            <ThemeIcon size="xl">
+              <IconChartBar />
+            </ThemeIcon>
+          </Group>
+          <div>
+            <Text fz="sm" fw={300}>
+              Created{" "}
+              <Text fz="sm" fw={500} className={classes.inlineText}>
+                {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
+              </Text>
             </Text>
-            <Text>
-            <div dangerouslySetInnerHTML={{__html: description}} />
-            <div>
-               UnitType: {unitType.name} ({unitType.unitName})
-            </div>
-        </Text></>
             
+
+            {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
+              <Text fz="sm" fw={300}>
+                Last updated{" "}
+                <Text fz="sm" fw={500} className={classes.inlineText}>
+                  {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
+                </Text>
+              </Text>
+            )}
+
+            <Text fz="sm">
+              By{" "}
+              <Text fz="sm" fw={500} className={classes.inlineText}>
+                <UserLinkWithData userId={authorId} />
+              </Text>
+            </Text>
+            <Text fz="sm" fw={300}>
+               Data index is measured in <Text fz="sm" fw={500} className={classes.inlineText}>{unitType.name} ({unitType.unitName})</Text>
+            </Text>
+          </div>
+        </Container>
+
+        {description && <Container size="sm" className={classes.bodyArea}>
+          <div dangerouslySetInnerHTML={{ __html: description }} />
+        </Container> }            
         
-      </Container>
+      
 
-      <Container size="xs">
-        <Title order={4}>Add Data points</Title>
-        <DataPointEditor dataIndexId={itemId} />
-      </Container>
-
-      <Container size="xs">
-        <Text fz="lg" fw={500}>
-          Data points
-          </Text>
+      {dataPointsResult.data && dataPointsResult.data.length > 0 && <Container size="sm" className={classes.bodyArea}>
+        <Title order={3} className={classes.areaTitle}>
+              Data Chart
+        </Title>
         <div style={{ width: 500, height: 300}}>
           <ResponsiveContainer width="100%" height="100%">
         <BarChart
@@ -74,10 +135,17 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="value" name={unitType.unitName} fill="#228be6" />
+          <Bar dataKey="value" name={unitType.unitName} fill="#5b6c41" />
         </BarChart>
       </ResponsiveContainer>
       </div>
+      </Container> }
+
+      <Container size="sm" className={classes.area}>
+        <Title order={4} className={classes.areaTitle}>Add Data points</Title>
+        <DataPointEditor dataIndexId={itemId} />
+      </Container>
+
       </Container>
     </AppLayout>
   );

@@ -1,36 +1,59 @@
-import type { FeedbackColumn, FeedbackItem, FeedbackRound } from "@prisma/client";
-import { Grid, Text, createStyles } from "@mantine/core";
+import type {
+  FeedbackColumn,
+  FeedbackItem,
+  FeedbackRound,
+} from "@prisma/client";
+import { Grid, Title, createStyles } from "@mantine/core";
 import { FeedbackItemCard } from "./FeedbackItemCard";
 
-
 const useStyles = createStyles((theme) => ({
-  column: {
-    backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.colors.gray[4],
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.xs,
+  },
+  area: {
+    backgroundColor: theme.colors.gray[4],
     borderRadius: theme.radius.md,
-    marginRight: theme.spacing.md,
-  }
+    padding: theme.spacing.md,
+    width: 300,
+  },
+  itemColumn: {
+    backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    width: 300,
+  },
 }));
 export function FeedbackColumns({
   feedbackColumns,
-  feedbackRound
+  feedbackRound,
 }: {
   feedbackColumns: (FeedbackColumn & {
     feedbackItems: FeedbackItem[];
-    
-})[], feedbackRound: FeedbackRound;
+  })[];
+  feedbackRound: FeedbackRound;
 }) {
   const { classes } = useStyles();
 
   return (
-    <Grid >
+    <>
       {feedbackColumns.map((column) => (
-        <Grid.Col key={column.id} className={classes.column} span={3}>
-        <Text>{column.title}</Text>
-        {column.feedbackItems.map((item) => (<FeedbackItemCard key={item.id} feedbackItem={item} feedbackColumns={feedbackColumns} feedbackRound={feedbackRound} />))}
-      </Grid.Col>
+        <Grid.Col key={column.id} span={3}>
+          <div className={classes.itemColumn}>
+          <Title order={3} className={classes.areaTitle}>
+              {column.title}
+            </Title>
+          {column.feedbackItems.map((item) => (
+            <FeedbackItemCard
+              key={item.id}
+              feedbackItem={item}
+              feedbackColumns={feedbackColumns}
+              feedbackRound={feedbackRound}
+            />
+          ))}
+          </div>
+        </Grid.Col>
       ))}
-      
-      
-    </Grid>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { DatePickerInput } from "@mantine/dates";
-import { NumberInput, Alert, Button } from "@mantine/core";
+import { NumberInput, Alert, Button, SimpleGrid } from "@mantine/core";
 
 import { IconCalendar } from "@tabler/icons-react";
 
@@ -43,28 +43,29 @@ export function DataPointEditor({ dataIndexId }: { dataIndexId: string }) {
       mutation.mutate({...values, dataIndexId: dataIndexId});
     })}
   >
+    <SimpleGrid cols={1}>
       <DatePickerInput
         icon={<IconCalendar size="1.1rem" stroke={1.5} />}
         label="Pick date"
         placeholder="Pick date"
         {...form.getInputProps("datestamp")}
-        mx="auto"
-        maw={400}
       />
 
       <NumberInput
         mt="xl"
         label="Number value for the chosen date"
         placeholder="NumberInput with custom layout"
-        description="Description below the input"
+        description="If there is a value for the chosen date, it will be overwritten."
         {...form.getInputProps("value")}
       />
-      <Button type="submit" mt="sm">
-            Submit
+      <div><Button type="submit" mt="sm">
+            Add point
           </Button>
+          </div>
 
      {mutation.error && 
            <Alert icon={<IconAlertCircle size={16} />} title="Bummer!" color="red">Something went wrong! {mutation.error.message}</Alert>}
+        </SimpleGrid>
         </form>
   );
 }

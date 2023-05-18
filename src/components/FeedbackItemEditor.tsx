@@ -1,12 +1,22 @@
 import { RichTextEditor } from "@mantine/tiptap";
-import { Button, Container, TextInput } from "@mantine/core";
+import { Button, Container, TextInput, createStyles, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { api } from "../utils/api";
 
+const useStyles = createStyles((theme) => ({
+
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.xs,
+  },
+ 
+}));
+
 export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string}) {
+  const { classes } = useStyles();
   const form = useForm({
     initialValues: {
       title: "",
@@ -37,7 +47,9 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
 
   return (
     <Container>
-        <div>Create feedback note</div>
+        <Title order={3} className={classes.areaTitle}>
+              My feedback items
+            </Title>
         <form
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, feedbackRoundId })
@@ -60,19 +72,6 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
               <RichTextEditor.Code />
             </RichTextEditor.ControlsGroup>
 
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.H1 />
-              <RichTextEditor.H2 />
-              <RichTextEditor.H3 />
-              <RichTextEditor.H4 />
-            </RichTextEditor.ControlsGroup>
-
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.Blockquote />
-              <RichTextEditor.Hr />
-              <RichTextEditor.BulletList />
-              <RichTextEditor.OrderedList />
-            </RichTextEditor.ControlsGroup>
           </RichTextEditor.Toolbar>
           <RichTextEditor.Content />
         </RichTextEditor>
