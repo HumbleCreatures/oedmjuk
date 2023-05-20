@@ -34,7 +34,7 @@ export const calendarEventRouter = createTRPCRouter({
               create: {
                 userId: ctx.session.user.id,
                 startAt: input.startAt,
-                endAt: input.endAt
+                endAt: input.endAt,
               },
             },
           },
@@ -43,17 +43,129 @@ export const calendarEventRouter = createTRPCRouter({
 
       return items[0];
     }),
+  setAttending: protectedProcedure
+    .input(
+      z.object({
+        calendarEventId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const attendee = await ctx.prisma.calendarEventAttendee.findFirst({
+        where: {
+          calendarEventId: input.calendarEventId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (attendee && !attendee.isAttending) {
+        return ctx.prisma.calendarEventAttendee.update({
+          where: {
+            id: attendee.id,
+          },
+          data: {
+            isAttending: true,
+          },
+        });
+      }
+
+      if (!attendee) {
+        return ctx.prisma.calendarEventAttendee.create({
+          data: {
+            calendarEventId: input.calendarEventId,
+            userId: ctx.session.user.id,
+            isAttending: true,
+          },
+        });
+      }
+
+      return attendee;
+    }),
+  setNotAttending: protectedProcedure
+    .input(
+      z.object({
+        calendarEventId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const attendee = await ctx.prisma.calendarEventAttendee.findFirst({
+        where: {
+          calendarEventId: input.calendarEventId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (attendee && attendee.isAttending) {
+        return ctx.prisma.calendarEventAttendee.update({
+          where: {
+            id: attendee.id,
+          },
+          data: {
+            isAttending: false,
+          },
+        });
+      }
+
+      if (!attendee) {
+        return ctx.prisma.calendarEventAttendee.create({
+          data: {
+            calendarEventId: input.calendarEventId,
+            userId: ctx.session.user.id,
+            isAttending: false,
+          },
+        });
+      }
+
+      return attendee;
+    }),
+  getCalendarEventsForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.calendarEvent.findMany({
+        where: { spaceId: input.spaceId },
+      });
+    }),
   getCalendarEvent: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
       const calendarEvent = await ctx.prisma.calendarEvent.findUnique({
         where: { id: input.itemId },
         include: {
-          space: true,
+          calendarEventAttendee: true,
         },
       });
-      
-      return calendarEvent;
-    })
 
+      if (!calendarEvent) {
+        return null;
+      }
+
+      const spaceMembers = await ctx.prisma.spaceMember.findMany({
+        where: {
+          spaceId: calendarEvent.spaceId,
+          leftAt: null,
+        },
+      });
+
+      const myAttendee = calendarEvent?.calendarEventAttendee.find(
+        (attendee) => attendee.userId === ctx.session.user.id
+      );
+      const attending = calendarEvent?.calendarEventAttendee.filter(
+        (attendee) => attendee.isAttending
+      );
+      const notAttending = calendarEvent?.calendarEventAttendee.filter(
+        (attendee) => !attendee.isAttending
+      );
+      const notAnswered = spaceMembers.filter(
+        (member) =>
+          !calendarEvent?.calendarEventAttendee.find(
+            (attendee) => attendee.userId === member.userId
+          )
+      );
+      return {
+        calendarEvent,
+        myAttendee,
+        attending,
+        notAttending,
+        notAnswered,
+      };
+    }),
 });
