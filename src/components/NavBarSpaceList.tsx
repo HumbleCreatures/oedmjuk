@@ -54,7 +54,7 @@ const useStyles = createStyles((theme) => ({
 
 export function NavbarSpaceList() {
   const { classes } = useStyles();
-  const spaceResult = api.space.getAllSpaces.useQuery();
+  const spaceResult = api.space.getMySpaces.useQuery();
 
   if(spaceResult.isLoading) {
     return <div>...Loading</div>

@@ -79,6 +79,19 @@ export const spaceRouter = createTRPCRouter({
   getAllSpaces: publicProcedure.query(async ({ ctx }) => {
     return ctx.prisma.space.findMany();
   }),
+  getMySpaces: publicProcedure.query(async ({ ctx }) => {
+    const spaceMembers = await ctx.prisma.spaceMember.findMany({
+      where: {
+        userId: ctx.session?.user.id,
+        leftAt: null
+      },
+      include: {
+        space: true,
+      }
+    });
+    
+    return spaceMembers.map((spaceMember) => spaceMember.space);
+  }),
 
   getSpaceFeed: protectedProcedure
   .input(z.object({ spaceId: z.string() }))

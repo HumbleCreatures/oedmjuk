@@ -85,6 +85,7 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
   const joinMutation = api.space.joinSpace.useMutation({
     onSuccess(_data) {
       void utils.space.getAllSpaces.invalidate();
+      void utils.space.getMySpaces.invalidate();
       void utils.space.getSpace.invalidate();
     },
   });
@@ -92,6 +93,7 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
   const leaveMutation = api.space.leaveSpace.useMutation({
     onSuccess(_data) {
       void utils.space.getAllSpaces.invalidate();
+      void utils.space.getMySpaces.invalidate();
       void utils.space.getSpace.invalidate();
     },
   });
