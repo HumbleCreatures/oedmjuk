@@ -124,6 +124,22 @@ export const calendarEventRouter = createTRPCRouter({
         where: { spaceId: input.spaceId },
       });
     }),
+  getMyCalendarEvents: protectedProcedure
+    .query(async ({ ctx }) => {
+      const spacesThings = await ctx.prisma.spaceMember.findMany({
+        where: { userId: ctx.session.user.id, leftAt: null },
+        include: {
+          space: {
+            include: {
+              calendarEvents:true
+            }
+          }
+        }
+      });
+      return spacesThings.flatMap((spaceThing) => {
+        return spaceThing.space.calendarEvents;
+       })
+    }),
   getCalendarEvent: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {

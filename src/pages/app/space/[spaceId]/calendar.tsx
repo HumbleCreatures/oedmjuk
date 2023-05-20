@@ -56,7 +56,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
         events={events}
         localizer={localizer}
         onDoubleClickEvent={(event: {id: string}) => {
-          router.push(`/app/space/${space.id}/calendarEvent/${event.id}`)
+          void router.push(`/app/space/${space.id}/calendarEvent/${event.id}`)
         }}
         style={{ height: '100vh' }}
         />
