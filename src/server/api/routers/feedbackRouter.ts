@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeedEventTypes } from "../../../utils/enums";
+import { FeedbackItemStates, FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -53,6 +53,27 @@ export const feedbackRouter = createTRPCRouter({
             }
           }
         }
+      });
+
+      return content;
+    }),
+    getFeedbackRoundsForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const content = await ctx.prisma.feedbackRound.findMany({
+        where: { spaceId: input.spaceId },
+      });
+
+      return content;
+    }),
+    getActiveFeedbackRoundsForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const content = await ctx.prisma.feedbackRound.findMany({
+        where: { 
+          spaceId: input.spaceId,
+          state: FeedbackItemStates.Created 
+        },
       });
 
       return content;
@@ -121,6 +142,10 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback round not found");
       }
 
+      if(feedbackRound.state !== FeedbackItemStates.Created) {
+        throw new Error("Feedback round closed");
+      }
+
       const myMembership = await ctx.prisma.spaceMember.findMany({
         where: {
           spaceId: feedbackRound.spaceId,
@@ -148,6 +173,30 @@ export const feedbackRouter = createTRPCRouter({
         },
       });
     }),
+    closeFeedbackRound: protectedProcedure
+      .input(
+        z.object({
+          itemId: z.string(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const feedbackRound = await ctx.prisma.feedbackRound.findUnique({
+          where: { id: input.itemId },
+        });
+  
+        if (!feedbackRound) {
+          throw new Error("Feedback item not found");
+        }
+  
+        return ctx.prisma.feedbackRound.update({
+          where: {
+            id: input.itemId
+          },
+          data: {
+            state: FeedbackItemStates.Closed
+          },
+        });
+      }),
     addFeedbackNote: protectedProcedure
       .input(
         z.object({
@@ -157,11 +206,15 @@ export const feedbackRouter = createTRPCRouter({
       )
       .mutation(async ({ ctx, input }) => {
         const feedbackItem = await ctx.prisma.feedbackItem.findUnique({
-          where: { id: input.feedbackItemId },
+          where: { id: input.feedbackItemId }, include: {feedbackRound: true},
         });
   
         if (!feedbackItem) {
           throw new Error("Feedback item not found");
+        }
+
+        if(feedbackItem.feedbackRound.state !== FeedbackItemStates.Created) {
+          throw new Error("Feedback round closed");
         }
   
         return ctx.prisma.feedbackNote.create({
@@ -184,11 +237,15 @@ export const feedbackRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
 
           const currentItem =await ctx.prisma.feedbackItem.findUnique({
-            where: { id: input.feedbackItemId },
+            where: { id: input.feedbackItemId }, include:{feedbackRound: true},
           });
 
           if(!currentItem) {
             throw new Error("Feedback item not found");
+          }
+
+          if(currentItem.feedbackRound.state !== FeedbackItemStates.Created) {
+            throw new Error("Feedback round closed");
           }
           
           const nextItem = input.itemNextPreviousId && await ctx.prisma.feedbackItem.findUnique({

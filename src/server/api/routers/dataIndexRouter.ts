@@ -63,6 +63,18 @@ export const dataIndexRouter = createTRPCRouter({
       
       return content;
     }),
+    getDataIndicesForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const content = await ctx.prisma.dataIndex.findMany({
+        where: { spaceId: input.spaceId },
+        include: {
+          unitType: true,
+        }
+      });
+      
+      return content;
+    }),
     getDataPointForIndex: protectedProcedure
     .input(z.object({ dataIndexId: z.string() }))
     .query(async ({ ctx, input }) => {

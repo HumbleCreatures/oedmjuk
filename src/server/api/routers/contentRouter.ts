@@ -37,6 +37,15 @@ export const contentRouter = createTRPCRouter({
       });
       
       return content;
+    }),
+    getAllContentForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const content = await ctx.prisma.content.findMany({
+        where: { spaceId: input.spaceId }
+      });
+      
+      return content;
     })
   /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
     return ctx.prisma.space.findMany();

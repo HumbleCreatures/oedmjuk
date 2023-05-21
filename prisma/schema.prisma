@@ -198,9 +198,12 @@ model CalendarEvent {
   authorId              String
   spaceFeedItem         SpaceFeedItem[]
   userCalendar          UserCalendar[]
-  proposals             Proposal[]
   calendarEventAttendee CalendarEventAttendee[]
-  selection             Selection[]
+  proposals             Proposal[]
+  selections            Selection[]
+  dataIndices           DataIndex[]
+  feedbackRound         FeedbackRound?          @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId       String?
 }
 
 model CalendarEventAttendee {
@@ -227,23 +230,22 @@ model UserCalendar {
 }
 
 model Proposal {
-  id              String                @id @default(cuid())
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  title           String
-  body            String
-  space           Space                 @relation(fields: [spaceId], references: [id])
-  spaceId         String
-  author          User                  @relation(fields: [authorId], references: [id])
-  authorId        String
-  proposalState   String                @default("ProposalCreated")
-  proposalType    String                @default("Internal")
-  votes           ProposalVote[]
-  participants    ProposalParticipant[]
-  objections      Objection[]
-  calendarEvent   CalendarEvent?        @relation(fields: [calendarEventId], references: [id])
-  calendarEventId String?
-  spaceFeedItem   SpaceFeedItem[]
+  id             String                @id @default(cuid())
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  title          String
+  body           String
+  space          Space                 @relation(fields: [spaceId], references: [id])
+  spaceId        String
+  author         User                  @relation(fields: [authorId], references: [id])
+  authorId       String
+  proposalState  String                @default("ProposalCreated")
+  proposalType   String                @default("Internal")
+  votes          ProposalVote[]
+  participants   ProposalParticipant[]
+  objections     Objection[]
+  calendarEvents CalendarEvent[]
+  spaceFeedItem  SpaceFeedItem[]
 }
 
 model ProposalParticipant {
@@ -304,10 +306,11 @@ model FeedbackRound {
   body            String
   space           Space            @relation(fields: [spaceId], references: [id])
   spaceId         String
-  status          String           @default("Created")
+  state           String           @default("Created")
   feedbackItem    FeedbackItem[]
   feedbackColumns FeedbackColumn[]
   spaceFeedItem   SpaceFeedItem[]
+  CalendarEvent   CalendarEvent[]
 }
 
 model FeedbackColumn {
@@ -364,23 +367,22 @@ model FeedbackNote {
 }
 
 model Selection {
-  id              String                 @id @default(cuid())
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-  space           Space                  @relation(fields: [spaceId], references: [id])
-  spaceId         String
-  creator         User                   @relation(fields: [creatorId], references: [id])
-  creatorId       String
-  title           String
-  body            String
-  status          String                 @default("Created")
-  calendarEvent   CalendarEvent?         @relation(fields: [calendarEventId], references: [id])
-  calendarEventId String?
-  votingCapital   Int?
-  spaceFeedItem   SpaceFeedItem[]
-  alternatives    SelectionAlternative[]
-  votes           SelectionVoteEntry[]
-  participants    SelectionParticipant[]
+  id             String                 @id @default(cuid())
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  space          Space                  @relation(fields: [spaceId], references: [id])
+  spaceId        String
+  creator        User                   @relation(fields: [creatorId], references: [id])
+  creatorId      String
+  title          String
+  body           String
+  state         String                 @default("Created")
+  calendarEvents CalendarEvent[]
+  votingCapital  Int?
+  spaceFeedItem  SpaceFeedItem[]
+  alternatives   SelectionAlternative[]
+  votes          SelectionVoteEntry[]
+  participants   SelectionParticipant[]
 }
 
 model SelectionAlternative {
@@ -431,10 +433,11 @@ model DataIndex {
   authorId        String
   urlToSource     String?
   nameOfSource    String?
-  unitType            DataIndexType    @relation(fields: [unitTypeId], references: [id])
-  unitTypeId          String
+  unitType        DataIndexType    @relation(fields: [unitTypeId], references: [id])
+  unitTypeId      String
   dataIndexPoints DataIndexPoint[]
   spaceFeedItem   SpaceFeedItem[]
+  calendarEvents  CalendarEvent[]
 }
 
 model DataIndexPoint {

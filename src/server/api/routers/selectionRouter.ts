@@ -246,4 +246,18 @@ export const selectionRouter = createTRPCRouter({
 
       return selection;
     }),
+    getSelectionsForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.selection.findMany({
+        where: { spaceId: input.spaceId },
+      });
+    }),
+    getActiveSelectionsForSpace: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.selection.findMany({
+        where: { spaceId: input.spaceId, state: SelectionStates.Created },
+      });
+    }),
 });

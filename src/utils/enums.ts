@@ -20,6 +20,11 @@ export enum SelectionStates {
     VoteClosed = 'VoteClosed',
 }
 
+export enum FeedbackItemStates { 
+    Created = 'Created',
+    Closed = 'Closed',
+}
+
 export enum VoteValue {
     Accept = 'Accept',
     Reject = 'Reject',

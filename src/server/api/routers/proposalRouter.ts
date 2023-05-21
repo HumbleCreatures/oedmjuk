@@ -200,6 +200,16 @@ export const proposalRouter = createTRPCRouter({
         },
       });
     }),
+    getActiveSpaceProposals: protectedProcedure
+    .input(z.object({ spaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.proposal.findMany({
+        where: { spaceId: input.spaceId, proposalState: ProposalStates.ProposalCreated },
+        include: {
+          objections: true,
+        },
+      });
+    }),
   getProposal: protectedProcedure
     .input(z.object({ proposalId: z.string() }))
     .query(async ({ ctx, input }) => {

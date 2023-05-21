@@ -50,7 +50,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
       <Container size="md">
       <SpaceNavBar space={space} isMember={isMember}/>
       <div className={classes.area}>
-        <Title order={2} className={classes.areaTitle}>Calendar goes here</Title>
+        <Title order={2} className={classes.areaTitle}>Agenda</Title>
         <Calendar
         defaultView='agenda'
         events={events}
