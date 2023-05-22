@@ -208,7 +208,6 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               </ThemeIcon>
             }
           >
-
               <List.Item key={calendarResult.data.calendarEvent.feedbackRound.id}>
                 <Link href={`/app/space/${calendarResult.data.calendarEvent.feedbackRound.spaceId}/feedback/${calendarResult.data.calendarEvent.feedbackRound.id}`}>{calendarResult.data.calendarEvent.feedbackRound.title}</Link>
               </List.Item>

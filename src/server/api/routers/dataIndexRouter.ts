@@ -70,6 +70,9 @@ export const dataIndexRouter = createTRPCRouter({
         where: { spaceId: input.spaceId },
         include: {
           unitType: true,
+          dataIndexPoints: {
+            where: { datestamp: { gte: new Date(new Date().setDate(new Date().getDate() - 7)) } },
+          },
         }
       });
       

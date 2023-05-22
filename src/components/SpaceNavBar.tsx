@@ -138,24 +138,27 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
           <Link href={`/app/space/${space.id}/`} className={classes.link}>
             Feed
             </Link>
-
             <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
             Calendar
             </Link>
-
-            <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
+            <Link href={`/app/space/${space.id}/content`} className={classes.link}>
             Content
             </Link>
-
-            <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
+            <Link href={`/app/space/${space.id}/dataIndices`} className={classes.link}>
             Data
             </Link>
-
+            <Link href={`/app/space/${space.id}/proposals`} className={classes.link}>
+            Proposals
+            </Link>
+            <Link href={`/app/space/${space.id}/selections`} className={classes.link}>
+            Selections
+            </Link>
+            <Link href={`/app/space/${space.id}/feedback`} className={classes.link}>
+            Feedback
+            </Link>
             <Link href={`/app/space/${space.id}/members`} className={classes.link}>
             Members
             </Link>
-            
-
         </Group>
       </div>
     </Container>
