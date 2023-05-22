@@ -23,6 +23,7 @@ import { IconNotebook } from "@tabler/icons";
 import type { Proposal } from "@prisma/client";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -393,6 +394,10 @@ function ProposalInfo({ proposal }: { proposal: Proposal }) {
             </Text>
           </Text>
         </div>
+
+        <Link href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}/edit`} passHref>
+              <Button component="a">Edit</Button>
+            </Link>
       </Container>
       <Container size="sm" className={classes.bodyArea}>
         <div dangerouslySetInnerHTML={{ __html: body }} />

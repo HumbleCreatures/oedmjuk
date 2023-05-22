@@ -21,6 +21,7 @@ import { IconRecycle } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import { useState } from "react";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -95,7 +96,7 @@ function FeedbackView({
 
   if (!feedbackResult.data) return <div>Could not load feedback round</div>;
   const feedbackRound = feedbackResult.data;
-  const { title, body, createdAt, creatorId, updatedAt, status } = feedbackRound;
+  const { title, body, createdAt, creatorId, updatedAt, state } = feedbackRound;
 
   return (
     <AppLayout>
@@ -120,7 +121,7 @@ function FeedbackView({
             <Text fz="sm" fw={300}>
               State:{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
-                {status}
+                {state}
               </Text>
             </Text>
             <Text fz="sm" fw={300}>
@@ -146,6 +147,9 @@ function FeedbackView({
               </Text>
             </Text>
           </div>
+          <Link href={`/app/space/${spaceId}/feedback/${feedbackRoundId}/edit`} passHref>
+              <Button component="a">Edit</Button>
+            </Link>
         </Container>
 
         <Container size="sm" className={classes.bodyArea}>

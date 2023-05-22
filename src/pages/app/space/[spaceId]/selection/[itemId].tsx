@@ -19,6 +19,7 @@ import { SelectionStates } from "../../../../../utils/enums";
 import { IconColorSwatch } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -87,7 +88,7 @@ function SelectionView({
   const selection = selectionResult.data;
   if (!selection) return <div>Could not load selection</div>;
   const {
-    status,
+    state,
     title,
     body,
     createdAt,
@@ -145,13 +146,16 @@ function SelectionView({
               </Text>
             </Text>
           </div>
+          <Link href={`/app/space/${spaceId}/selection/${selectionId}/edit`} passHref>
+              <Button component="a">Edit</Button>
+            </Link>
         </Container>
 
         <Container size="sm" className={classes.bodyArea}>
           <div dangerouslySetInnerHTML={{ __html: body }} />
         </Container>
 
-        {selection.status === SelectionStates.Created && (
+        {selection.state === SelectionStates.Created && (
           <Container size="sm" className={classes.bodyArea}>
             <AlternativeEditor selectionId={selectionId} />
           </Container>
@@ -162,7 +166,7 @@ function SelectionView({
             Alternatives
           </Title>
 
-          {selection.status === SelectionStates.BuyingStarted &&
+          {selection.state === SelectionStates.BuyingStarted &&
             voteResult.data &&
             voteResult.data.data && (
               <Text fz="sm" className={classes.pointsText}>
@@ -182,7 +186,7 @@ function SelectionView({
                   <AlternativeListItem
                     key={alternative.id}
                     showResults={
-                      selection.status === SelectionStates.VoteClosed
+                      selection.state === SelectionStates.VoteClosed
                     }
                     alternative={alternative}
                     canVote={!!voteResult.data?.canBuyVotes}
@@ -195,7 +199,7 @@ function SelectionView({
               : selection.alternatives.map((alternative) => (
                   <AlternativeListItem
                     showResults={
-                      selection.status === SelectionStates.VoteClosed
+                      selection.state === SelectionStates.VoteClosed
                     }
                     key={alternative.id}
                     alternative={alternative}
@@ -205,7 +209,7 @@ function SelectionView({
           </SimpleGrid>
         </Container>
 
-        {selection.status === SelectionStates.Created && (
+        {selection.state === SelectionStates.Created && (
           <Container size="sm" className={classes.area}>
             <SimpleGrid cols={1}>
               <div>
@@ -224,7 +228,7 @@ function SelectionView({
           </Container>
         )}
 
-        {selection.status === SelectionStates.BuyingStarted && (
+        {selection.state === SelectionStates.BuyingStarted && (
           <Container size="sm" className={classes.area}>
             <Button
               disabled={selection.alternatives.length < 3}

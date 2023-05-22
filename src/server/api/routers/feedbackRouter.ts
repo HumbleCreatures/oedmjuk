@@ -41,6 +41,23 @@ export const feedbackRouter = createTRPCRouter({
         },
       });
     }),
+  updateFeedbackRound: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+        title: z.string(),
+        body: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.feedbackRound.update({
+        where: { id: input.itemId },
+        data: {
+          title: input.title,
+          body: input.body,
+        },
+      });
+    }),
   getFeedbackRound: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -49,15 +66,15 @@ export const feedbackRouter = createTRPCRouter({
         include: {
           feedbackColumns: {
             include: {
-              feedbackItems: true
-            }
-          }
-        }
+              feedbackItems: true,
+            },
+          },
+        },
       });
 
       return content;
     }),
-    getFeedbackRoundsForSpace: protectedProcedure
+  getFeedbackRoundsForSpace: protectedProcedure
     .input(z.object({ spaceId: z.string() }))
     .query(async ({ ctx, input }) => {
       const content = await ctx.prisma.feedbackRound.findMany({
@@ -66,57 +83,68 @@ export const feedbackRouter = createTRPCRouter({
 
       return content;
     }),
-    getActiveFeedbackRoundsForSpace: protectedProcedure
+  getActiveFeedbackRoundsForSpace: protectedProcedure
     .input(z.object({ spaceId: z.string() }))
     .query(async ({ ctx, input }) => {
       const content = await ctx.prisma.feedbackRound.findMany({
-        where: { 
+        where: {
           spaceId: input.spaceId,
-          state: FeedbackItemStates.Created 
+          state: FeedbackItemStates.Created,
         },
       });
 
       return content;
     }),
-    getFeedbackItem: protectedProcedure
+  getFeedbackItem: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
       const content = await ctx.prisma.feedbackItem.findUnique({
         where: { id: input.itemId },
         include: {
-          column:true,
+          column: true,
           feedbackRound: true,
           feedbackMovement: {
             include: {
               feedbackColumn: true,
-            }
-          },          
+            },
+          },
           feedbackNotes: {
             include: {
-              author: true
-            }
-          }
-        }
+              author: true,
+            },
+          },
+        },
       });
 
-      if(!content) {return content;}
+      if (!content) {
+        return content;
+      }
 
-      if(content.createdByExternalUser || content.columnId || content.authorId === ctx.session.user.id) {
+      if (
+        content.createdByExternalUser ||
+        content.columnId ||
+        content.authorId === ctx.session.user.id
+      ) {
         return content;
       }
 
       return content;
     }),
-    getMyFeedbackItems: protectedProcedure
+  getMyFeedbackItems: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
       const feedbackItems = await ctx.prisma.feedbackItem.findMany({
-        where: { feedbackRoundId: input.itemId, authorId: ctx.session.user.id, createdByExternalUser: false, columnId: null },
+        where: {
+          feedbackRoundId: input.itemId,
+          authorId: ctx.session.user.id,
+          createdByExternalUser: false,
+          columnId: null,
+        },
       });
 
       return feedbackItems;
     }),
-    getExternalFeedbackItems: protectedProcedure
+  getExternalFeedbackItems: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
       const feedbackItems = await ctx.prisma.feedbackItem.findMany({
@@ -142,7 +170,7 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback round not found");
       }
 
-      if(feedbackRound.state !== FeedbackItemStates.Created) {
+      if (feedbackRound.state !== FeedbackItemStates.Created) {
         throw new Error("Feedback round closed");
       }
 
@@ -173,126 +201,131 @@ export const feedbackRouter = createTRPCRouter({
         },
       });
     }),
-    closeFeedbackRound: protectedProcedure
-      .input(
-        z.object({
-          itemId: z.string(),
-        })
-      )
-      .mutation(async ({ ctx, input }) => {
-        const feedbackRound = await ctx.prisma.feedbackRound.findUnique({
-          where: { id: input.itemId },
-        });
-  
-        if (!feedbackRound) {
-          throw new Error("Feedback item not found");
-        }
-  
-        return ctx.prisma.feedbackRound.update({
-          where: {
-            id: input.itemId
-          },
+  closeFeedbackRound: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const feedbackRound = await ctx.prisma.feedbackRound.findUnique({
+        where: { id: input.itemId },
+      });
+
+      if (!feedbackRound) {
+        throw new Error("Feedback item not found");
+      }
+
+      return ctx.prisma.feedbackRound.update({
+        where: {
+          id: input.itemId,
+        },
+        data: {
+          state: FeedbackItemStates.Closed,
+        },
+      });
+    }),
+  addFeedbackNote: protectedProcedure
+    .input(
+      z.object({
+        body: z.string(),
+        feedbackItemId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const feedbackItem = await ctx.prisma.feedbackItem.findUnique({
+        where: { id: input.feedbackItemId },
+        include: { feedbackRound: true },
+      });
+
+      if (!feedbackItem) {
+        throw new Error("Feedback item not found");
+      }
+
+      if (feedbackItem.feedbackRound.state !== FeedbackItemStates.Created) {
+        throw new Error("Feedback round closed");
+      }
+
+      return ctx.prisma.feedbackNote.create({
+        data: {
+          body: input.body,
+          feedbackItemId: input.feedbackItemId,
+          authorId: ctx.session.user.id,
+        },
+      });
+    }),
+  moveFeedbackTo: protectedProcedure
+    .input(
+      z.object({
+        feedbackItemId: z.string(),
+        feedbackColumnId: z.string(),
+        itemNextPreviousId: z.string().nullable(),
+        itemPositionPreviousId: z.string().nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const currentItem = await ctx.prisma.feedbackItem.findUnique({
+        where: { id: input.feedbackItemId },
+        include: { feedbackRound: true },
+      });
+
+      if (!currentItem) {
+        throw new Error("Feedback item not found");
+      }
+
+      if (currentItem.feedbackRound.state !== FeedbackItemStates.Created) {
+        throw new Error("Feedback round closed");
+      }
+
+      const nextItem =
+        input.itemNextPreviousId &&
+        (await ctx.prisma.feedbackItem.findUnique({
+          where: { id: input.itemNextPreviousId },
+        }));
+
+      const previousItem =
+        input.itemNextPreviousId &&
+        (await ctx.prisma.feedbackItem.findUnique({
+          where: { id: input.itemNextPreviousId },
+        }));
+
+      let order = !previousItem && !nextItem ? 1024 : -1;
+      if (previousItem && !nextItem) {
+        order = previousItem.order + 1024;
+      }
+      if (!previousItem && nextItem) {
+        order = nextItem.order / 2;
+      }
+
+      if (previousItem && nextItem) {
+        order = (previousItem.order + nextItem.order) / 2;
+      }
+
+      //TODO: if order exits, recalculate order for all items in the column
+
+      if (currentItem.columnId === input.feedbackColumnId) {
+        return ctx.prisma.feedbackItem.update({
+          where: { id: input.feedbackItemId },
           data: {
-            state: FeedbackItemStates.Closed
+            order,
           },
         });
-      }),
-    addFeedbackNote: protectedProcedure
-      .input(
-        z.object({
-          body: z.string(),
-          feedbackItemId: z.string(),
-        })
-      )
-      .mutation(async ({ ctx, input }) => {
-        const feedbackItem = await ctx.prisma.feedbackItem.findUnique({
-          where: { id: input.feedbackItemId }, include: {feedbackRound: true},
-        });
-  
-        if (!feedbackItem) {
-          throw new Error("Feedback item not found");
-        }
+      }
 
-        if(feedbackItem.feedbackRound.state !== FeedbackItemStates.Created) {
-          throw new Error("Feedback round closed");
-        }
-  
-        return ctx.prisma.feedbackNote.create({
-          data: {
-            body: input.body,
-            feedbackItemId: input.feedbackItemId,
-            authorId: ctx.session.user.id,
-          },
-        });
-      }),
-      moveFeedbackTo: protectedProcedure
-        .input(
-          z.object({
-            feedbackItemId: z.string(),
-            feedbackColumnId: z.string(),
-            itemNextPreviousId: z.string().nullable(),
-            itemPositionPreviousId: z.string().nullable(),
-          })
-        )
-        .mutation(async ({ ctx, input }) => {
-
-          const currentItem =await ctx.prisma.feedbackItem.findUnique({
-            where: { id: input.feedbackItemId }, include:{feedbackRound: true},
-          });
-
-          if(!currentItem) {
-            throw new Error("Feedback item not found");
-          }
-
-          if(currentItem.feedbackRound.state !== FeedbackItemStates.Created) {
-            throw new Error("Feedback round closed");
-          }
-          
-          const nextItem = input.itemNextPreviousId && await ctx.prisma.feedbackItem.findUnique({
-            where: { id: input.itemNextPreviousId },
-          });
-
-          const previousItem = input.itemNextPreviousId && await ctx.prisma.feedbackItem.findUnique({
-            where: { id: input.itemNextPreviousId },
-          });
-    
-          let order = (!previousItem && !nextItem) ? 1024 : -1;
-          if(previousItem && !nextItem) { 
-            order = previousItem.order + 1024;
-          }
-          if(!previousItem && nextItem) { 
-            order = nextItem.order / 2;
-          }
-
-          if(previousItem && nextItem) { 
-            order = (previousItem.order + nextItem.order) / 2;
-          }
-
-          //TODO: if order exits, recalculate order for all items in the column
-
-          if(currentItem.columnId === input.feedbackColumnId) { 
-            return ctx.prisma.feedbackItem.update({
-              where: { id: input.feedbackItemId },
-              data: {
-                order,
-              },
-            });
-          }
-
-          return ctx.prisma.feedbackItem.update({
-            where: { id: input.feedbackItemId },
-            data: {
-              columnId: input.feedbackColumnId,
-              order,
-              feedbackMovement: {
-                create: { 
-                  feedbackColumnId: input.feedbackColumnId,
-                  moverId: ctx.session.user.id,
-                }
-              }
+      return ctx.prisma.feedbackItem.update({
+        where: { id: input.feedbackItemId },
+        data: {
+          columnId: input.feedbackColumnId,
+          order,
+          feedbackMovement: {
+            create: {
+              feedbackColumnId: input.feedbackColumnId,
+              moverId: ctx.session.user.id,
             },
-          });
-        }),
+          },
+        },
+      });
+    }),
 });
 
 //Get my non placed feedback items.

@@ -51,6 +51,25 @@ export const dataIndexRouter = createTRPCRouter({
           },
         })
     }),
+    updateDataIndex: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+        title: z.string(),
+        description: z.string(),
+        unitTypeId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        return ctx.prisma.dataIndex.update({
+          where: { id: input.itemId},
+          data: {
+            title: input.title,
+            description: input.description,
+            unitTypeId: input.unitTypeId,                           
+          },
+        })
+    }),
   getDataIndex: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {

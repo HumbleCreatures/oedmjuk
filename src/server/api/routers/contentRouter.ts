@@ -29,6 +29,23 @@ export const contentRouter = createTRPCRouter({
           },
         })
     }),
+    updateContent: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+        title: z.string(),
+        body: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        return ctx.prisma.content.update({
+          where: { id: input.itemId},
+          data: {
+            title: input.title,
+            body: input.body,                        
+          },
+        })
+    }),
   getContent: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {

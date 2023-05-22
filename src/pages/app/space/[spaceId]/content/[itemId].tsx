@@ -1,12 +1,13 @@
 import { useRouter } from "next/router";
 import { type NextPage } from "next";
 import AppLayout from "../../../../../components/AppLayout";
-import { Container, Text, Title, createStyles, Group, ThemeIcon } from "@mantine/core";
+import { Container, Text, Title, createStyles, Group, ThemeIcon, Button } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import { DateTime } from "luxon";
 import { IconAlignBoxLeftMiddle } from "@tabler/icons";
 import { UserLinkWithData } from "../../../../../components/UserButton";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -86,6 +87,9 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
 
                   <Text fz="sm">By <Text fz="sm" fw={500} className={classes.inlineText}><UserLinkWithData userId={authorId} /></Text></Text>
                 </div>
+                <Link href={`/app/space/${spaceId}/content/${itemId}/edit`} passHref>
+              <Button component="a">Edit</Button>
+            </Link>
         </Container>
         <Container size="sm" className={classes.bodyArea}> 
             <div

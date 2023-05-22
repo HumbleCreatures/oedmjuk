@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { type NextPage } from "next";
 import AppLayout from "../../../../../components/AppLayout";
-import { Container, Text, Title, createStyles, Group, ThemeIcon } from "@mantine/core";
+import { Container, Text, Title, createStyles, Group, ThemeIcon, Button } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
 import { DataPointEditor } from '../../../../../components/DataPointEditor';
@@ -9,6 +9,7 @@ import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Resp
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import { IconChartBar } from '@tabler/icons';
+import Link from 'next/link';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -105,6 +106,9 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
                Data index is measured in <Text fz="sm" fw={500} className={classes.inlineText}>{unitType.name} ({unitType.unitName})</Text>
             </Text>
           </div>
+          <Link href={`/app/space/${spaceId}/dataIndex/${itemId}/edit`} passHref>
+              <Button component="a">Edit</Button>
+            </Link>
         </Container>
 
         {description && <Container size="sm" className={classes.bodyArea}>

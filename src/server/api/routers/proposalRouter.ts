@@ -4,9 +4,8 @@ import {
   ProposalStates,
   VoteValue,
 } from "../../../utils/enums";
-
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { ProposalVote } from "@prisma/client";
+import type { ProposalVote } from "@prisma/client";
 
 export const proposalRouter = createTRPCRouter({
   createProposal: protectedProcedure
@@ -30,6 +29,23 @@ export const proposalRouter = createTRPCRouter({
               feedEventType: FeedEventTypes.ProposalEventCreated,
             },
           },
+        },
+      });
+    }),
+    updateProposal: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+        title: z.string(),
+        body: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.proposal.update({
+        where: { id: input.itemId },
+        data: {
+          title: input.title,
+          body: input.body,          
         },
       });
     }),

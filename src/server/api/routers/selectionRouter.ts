@@ -31,6 +31,23 @@ export const selectionRouter = createTRPCRouter({
         },
       });
     }),
+    updateSelection: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+        title: z.string(),
+        body: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.selection.update({
+        where: { id: input.itemId },
+        data: {
+          title: input.title,
+          body: input.body,
+        },
+      });
+    }),
 
   addAlternative: protectedProcedure
     .input(
@@ -80,7 +97,7 @@ export const selectionRouter = createTRPCRouter({
           id: input.selectionId,
         },
         data: {
-          status: SelectionStates.BuyingStarted,
+          state: SelectionStates.BuyingStarted,
           votingCapital: Math.pow(selection.alternatives.length, 2),
           participants: {
             create: allSpaceUsers.map((u) => ({ participantId: u.userId })),
@@ -107,7 +124,7 @@ export const selectionRouter = createTRPCRouter({
 
       if (!alternative) throw new Error("Alternative not found");
 
-      if (alternative.selection.status !== SelectionStates.BuyingStarted)
+      if (alternative.selection.state !== SelectionStates.BuyingStarted)
         throw new Error("Selection not in buying vote s state");
 
       const isParticipant = alternative.selection.participants.some(
@@ -193,7 +210,7 @@ export const selectionRouter = createTRPCRouter({
           id: input.selectionId,
         },
         data: {
-          status: SelectionStates.VoteClosed,
+          state: SelectionStates.VoteClosed,
         },
       });
     }),
