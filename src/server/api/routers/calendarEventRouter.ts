@@ -296,6 +296,7 @@ export const calendarEventRouter = createTRPCRouter({
           proposals: true,
           dataIndices: true,
           selections: true,
+          feedbackRound: true,
         },
       });
 

@@ -221,7 +221,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   {item.selection.title}
                 </Text>
                 <Text fz="sm" fw={300}>
-                  Status: {item.selection.status}
+                  Status: {item.selection.state}
                 </Text>
               </Group>
             </Card.Section>
@@ -263,7 +263,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   {item.feedbackRound.title}
                 </Text>
                 <Text fz="sm" fw={300}>
-                  Status: {item.feedbackRound.status}
+                  Status: {item.feedbackRound.state}
                 </Text>
               </Group>
             </Card.Section>

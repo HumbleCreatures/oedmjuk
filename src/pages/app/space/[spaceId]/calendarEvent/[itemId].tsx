@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
-import { IconCalendarEvent, IconUserCheck, IconUserX } from "@tabler/icons";
+import { IconCalendarEvent, IconChartBar, IconColorSwatch, IconNotebook, IconRecycle, IconUserCheck, IconUserX } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
@@ -130,11 +130,91 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
                 <UserLinkWithData userId={authorId} />
               </Text>
             </Text>
+
+            <Link href={`/app/space/${spaceId}/calendarEvent/${itemId}/edit`} passHref>
+              <Button component="a">Edit</Button>
+            </Link>
           </div>
         </Container>
         <Container size="sm" className={classes.bodyArea}>
           <div dangerouslySetInnerHTML={{ __html: body }} />
         </Container>
+        <Container size="sm" className={classes.area}>
+          <Title order={2} className={classes.areaTitle}>
+            Agenda
+          </Title>
+          <List
+            spacing="xs"
+            size="sm"
+            mb="xs"
+            center
+            icon={
+              <ThemeIcon color="earth" size={24} radius="xl">
+                <IconNotebook size="1rem" />
+              </ThemeIcon>
+            }
+          >
+            {calendarResult.data.calendarEvent.proposals.map((proposal) => (
+              <List.Item key={proposal.id}>
+                <Link href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}`}>{proposal.title}</Link>
+              </List.Item>
+            ))}
+          </List>
+
+          <List
+            spacing="xs"
+            size="sm"
+            mb="xs"
+            center
+            icon={
+              <ThemeIcon color="earth" size={24} radius="xl">
+                <IconColorSwatch size="1rem" />
+              </ThemeIcon>
+            }
+          >
+            {calendarResult.data.calendarEvent.selections.map((selection) => (
+              <List.Item key={selection.id}>
+                <Link href={`/app/space/${selection.spaceId}/selection/${selection.id}`}>{selection.title}</Link>
+              </List.Item>
+            ))}
+          </List>
+
+          <List
+            spacing="xs"
+            size="sm"
+            mb="xs"
+            center
+            icon={
+              <ThemeIcon color="earth" size={24} radius="xl">
+                <IconChartBar size="1rem" />
+              </ThemeIcon>
+            }
+          >
+            {calendarResult.data.calendarEvent.dataIndices.map((dataIndex) => (
+              <List.Item key={dataIndex.id}>
+                <Link href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`}>{dataIndex.title}</Link>
+              </List.Item>
+            ))}
+          </List>
+
+          {calendarResult.data.calendarEvent.feedbackRound && <List
+            spacing="xs"
+            size="sm"
+            mb="xs"
+            center
+            icon={
+              <ThemeIcon color="earth" size={24} radius="xl">
+                <IconRecycle size="1rem" />
+              </ThemeIcon>
+            }
+          >
+
+              <List.Item key={calendarResult.data.calendarEvent.feedbackRound.id}>
+                <Link href={`/app/space/${calendarResult.data.calendarEvent.feedbackRound.spaceId}/feedback/${calendarResult.data.calendarEvent.feedbackRound.id}`}>{calendarResult.data.calendarEvent.feedbackRound.title}</Link>
+              </List.Item>
+          </List>}
+        </Container>
+
         {amIAttending === undefined || changeAttendee ? (
           <Container size="sm" className={classes.area}>
             <Button
