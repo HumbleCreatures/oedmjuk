@@ -310,7 +310,7 @@ model FeedbackRound {
   feedbackItem    FeedbackItem[]
   feedbackColumns FeedbackColumn[]
   spaceFeedItem   SpaceFeedItem[]
-  CalendarEvent   CalendarEvent[]
+  calendarEvent   CalendarEvent[]
 }
 
 model FeedbackColumn {

@@ -178,7 +178,7 @@ export const calendarEventRouter = createTRPCRouter({
     removeFeedbackRoundFromCalendarEvent: protectedProcedure
     .input(
       z.object({
-        dataIndexIds: z.string().array(),
+        feedbackRoundId: z.string(),
         calendarEventId: z.string(),
       })
     )
@@ -294,6 +294,8 @@ export const calendarEventRouter = createTRPCRouter({
         include: {
           calendarEventAttendee: true,
           proposals: true,
+          dataIndices: true,
+          selections: true,
         },
       });
 

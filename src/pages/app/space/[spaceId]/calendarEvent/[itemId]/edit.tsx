@@ -22,6 +22,10 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { RichTextEditor } from "@mantine/tiptap";
 import { DateTimePicker } from "@mantine/dates";
 import { useEffect, useState } from "react";
+import { ProposalToCalendarEventEditor } from "../../../../../../components/ProposalToCalendarEventEditor";
+import { SelectionToCalendarEventEditor } from "../../../../../../components/SelectionToCalendarEventEditor";
+import { DataIndexToCalendarEventEditor } from "../../../../../../components/DataIndexToCalendarEventEditor";
+import { FeedbackRoundToCalendarEventEditor } from "../../../../../../components/FeedbackRoundToCalendarEventEditor";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -44,14 +48,12 @@ const useStyles = createStyles((theme) => ({
 
 function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const { classes } = useStyles();
-  const [searchProposalValue, onSearchProposalChange] = useState("");
+  
   const spaceQuery = api.space.getSpace.useQuery({ spaceId });
   const calendarEventQuery = api.calendarEvents.getCalendarEvent.useQuery({
     itemId,
   });
-  const proposalQuery = api.proposal.getActiveSpaceProposals.useQuery({
-    spaceId,
-  });
+
 
   const form = useForm({
     initialValues: {
@@ -76,19 +78,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
     },
   });
 
-  const addProposalMutation =
-    api.calendarEvents.addProposalToCalendarEvent.useMutation({
-      onSuccess() {
-        void utils.calendarEvents.getCalendarEvent.invalidate({ itemId });
-      },
-    });
 
-  const removeProposalMutation =
-    api.calendarEvents.removeProposalFromCalendarEvent.useMutation({
-      onSuccess() {
-        void utils.calendarEvents.getCalendarEvent.invalidate({ itemId });
-      },
-    });
 
   const router = useRouter();
 
@@ -105,30 +95,20 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   useEffect(() => {
     if (calendarEventQuery.data) {
       form.setValues(calendarEventQuery.data.calendarEvent);
+      if(editor) {
+        editor.commands.setContent(calendarEventQuery.data.calendarEvent.body);
+      }
     }
-   }, [form, editor, calendarEventQuery.data])
+   }, [editor, calendarEventQuery.data])
   if (spaceQuery.isPlaceholderData) return <div>Loading ...</div>;
   if (!spaceQuery.data) return <div>Did not find space.</div>;
   if (calendarEventQuery.isLoading) return <div>Loading ...</div>;
   if (!calendarEventQuery.data) return <div>Did not find calendar event.</div>;
-  if (proposalQuery.isLoading) return <div>Loading ...</div>;
-  if (!proposalQuery.data) return <div>Did not find proposals.</div>;
+
 
   const { space, isMember } = spaceQuery.data;
-  const proposalSelectItems = proposalQuery.data.map((proposal) => ({
-    value: proposal.id,
-    label: proposal.title,
-    onRemove: () => {
-      removeProposalMutation.mutate({
-        calendarEventId: itemId,
-        proposalId: proposal.id,
-      });
-    },
-  }));
-  const proposalSelectValue =
-    calendarEventQuery.data.calendarEvent.proposals.map(
-      (proposal) => proposal.id
-    );
+  
+
 
   return (
     <AppLayout>
@@ -136,7 +116,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
         <SpaceNavBar space={space} isMember={isMember} />
         <Container size="sm" className={classes.area}>
           <Title className={classes.areaTitle} order={2}>
-            Create calendar event
+            Edit calendar event
           </Title>
 
           <form
@@ -222,51 +202,10 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
           </form>
         </Container>
 
-        <Container size="sm" className={classes.area}>
-          <Title className={classes.areaTitle} order={2}>
-            Proposals
-          </Title>
-          <MultiSelect
-            data={proposalSelectItems}
-            label="Connect proposals"
-            placeholder="You can only select created proposals"
-            searchable
-            searchValue={searchProposalValue}
-            onSearchChange={onSearchProposalChange}
-            nothingFound="Nothing found"
-            clearable
-            onChange={(value) => {
-              console.log(value);
-              if (value.length === 0) {
-                if (proposalSelectValue.length > 0) {
-                  removeProposalMutation.mutate({
-                    calendarEventId: itemId,
-                    proposalIds: proposalSelectValue,
-                  });
-                } else {
-                  return;
-                }
-              }
-
-              if(value.length < proposalSelectValue.length) { 
-                const removedProposals = proposalSelectValue.filter((proposalId) => !value.includes(proposalId));
-                removeProposalMutation.mutate({
-                  calendarEventId: itemId,
-                  proposalIds: removedProposals,
-                });
-                return;
-              }
-
-              const lastValue = value[value.length - 1];
-              if (lastValue === undefined) return;
-              addProposalMutation.mutate({
-                calendarEventId: itemId,
-                proposalId: lastValue,
-              });
-            }}
-            value={proposalSelectValue}
-          />
-        </Container>
+              <ProposalToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedProposals={calendarEventQuery.data.calendarEvent.proposals}  />
+              <SelectionToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedSelections={calendarEventQuery.data.calendarEvent.selections}  />
+              <DataIndexToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedDataIndex={calendarEventQuery.data.calendarEvent.dataIndices}  />
+              <FeedbackRoundToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedFeedbackRoundId={calendarEventQuery.data.calendarEvent.feedbackRoundId}  />
       </Container>
     </AppLayout>
   );
