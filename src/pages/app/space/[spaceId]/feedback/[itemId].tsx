@@ -22,6 +22,7 @@ import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import { useState } from "react";
 import Link from "next/link";
+import { FeedbackRoundStates } from "../../../../../utils/enums";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -86,6 +87,12 @@ function FeedbackView({
   const feedbackResult = api.feedback.getFeedbackRound.useQuery({
     itemId: feedbackRoundId,
   });
+  const utils = api.useContext();
+  const closeMutation = api.feedback.closeFeedbackRound.useMutation( {
+    onSuccess: () => { 
+      void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
+    }
+  });
   const [showEditor, setShowEditor] = useState(false);
 
   if (feedbackResult.isLoading || spaceResult.isLoading)
@@ -147,9 +154,12 @@ function FeedbackView({
               </Text>
             </Text>
           </div>
+          <Group>
           <Link href={`/app/space/${spaceId}/feedback/${feedbackRoundId}/edit`} passHref>
               <Button component="a">Edit</Button>
             </Link>
+            <Button onClick={() => closeMutation.mutate({itemId: feedbackRoundId})}>Close feedback round</Button>
+            </Group>
         </Container>
 
         <Container size="sm" className={classes.bodyArea}>
@@ -169,14 +179,15 @@ function FeedbackView({
                 feedbackRound={feedbackRound}
               />
             </div>
-            <div className={classes.editColumnSection}>
+            
+            {feedbackRound.state === FeedbackRoundStates.Created && <div className={classes.editColumnSection}>
               {!showEditor && (
                 <Button onClick={() => setShowEditor(true)}>Add item</Button>
               )}
               {showEditor && (
                 <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
               )}
-            </div>
+            </div>}
           </Grid.Col>
           <Grid.Col span={3}>
             <div className={classes.itemColumn}>

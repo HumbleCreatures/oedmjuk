@@ -5,7 +5,7 @@ import { Container, Text, Title, createStyles, Group, ThemeIcon, Button } from "
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
 import { DataPointEditor } from '../../../../../components/DataPointEditor';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import { IconChartBar } from '@tabler/icons';
@@ -49,7 +49,7 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
   const { classes } = useStyles();
   const data = api.space.getSpace.useQuery({spaceId}).data;
   const dataIndexResult = api.dataIndex.getDataIndex.useQuery({itemId});
-  const dataPointsResult = api.dataIndex.getDataPointForIndex.useQuery({dataIndexId: itemId});
+  const dataPointsResult = api.dataIndex.getDataPointsForIndex.useQuery({dataIndexId: itemId});
   if(!data || !data.space) return (<div>loading...</div>)
   if(dataIndexResult.isLoading) return (<div>loading...</div>)
   if(!dataIndexResult.data) return (<div>could not load item...</div>)

@@ -99,7 +99,7 @@ function ProposalView({
   const { space, isMember } = spaceReslt.data;
 
   if (!proposalResult.data) return <div>Could not load proposal</div>;
-  const { proposal, votingResult } = proposalResult.data;
+  const { proposal, votingResult, myPickResults } = proposalResult.data;
   if (!proposal) return <div>Could not load proposal</div>;
   const { objections, proposalState, title, body, participants } = proposal;
 
@@ -164,6 +164,34 @@ function ProposalView({
                 {numberOfMissedVotes}
               </Text>{" "}
               participants did not vote
+            </Text>
+
+            <Title order={3} className={classes.areaTitle}>
+              Expert Vote results
+            </Title>
+            <Text fz="md" fw={300}>
+              <Text fz="md" fw={500} className={classes.inlineText}>
+                {myPickResults.numberOfAccepts}
+              </Text>{" "}
+              experts accepted the proposal
+            </Text>
+            <Text fz="md" fw={300}>
+              <Text fz="md" fw={500} className={classes.inlineText}>
+                {myPickResults.numberOfRejects}
+              </Text>{" "}
+              experts rejected the proposal
+            </Text>
+            <Text fz="md" fw={300}>
+              <Text fz="md" fw={500} className={classes.inlineText}>
+                {myPickResults.numberOfAbstains}
+              </Text>{" "}
+              experts abstained
+            </Text>
+            <Text fz="md" fw={300}>
+              <Text fz="md" fw={500} className={classes.inlineText}>
+                {myPickResults.numberOfMissedVotes}
+              </Text>{" "}
+              experts did not vote
             </Text>
             
 

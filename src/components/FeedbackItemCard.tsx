@@ -3,6 +3,7 @@ import { FeedbackColumn, FeedbackItem, FeedbackRound } from "@prisma/client";
 import { api } from "../utils/api";
 import Link from "next/link";
 import { Router, useRouter } from "next/router";
+import { FeedbackRoundStates } from "../utils/enums";
 
 const useStyles = createStyles((theme) => ({
   areaTitle: {
@@ -60,7 +61,7 @@ export function FeedbackItemCard({
 
       <Card.Section withBorder p="sm">
         <Group>
-        <Menu shadow="md" width={200}>
+        {feedbackRound.state === FeedbackRoundStates.Created && <Menu shadow="md" width={200}>
           <Menu.Target>
             <Button>Move</Button>
           </Menu.Target>
@@ -85,7 +86,7 @@ export function FeedbackItemCard({
               );
             })}
           </Menu.Dropdown>
-        </Menu>
+        </Menu>}
         <Button onClick={() => void router.push(`/app/space/${feedbackRound.spaceId}/feedback/${feedbackRound.id}/item/${feedbackItem.id}`)}>View</Button>
         </Group>
       </Card.Section>

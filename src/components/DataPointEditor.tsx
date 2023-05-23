@@ -17,7 +17,7 @@ export function DataPointEditor({ dataIndexId }: { dataIndexId: string }) {
     const mutation = api.dataIndex.upsertDataIndexPoint.useMutation({
         onSuccess() {
           void utils.dataIndex.getDataIndex.invalidate({itemId: dataIndexId});
-          void utils.dataIndex.getDataPointForIndex.invalidate({dataIndexId: dataIndexId});
+          void utils.dataIndex.getDataPointsForIndex.invalidate({dataIndexId: dataIndexId});
         },
       });
 

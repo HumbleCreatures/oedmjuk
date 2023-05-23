@@ -41,7 +41,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
       <div className={classes.area}>
         <Title order={2} className={classes.areaTitle}>Data Indices</Title>
         <SimpleGrid cols={1}>
-            {dataIndexRequest.data.map((dataIndex) => (<Link href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`} key={dataIndex.id}>
+            {dataIndexRequest.data.map(({dataIndex, dataIndexPoints}) => (<Link href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`} key={dataIndex.id}>
               <Card>
                 <Card.Section mt="md" inheritPadding py="xs">
             <Text fz="lg" fw={500}>{dataIndex.title}</Text>
@@ -67,7 +67,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
         <BarChart
           width={500}
           height={300}
-          data={dataIndex.dataIndexPoints.map((dataPoint) => ({name: dataPoint.datestamp.toISOString().split('T')[0], value: dataPoint.value}))}
+          data={dataIndexPoints.map((dataPoint) => ({name: dataPoint.datestamp.toISOString().split('T')[0], value: dataPoint.value}))}
           margin={{
             top: 5,
             right: 30,

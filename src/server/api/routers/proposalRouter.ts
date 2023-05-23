@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, z } from "zod";
 import {
   FeedEventTypes,
   ProposalStates,
@@ -256,6 +256,35 @@ export const proposalRouter = createTRPCRouter({
         const voteArray = Array.from(uniqeVotes.values());
         //TODO: Calculate accept results in %
         //TODO: Calculate myPick results
+        const myPickResults = voteArray.reduce((acc, vote) => {
+          if (vote.myPickId) {
+            const pickVote = uniqeVotes.get(vote.myPickId);
+            if(!pickVote) {
+              acc.numberOfMissedVotes = acc.numberOfMissedVotes++;
+              return acc;
+            }
+            
+            if (pickVote.accept) { 
+              acc.numberOfAccepts = acc.numberOfAccepts++;
+              return acc;
+            }
+
+            if (pickVote.accept === false) { 
+              acc.numberOfRejects = acc.numberOfRejects++;
+              return acc;
+            }
+
+            if (pickVote.accept === undefined) { 
+              acc.numberOfAbstains = acc.numberOfAbstains++;
+              return acc;
+            }
+          }
+          return acc; 
+        }, {numberOfAccepts: 0,
+          numberOfRejects: 0,
+          numberOfAbstains:0,
+          numberOfMissedVotes: 0});
+
 
         const votingResult = {
           numberOfParticipants: proposal.participants.length,
@@ -269,6 +298,7 @@ export const proposalRouter = createTRPCRouter({
         return {
           proposal,
           votingResult,
+          myPickResults
         };
       }
       return { proposal, votingResult: undefined };

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeedbackItemStates, FeedEventTypes } from "../../../utils/enums";
+import { FeedbackRoundStates, FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -89,7 +89,7 @@ export const feedbackRouter = createTRPCRouter({
       const content = await ctx.prisma.feedbackRound.findMany({
         where: {
           spaceId: input.spaceId,
-          state: FeedbackItemStates.Created,
+          state: FeedbackRoundStates.Created,
         },
       });
 
@@ -170,7 +170,7 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback round not found");
       }
 
-      if (feedbackRound.state !== FeedbackItemStates.Created) {
+      if (feedbackRound.state !== FeedbackRoundStates.Created) {
         throw new Error("Feedback round closed");
       }
 
@@ -221,7 +221,7 @@ export const feedbackRouter = createTRPCRouter({
           id: input.itemId,
         },
         data: {
-          state: FeedbackItemStates.Closed,
+          state: FeedbackRoundStates.Closed,
         },
       });
     }),
@@ -242,7 +242,7 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback item not found");
       }
 
-      if (feedbackItem.feedbackRound.state !== FeedbackItemStates.Created) {
+      if (feedbackItem.feedbackRound.state !== FeedbackRoundStates.Created) {
         throw new Error("Feedback round closed");
       }
 
@@ -273,7 +273,7 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback item not found");
       }
 
-      if (currentItem.feedbackRound.state !== FeedbackItemStates.Created) {
+      if (currentItem.feedbackRound.state !== FeedbackRoundStates.Created) {
         throw new Error("Feedback round closed");
       }
 

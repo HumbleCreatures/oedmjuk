@@ -25,5 +25,15 @@ export function formatDateLengthBetween(startAt: Date, endAt: Date) {
     }
 
     return resultingString;
-
 }
+
+
+export function getDatesBetween(startDate: Date, endDate: Date): Date[] {
+    const currentDate = new Date(startDate.getTime());
+    const dates = [];
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return dates;
+  }

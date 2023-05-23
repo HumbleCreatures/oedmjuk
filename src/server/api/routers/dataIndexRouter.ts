@@ -2,6 +2,7 @@ import { z } from "zod";
 import { FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { getDatesBetween } from "../../../utils/dateFormaters";
 
 export const dataIndexRouter = createTRPCRouter({
     createDataIndexType: protectedProcedure
@@ -85,7 +86,8 @@ export const dataIndexRouter = createTRPCRouter({
     getDataIndicesForSpace: protectedProcedure
     .input(z.object({ spaceId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const content = await ctx.prisma.dataIndex.findMany({
+      const sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+      const dataIndices = await ctx.prisma.dataIndex.findMany({
         where: { spaceId: input.spaceId },
         include: {
           unitType: true,
@@ -94,18 +96,55 @@ export const dataIndexRouter = createTRPCRouter({
           },
         }
       });
+
+      const result = dataIndices.map(dataIndex => { 
+        const newPoints = getDatesBetween(sevenDaysAgo, new Date()).map(date => {
+          const dataPoint = dataIndex.dataIndexPoints.find(point => point.datestamp.toISOString().split('T')[0] === date.toISOString().split('T')[0]);
+          if(dataPoint) {
+            return dataPoint;
+          } else {
+            return {
+              id: date.toISOString(),
+              datestamp: date,
+              value: 0,
+            }
+          }
+        });
+
+        return {dataIndex, dataIndexPoints: newPoints}
+
+      })
+
       
-      return content;
+      return result;
     }),
-    getDataPointForIndex: protectedProcedure
+    getDataPointsForIndex: protectedProcedure
     .input(z.object({ dataIndexId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const content = await ctx.prisma.dataIndexPoint.findMany({
-        where: { dataIndexId: input.dataIndexId },
+      const thirtyDaysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
+      const dataPoints = await ctx.prisma.dataIndexPoint.findMany({
+        where: { 
+          dataIndexId: input.dataIndexId, 
+          datestamp: { gte: thirtyDaysAgo }
+        },
         orderBy: { datestamp: 'asc' },
       });
+
+      const dateSeries = getDatesBetween(thirtyDaysAgo, new Date()).map(date => {
+        const dataPoint = dataPoints.find(point => point.datestamp.toISOString().split('T')[0] === date.toISOString().split('T')[0]);
+        if(dataPoint) {
+          return dataPoint;
+        } else {
+          return {
+            id: date.toISOString(),
+            datestamp: date,
+            value: 0,
+          }
+        }
+      });
+
       
-      return content;
+      return dateSeries;
     }),
     upsertDataIndexPoint: protectedProcedure
     .input(

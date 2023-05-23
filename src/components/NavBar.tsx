@@ -131,7 +131,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const links = [
-  { icon: IconCalendar, label: "My Calendar", notifications: 3, href: "/app/my/calendar" },
+  { icon: IconCalendar, label: "My Calendar", /*notifications: 3,*/ href: "/app/my/calendar" },
   { icon: IconSettings, label: "Settings", href: "/app/settings/dataIndexTypes" },
 ];
 

@@ -7,6 +7,7 @@ import { FeedbackNoteEditor } from "../../../../../../../components/FeedbackNote
 import { UserLinkWithData } from "../../../../../../../components/UserButton";
 import { DateTime } from "luxon";
 import { IconArrowMoveRight } from "@tabler/icons";
+import { FeedbackRoundStates } from "../../../../../../../utils/enums";
 
 const useStyles = createStyles((theme) => ({
   areaTitle: {
@@ -53,7 +54,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
 
   if (!feedbackResult.data) return <div>Could not load feedback round</div>;
   const feedbackItem = feedbackResult.data;
-  const { title, body, createdAt, updatedAt, authorId, createdByExternalUser } = feedbackItem;
+  const { title, body, createdAt, updatedAt, authorId, createdByExternalUser, feedbackRound } = feedbackItem;
 
   return (
     <AppLayout>
@@ -126,7 +127,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
           ))}
           </SimpleGrid>
       </Container>
-      <Container size="sm" className={classes.noteEditorArea}>
+      {feedbackRound.state === FeedbackRoundStates.Created && <Container size="sm" className={classes.noteEditorArea}>
       <Title order={2} className={classes.areaTitle}>
               Create feedback note
             </Title>
@@ -134,7 +135,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
           feedbackItemId={feedbackItemId}
           feedbackRoundId={feedbackItem.feedbackRoundId}
         />
-      </Container>
+      </Container> }
 
       {feedbackItem.feedbackMovement && feedbackItem.feedbackMovement.length > 0 &&<Container size="sm" className={classes.area}>
       <Title order={2} className={classes.areaTitle}>
