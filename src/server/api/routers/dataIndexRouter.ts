@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeedEventTypes } from "../../../utils/enums";
+import { SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { getDatesBetween } from "../../../utils/dateFormaters";
@@ -46,7 +46,7 @@ export const dataIndexRouter = createTRPCRouter({
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                feedEventType: FeedEventTypes.DataIndexCreated,
+                feedEventType: SpaceFeedEventTypes.DataIndexCreated,
               },
             },            
           },

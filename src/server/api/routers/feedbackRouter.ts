@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeedbackRoundStates, FeedEventTypes } from "../../../utils/enums";
+import { FeedbackRoundStates, SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -35,7 +35,7 @@ export const feedbackRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              feedEventType: FeedEventTypes.FeedbackRoundCreated,
+              feedEventType: SpaceFeedEventTypes.FeedbackRoundCreated,
             },
           },
         },

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  FeedEventTypes,
+  SpaceFeedEventTypes,
   SelectionStates,
 } from "../../../utils/enums";
 
@@ -25,7 +25,7 @@ export const selectionRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              feedEventType: FeedEventTypes.SelectionCreated,
+              feedEventType: SpaceFeedEventTypes.SelectionCreated,
             },
           },
         },

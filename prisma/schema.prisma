@@ -78,6 +78,7 @@ model User {
   selectionParticipant      SelectionParticipant[]
   feedbackNote              FeedbackNote[]
   feedbackMovement          FeedbackMovement[]
+  UserFeedItem              UserFeedItem[]
 }
 
 model VerificationToken {
@@ -101,6 +102,7 @@ model Space {
   dataIndex      DataIndex[]
   selection      Selection[]
   feedbackRound  FeedbackRound[]
+  UserFeedItem   UserFeedItem[]
 }
 
 model SpaceFeedItem {
@@ -108,6 +110,30 @@ model SpaceFeedItem {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   feedEventType   String
+  space           Space          @relation(fields: [spaceId], references: [id])
+  spaceId         String
+  content         Content?       @relation(fields: [contentId], references: [id])
+  contentId       String?
+  calendarEvent   CalendarEvent? @relation(fields: [calendarEventId], references: [id])
+  calendarEventId String?
+  proposal        Proposal?      @relation(fields: [proposalId], references: [id])
+  proposalId      String?
+  selection       Selection?     @relation(fields: [selectionId], references: [id])
+  selectionId     String?
+  feedbackRound   FeedbackRound? @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId String?
+  dataIndex       DataIndex?     @relation(fields: [dataIndexId], references: [id])
+  dataIndexId     String?
+}
+
+model UserFeedItem {
+  id              String         @id @default(cuid())
+  user            User           @relation(fields: [userId], references: [id])
+  userId          String
+  readAt          DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  eventType       String
   space           Space          @relation(fields: [spaceId], references: [id])
   spaceId         String
   content         Content?       @relation(fields: [contentId], references: [id])
@@ -149,6 +175,7 @@ model Content {
   order          Int
   contentVersion ContentVersion[]
   comment        Comment[]
+  UserFeedItem   UserFeedItem[]
 }
 
 model ContentVersion {
@@ -204,6 +231,7 @@ model CalendarEvent {
   dataIndices           DataIndex[]
   feedbackRound         FeedbackRound?          @relation(fields: [feedbackRoundId], references: [id])
   feedbackRoundId       String?
+  UserFeedItem          UserFeedItem[]
 }
 
 model CalendarEventAttendee {
@@ -246,6 +274,7 @@ model Proposal {
   objections     Objection[]
   calendarEvents CalendarEvent[]
   spaceFeedItem  SpaceFeedItem[]
+  UserFeedItem   UserFeedItem[]
 }
 
 model ProposalParticipant {
@@ -311,6 +340,7 @@ model FeedbackRound {
   feedbackColumns FeedbackColumn[]
   spaceFeedItem   SpaceFeedItem[]
   calendarEvent   CalendarEvent[]
+  UserFeedItem    UserFeedItem[]
 }
 
 model FeedbackColumn {
@@ -376,13 +406,14 @@ model Selection {
   creatorId      String
   title          String
   body           String
-  state         String                 @default("Created")
+  state          String                 @default("Created")
   calendarEvents CalendarEvent[]
   votingCapital  Int?
   spaceFeedItem  SpaceFeedItem[]
   alternatives   SelectionAlternative[]
   votes          SelectionVoteEntry[]
   participants   SelectionParticipant[]
+  UserFeedItem   UserFeedItem[]
 }
 
 model SelectionAlternative {
@@ -438,6 +469,7 @@ model DataIndex {
   dataIndexPoints DataIndexPoint[]
   spaceFeedItem   SpaceFeedItem[]
   calendarEvents  CalendarEvent[]
+  UserFeedItem    UserFeedItem[]
 }
 
 model DataIndexPoint {
