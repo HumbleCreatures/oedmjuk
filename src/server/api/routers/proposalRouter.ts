@@ -1,6 +1,7 @@
-import { number, z } from "zod";
+import { z } from "zod";
 import {
   SpaceFeedEventTypes,
+  UserFeedEventTypes,
   ProposalStates,
   VoteValue,
 } from "../../../utils/enums";
@@ -27,6 +28,13 @@ export const proposalRouter = createTRPCRouter({
             create: {
               spaceId: input.spaceId,
               feedEventType: SpaceFeedEventTypes.ProposalEventCreated,
+            },
+          },
+          UserFeedItem: {
+            create: {
+              spaceId: input.spaceId,
+              userId: ctx.session.user.id,
+              eventType: UserFeedEventTypes.ProposalEventCreated,
             },
           },
         },
@@ -57,13 +65,26 @@ export const proposalRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.objection.create({
+      const proposal = await ctx.prisma.proposal.findUnique({ where: { id: input.proposalId } });
+      if(!proposal) throw new Error("Proposal not found");
+      const objection = await ctx.prisma.objection.create({
         data: {
           proposalId: input.proposalId,
           body: input.body,
           authorId: ctx.session.user.id,
         },
       });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: ctx.session.user.id,
+          proposalId: input.proposalId,
+          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          spaceId: proposal.spaceId,
+        }
+      });
+
+      return objection
     }),
   resolveObjection: protectedProcedure
     .input(
@@ -117,7 +138,7 @@ export const proposalRouter = createTRPCRouter({
         },
       });
 
-      return await ctx.prisma.proposal.update({
+      const updatedProposal = await ctx.prisma.proposal.update({
         where: {
           id: input.proposalId,
         },
@@ -128,6 +149,17 @@ export const proposalRouter = createTRPCRouter({
           },
         },
       });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: ctx.session.user.id,
+          proposalId: input.proposalId,
+          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          spaceId: proposal.spaceId,
+        }
+      });
+
+      return updatedProposal
     }),
   castVote: protectedProcedure
     .input(
@@ -187,7 +219,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Proposal not found");
 
-      return await ctx.prisma.proposal.update({
+      const updatedProposal = await ctx.prisma.proposal.update({
         where: {
           id: input.proposalId,
         },
@@ -195,6 +227,17 @@ export const proposalRouter = createTRPCRouter({
           proposalState: ProposalStates.VoteClosed,
         },
       });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: ctx.session.user.id,
+          proposalId: input.proposalId,
+          eventType: UserFeedEventTypes.ProposalVotingEnded,
+          spaceId: proposal.spaceId,
+        }
+      });
+
+      return updatedProposal;
     }),
   getUserVote: protectedProcedure
     .input(z.object({ proposalId: z.string() }))

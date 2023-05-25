@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   SpaceFeedEventTypes,
   SelectionStates,
+  UserFeedEventTypes,
 } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -26,6 +27,13 @@ export const selectionRouter = createTRPCRouter({
             create: {
               spaceId: input.spaceId,
               feedEventType: SpaceFeedEventTypes.SelectionCreated,
+            },
+          },
+          UserFeedItem: {
+            create: {
+              spaceId: input.spaceId,
+              userId: ctx.session.user.id,
+              eventType: UserFeedEventTypes.SelectionCreated,
             },
           },
         },
@@ -58,7 +66,9 @@ export const selectionRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.selectionAlternative.create({
+      const selection = await ctx.prisma.selection.findUnique({ where: { id: input.selectionId } });
+      if (!selection) throw new Error("Selection not found");
+      const alternative = await ctx.prisma.selectionAlternative.create({
         data: {
           selectionId: input.selectionId,
           body: input.body,
@@ -66,6 +76,17 @@ export const selectionRouter = createTRPCRouter({
           authorId: ctx.session.user.id,
         },
       });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: ctx.session.user.id,
+          proposalId: input.selectionId,
+          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          spaceId: selection.spaceId,
+        }
+      });
+
+      return alternative;
     }),
 
   startBuyingRound: protectedProcedure
