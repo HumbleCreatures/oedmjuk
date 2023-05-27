@@ -104,6 +104,14 @@ export const selectionRouter = createTRPCRouter({
         }
       });
 
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          selectionId: input.selectionId,
+          feedEventType: UserFeedEventTypes.SelectionAlternativeAdded,
+          spaceId: selection.spaceId,
+        }          
+       });
+
       return alternative;
     }),
 
@@ -152,6 +160,14 @@ export const selectionRouter = createTRPCRouter({
           spaceId: selection.spaceId,
         }
       });
+
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          selectionId: input.selectionId,
+          feedEventType: UserFeedEventTypes.SelectionVoteStarted,
+          spaceId: selection.spaceId,
+        }          
+       });
 
       return updatedSelection;
     }),
@@ -272,6 +288,16 @@ export const selectionRouter = createTRPCRouter({
           spaceId: selection.spaceId,
         }
       });
+
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          selectionId: input.selectionId,
+          feedEventType: UserFeedEventTypes.SelectionVoteEnded,
+          spaceId: selection.spaceId,
+        }          
+       });
+
+       return updatedSelection
     }),
   getUserVotes: protectedProcedure
     .input(z.object({ selectionId: z.string() }))

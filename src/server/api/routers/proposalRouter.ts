@@ -101,6 +101,14 @@ export const proposalRouter = createTRPCRouter({
         }
       });
 
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          proposalId: input.proposalId,
+          feedEventType: UserFeedEventTypes.ProposalObjectionAdded,
+          spaceId: proposal.spaceId,
+        }          
+       });
+
       return objection
     }),
   resolveObjection: protectedProcedure
@@ -175,6 +183,14 @@ export const proposalRouter = createTRPCRouter({
           spaceId: proposal.spaceId,
         }
       });
+
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          proposalId: input.proposalId,
+          feedEventType: UserFeedEventTypes.ProposalVotingStarted,
+          spaceId: proposal.spaceId,
+        }          
+       });
 
       return updatedProposal
     }),
@@ -253,6 +269,14 @@ export const proposalRouter = createTRPCRouter({
           spaceId: proposal.spaceId,
         }
       });
+
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          proposalId: input.proposalId,
+          feedEventType: UserFeedEventTypes.ProposalVotingEnded,
+          spaceId: proposal.spaceId,
+        }          
+       });
 
       return updatedProposal;
     }),

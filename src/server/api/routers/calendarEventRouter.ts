@@ -111,6 +111,20 @@ export const calendarEventRouter = createTRPCRouter({
         });
       }
 
+      await Promise.all(updateUserFeedList.map((uf) => {
+        return ctx.prisma.userFeedItem.create({
+          data: uf,
+        });
+       }));
+
+       await ctx.prisma.spaceFeedItem.create({
+        data: {
+          spaceId: calendarEvent.spaceId,
+          calendarEventId: calendarEvent.id,
+          feedEventType: SpaceFeedEventTypes.CalendarEventUpdated,
+        }          
+       });
+
       const updatedEvent = await ctx.prisma.calendarEvent.update({
         where: { id: input.itemId },
         data: {

@@ -1,7 +1,7 @@
 import { createTRPCRouter } from "./trpc";
 import { spaceRouter } from "./routers/spaceRouter";
 import { contentRouter } from "./routers/contentRouter";
-import { userRouter } from "./routers/user";
+import { userRouter } from "./routers/userRouter";
 import { calendarEventRouter } from "./routers/calendarEventRouter";
 import { proposalRouter } from "./routers/proposalRouter";
 import { selectionRouter } from "./routers/selectionRouter";
