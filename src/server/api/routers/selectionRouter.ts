@@ -17,6 +17,28 @@ export const selectionRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+
+      const space = await ctx.prisma.space.findUnique({where: {id: input.spaceId},
+        include: {spaceMembers: true}});
+
+      if(!space) throw new Error("Space not found");
+      
+      const isMember = space.spaceMembers.some((sm) => sm.userId === ctx.session.user.id);
+      
+      const userFeedItems = space.spaceMembers.map((sm) => ({ 
+        spaceId: input.spaceId,
+        userId: sm.userId,
+        eventType: UserFeedEventTypes.SelectionCreated,
+      }))
+
+      if(!isMember) {
+        userFeedItems.push({
+          spaceId: input.spaceId,
+          userId: ctx.session.user.id,
+          eventType: UserFeedEventTypes.SelectionCreated,
+        })
+      }
+
       return await ctx.prisma.selection.create({
         data: {
           title: input.title,
@@ -30,11 +52,7 @@ export const selectionRouter = createTRPCRouter({
             },
           },
           UserFeedItem: {
-            create: {
-              spaceId: input.spaceId,
-              userId: ctx.session.user.id,
-              eventType: UserFeedEventTypes.SelectionCreated,
-            },
+            create: userFeedItems,
           },
         },
       });
@@ -79,9 +97,9 @@ export const selectionRouter = createTRPCRouter({
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: selection.creatorId,
           proposalId: input.selectionId,
-          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          eventType: UserFeedEventTypes.SelectionAlternativeAdded,
           spaceId: selection.spaceId,
         }
       });
@@ -113,7 +131,7 @@ export const selectionRouter = createTRPCRouter({
         },
       });
 
-      return await ctx.prisma.selection.update({
+      const updatedSelection = await ctx.prisma.selection.update({
         where: {
           id: input.selectionId,
         },
@@ -125,6 +143,17 @@ export const selectionRouter = createTRPCRouter({
           },
         },
       });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: selection.creatorId,
+          selectionId: input.selectionId,
+          eventType: UserFeedEventTypes.SelectionVoteStarted,
+          spaceId: selection.spaceId,
+        }
+      });
+
+      return updatedSelection;
     }),
   buyVotes: protectedProcedure
     .input(
@@ -226,13 +255,22 @@ export const selectionRouter = createTRPCRouter({
 
       if (!selection) throw new Error("Proposal not found");
 
-      return await ctx.prisma.selection.update({
+      const updatedSelection = await ctx.prisma.selection.update({
         where: {
           id: input.selectionId,
         },
         data: {
           state: SelectionStates.VoteClosed,
         },
+      });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: updatedSelection.creatorId,
+          selectionId: input.selectionId,
+          eventType: UserFeedEventTypes.SelectionVoteEnded,
+          spaceId: selection.spaceId,
+        }
       });
     }),
   getUserVotes: protectedProcedure

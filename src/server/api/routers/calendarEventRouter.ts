@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SpaceFeedEventTypes } from "../../../utils/enums";
+import { SpaceFeedEventTypes, UserFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -15,6 +15,31 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const space = await ctx.prisma.space.findUnique({
+        where: { id: input.spaceId },
+        include: { spaceMembers: true },
+      });
+
+      if (!space) throw new Error("Space not found");
+
+      const isMember = space.spaceMembers.some(
+        (sm) => sm.userId === ctx.session.user.id
+      );
+
+      const userFeedItems = space.spaceMembers.map((sm) => ({
+        spaceId: input.spaceId,
+        userId: sm.userId,
+        eventType: UserFeedEventTypes.CalendarEventCreated,
+      }));
+
+      if (!isMember) {
+        userFeedItems.push({
+          spaceId: input.spaceId,
+          userId: ctx.session.user.id,
+          eventType: UserFeedEventTypes.CalendarEventCreated,
+        });
+      }
+
       const items = await ctx.prisma.$transaction([
         ctx.prisma.calendarEvent.create({
           data: {
@@ -37,35 +62,68 @@ export const calendarEventRouter = createTRPCRouter({
                 endAt: input.endAt,
               },
             },
+            UserFeedItem: {
+              create: userFeedItems,
+            },
           },
         }),
       ]);
 
       return items[0];
     }),
-    updateCalendarEvent: protectedProcedure
+  updateCalendarEvent: protectedProcedure
     .input(
       z.object({
         title: z.string(),
         body: z.string(),
-        spaceId: z.string(),
         itemId: z.string(),
         startAt: z.date(),
         endAt: z.date(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.itemId }, 
-        data: { 
-        title: input.title,
-        body: input.body,
-        spaceId: input.spaceId,
-        startAt: input.startAt,
-        endAt: input.endAt,
-      }});
+      const calendarEvent = await ctx.prisma.calendarEvent.findUnique({
+        where: { id: input.itemId },
+        include: { calendarEventAttendee: true },
+      });
+
+      if (!calendarEvent) {
+        throw new Error("Calendar event not found");
+      }
+
+      const updateUserFeedList = calendarEvent.calendarEventAttendee
+        .filter((cea) => cea.isAttending)
+        .map((cea) => ({
+          spaceId: calendarEvent.spaceId,
+          userId: cea.userId,
+          eventType: UserFeedEventTypes.CalendarEventUpdate,
+          calendarEventId: calendarEvent.id,
+        }));
+
+      if (
+        !updateUserFeedList.some((uf) => uf.userId === calendarEvent.authorId)
+      ) {
+        updateUserFeedList.push({
+          spaceId: calendarEvent.spaceId,
+          userId: calendarEvent.authorId,
+          eventType: UserFeedEventTypes.CalendarEventUpdate,
+          calendarEventId: calendarEvent.id,
+        });
+      }
+
+      const updatedEvent = await ctx.prisma.calendarEvent.update({
+        where: { id: input.itemId },
+        data: {
+          title: input.title,
+          body: input.body,
+          startAt: input.startAt,
+          endAt: input.endAt,
+        },
+      });
+
+      return updatedEvent;
     }),
-    addProposalToCalendarEvent: protectedProcedure
+  addProposalToCalendarEvent: protectedProcedure
     .input(
       z.object({
         proposalId: z.string(),
@@ -73,15 +131,16 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           proposals: {
-            connect: {id: input.proposalId}
-          }
-      }});
+            connect: { id: input.proposalId },
+          },
+        },
+      });
     }),
-    removeProposalFromCalendarEvent: protectedProcedure
+  removeProposalFromCalendarEvent: protectedProcedure
     .input(
       z.object({
         proposalIds: z.string().array(),
@@ -89,15 +148,16 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           proposals: {
-            disconnect: input.proposalIds.map((id) => ({id}))
-          }
-      }});
+            disconnect: input.proposalIds.map((id) => ({ id })),
+          },
+        },
+      });
     }),
-    addSelectionToCalendarEvent: protectedProcedure
+  addSelectionToCalendarEvent: protectedProcedure
     .input(
       z.object({
         selectionId: z.string(),
@@ -105,15 +165,16 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           selections: {
-            connect: {id: input.selectionId}
-          }
-      }});
+            connect: { id: input.selectionId },
+          },
+        },
+      });
     }),
-    removeSelectionFromCalendarEvent: protectedProcedure
+  removeSelectionFromCalendarEvent: protectedProcedure
     .input(
       z.object({
         selectionIds: z.string().array(),
@@ -121,15 +182,16 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           selections: {
-            disconnect: input.selectionIds.map((id) => ({id}))
-          }
-      }});
+            disconnect: input.selectionIds.map((id) => ({ id })),
+          },
+        },
+      });
     }),
-    addDataIndexToCalendarEvent: protectedProcedure
+  addDataIndexToCalendarEvent: protectedProcedure
     .input(
       z.object({
         dataIndexId: z.string(),
@@ -137,15 +199,16 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           dataIndices: {
-            connect: {id: input.dataIndexId}
-          }
-      }});
+            connect: { id: input.dataIndexId },
+          },
+        },
+      });
     }),
-    removeDataIndicesFromCalendarEvent: protectedProcedure
+  removeDataIndicesFromCalendarEvent: protectedProcedure
     .input(
       z.object({
         dataIndexIds: z.string().array(),
@@ -153,15 +216,16 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           dataIndices: {
-            disconnect: input.dataIndexIds.map((id) => ({id}))
-          }
-      }});
+            disconnect: input.dataIndexIds.map((id) => ({ id })),
+          },
+        },
+      });
     }),
-    addFeedbackRoundToCalendarEvent: protectedProcedure
+  addFeedbackRoundToCalendarEvent: protectedProcedure
     .input(
       z.object({
         feedbackRoundId: z.string(),
@@ -169,13 +233,14 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
-          feedbackRoundId: input.feedbackRoundId
-      }});
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
+          feedbackRoundId: input.feedbackRoundId,
+        },
+      });
     }),
-    removeFeedbackRoundFromCalendarEvent: protectedProcedure
+  removeFeedbackRoundFromCalendarEvent: protectedProcedure
     .input(
       z.object({
         feedbackRoundId: z.string(),
@@ -183,11 +248,12 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.calendarEvent.update({ 
-        where: {id: input.calendarEventId }, 
-        data: { 
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
           feedbackRoundId: null,
-      }});
+        },
+      });
     }),
   setAttending: protectedProcedure
     .input(
@@ -196,6 +262,14 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const calendarEvent = await ctx.prisma.calendarEvent.findUnique({
+        where: { id: input.calendarEventId },
+      });
+
+      if (!calendarEvent) {
+        throw new Error("Calendar event not found");
+      }
+
       const attendee = await ctx.prisma.calendarEventAttendee.findFirst({
         where: {
           calendarEventId: input.calendarEventId,
@@ -204,7 +278,7 @@ export const calendarEventRouter = createTRPCRouter({
       });
 
       if (attendee && !attendee.isAttending) {
-        return ctx.prisma.calendarEventAttendee.update({
+        const updatedAttendee = ctx.prisma.calendarEventAttendee.update({
           where: {
             id: attendee.id,
           },
@@ -212,18 +286,39 @@ export const calendarEventRouter = createTRPCRouter({
             isAttending: true,
           },
         });
+
+        await ctx.prisma.userFeedItem.create({
+          data: {
+            userId: attendee.userId,
+            calendarEventId: attendee.calendarEventId,
+            eventType: UserFeedEventTypes.CalendarEventAttending,
+            spaceId: calendarEvent.spaceId,
+          },
+        });
+
+        return updatedAttendee;
       }
 
       if (!attendee) {
-        return ctx.prisma.calendarEventAttendee.create({
+        const newAttendee = await ctx.prisma.calendarEventAttendee.create({
           data: {
             calendarEventId: input.calendarEventId,
             userId: ctx.session.user.id,
             isAttending: true,
           },
         });
-      }
 
+        await ctx.prisma.userFeedItem.create({
+          data: {
+            userId: newAttendee.userId,
+            calendarEventId: newAttendee.calendarEventId,
+            eventType: UserFeedEventTypes.CalendarEventAttending,
+            spaceId: calendarEvent.spaceId,
+          },
+        });
+
+        return newAttendee;
+      }
       return attendee;
     }),
   setNotAttending: protectedProcedure
@@ -233,6 +328,14 @@ export const calendarEventRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const calendarEvent = await ctx.prisma.calendarEvent.findUnique({
+        where: { id: input.calendarEventId },
+      });
+
+      if (!calendarEvent) {
+        throw new Error("Calendar event not found");
+      }
+
       const attendee = await ctx.prisma.calendarEventAttendee.findFirst({
         where: {
           calendarEventId: input.calendarEventId,
@@ -241,7 +344,7 @@ export const calendarEventRouter = createTRPCRouter({
       });
 
       if (attendee && attendee.isAttending) {
-        return ctx.prisma.calendarEventAttendee.update({
+        const updatedAttending = await ctx.prisma.calendarEventAttendee.update({
           where: {
             id: attendee.id,
           },
@@ -249,16 +352,38 @@ export const calendarEventRouter = createTRPCRouter({
             isAttending: false,
           },
         });
+
+        await ctx.prisma.userFeedItem.create({
+          data: {
+            userId: updatedAttending.userId,
+            calendarEventId: updatedAttending.calendarEventId,
+            eventType: UserFeedEventTypes.CalendarEventNotAttending,
+            spaceId: calendarEvent.spaceId,
+          },
+        });
+
+        return updatedAttending;
       }
 
       if (!attendee) {
-        return ctx.prisma.calendarEventAttendee.create({
+        const newAttendee = await ctx.prisma.calendarEventAttendee.create({
           data: {
             calendarEventId: input.calendarEventId,
             userId: ctx.session.user.id,
             isAttending: false,
           },
         });
+
+        await ctx.prisma.userFeedItem.create({
+          data: {
+            userId: newAttendee.userId,
+            calendarEventId: newAttendee.calendarEventId,
+            eventType: UserFeedEventTypes.CalendarEventNotAttending,
+            spaceId: calendarEvent.spaceId,
+          },
+        });
+
+        return newAttendee;
       }
 
       return attendee;
@@ -270,22 +395,21 @@ export const calendarEventRouter = createTRPCRouter({
         where: { spaceId: input.spaceId },
       });
     }),
-  getMyCalendarEvents: protectedProcedure
-    .query(async ({ ctx }) => {
-      const spacesThings = await ctx.prisma.spaceMember.findMany({
-        where: { userId: ctx.session.user.id, leftAt: null },
-        include: {
-          space: {
-            include: {
-              calendarEvents:true
-            }
-          }
-        }
-      });
-      return spacesThings.flatMap((spaceThing) => {
-        return spaceThing.space.calendarEvents;
-       })
-    }),
+  getMyCalendarEvents: protectedProcedure.query(async ({ ctx }) => {
+    const spacesThings = await ctx.prisma.spaceMember.findMany({
+      where: { userId: ctx.session.user.id, leftAt: null },
+      include: {
+        space: {
+          include: {
+            calendarEvents: true,
+          },
+        },
+      },
+    });
+    return spacesThings.flatMap((spaceThing) => {
+      return spaceThing.space.calendarEvents;
+    });
+  }),
   getCalendarEvent: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {

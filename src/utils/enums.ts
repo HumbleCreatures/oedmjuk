@@ -24,9 +24,8 @@ export enum UserFeedEventTypes {
     SelectionVoteEnded = 'SelectionVoteEnded',
     CalendarEventCreated = 'CalendarEventCreated',
     CalendarEventUpdate = 'CalendarEventUpdated',
-    ContentCreated = 'ContentCreated',
-    FeedbackRoundCreated = 'FeedbackRoundCreated',
-    DataIndexCreated = 'DataIndexCreated',
+    CalendarEventAttending = 'CalendarEventAttending',
+    CalendarEventNotAttending = 'CalendarEventNotAttending',
     
 }
 

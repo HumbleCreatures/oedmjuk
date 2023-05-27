@@ -18,6 +18,27 @@ export const proposalRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const space = await ctx.prisma.space.findUnique({where: {id: input.spaceId},
+        include: {spaceMembers: true}});
+
+      if(!space) throw new Error("Space not found");
+      
+      const isMember = space.spaceMembers.some((sm) => sm.userId === ctx.session.user.id);
+      
+      const userFeedItems = space.spaceMembers.map((sm) => ({ 
+        spaceId: input.spaceId,
+        userId: sm.userId,
+        eventType: UserFeedEventTypes.ProposalEventCreated,
+      }))
+
+      if(!isMember) {
+        userFeedItems.push({
+          spaceId: input.spaceId,
+          userId: ctx.session.user.id,
+          eventType: UserFeedEventTypes.ProposalEventCreated,
+        })
+      }
+
       return await ctx.prisma.proposal.create({
         data: {
           title: input.title,
@@ -31,11 +52,7 @@ export const proposalRouter = createTRPCRouter({
             },
           },
           UserFeedItem: {
-            create: {
-              spaceId: input.spaceId,
-              userId: ctx.session.user.id,
-              eventType: UserFeedEventTypes.ProposalEventCreated,
-            },
+            create: userFeedItems,
           },
         },
       });
@@ -77,7 +94,7 @@ export const proposalRouter = createTRPCRouter({
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: proposal.authorId,
           proposalId: input.proposalId,
           eventType: UserFeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
@@ -152,7 +169,7 @@ export const proposalRouter = createTRPCRouter({
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: updatedProposal.authorId,
           proposalId: input.proposalId,
           eventType: UserFeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
@@ -230,7 +247,7 @@ export const proposalRouter = createTRPCRouter({
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: updatedProposal.authorId,
           proposalId: input.proposalId,
           eventType: UserFeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
