@@ -54,7 +54,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
 
   if (!feedbackResult.data) return <div>Could not load feedback round</div>;
   const feedbackItem = feedbackResult.data;
-  const { title, body, createdAt, updatedAt, authorId, createdByExternalUser, feedbackRound } = feedbackItem;
+  const { title, body, createdAt, updatedAt, creatorId, createdByExternalUser, feedbackRound } = feedbackItem;
 
   return (
     <AppLayout>
@@ -71,7 +71,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
               </Text>
               {" "}by{" "}
               <Text fz="sm" fw={500} className={classes.makeInline}>
-                <UserLinkWithData userId={authorId} />
+                <UserLinkWithData userId={creatorId} />
               </Text>
               {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
                 <>
@@ -111,7 +111,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
               </Text>
               {" "}by{" "}
               <Text fz="sm" fw={500} className={classes.makeInline}>
-                <UserLinkWithData userId={note.authorId} />
+                <UserLinkWithData userId={note.creatorId} />
               </Text>
               {note.updatedAt && note.updatedAt.getTime() !== note.createdAt.getTime() && (
                 <>

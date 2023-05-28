@@ -17,6 +17,7 @@ export const userRouter = createTRPCRouter({
         proposal: true,
         selection: true,
         feedbackRound: true,
+        space: true,
         dataIndex: {
           include: {
             unitType: true,

@@ -52,7 +52,7 @@ export function ObjectionEditor({ proposalId }: { proposalId: string }) {
   const utils = api.useContext();
   const mutation = api.proposal.addObjection.useMutation({
     onSuccess() {
-      void utils.proposal.getProposal.invalidate({ proposalId });
+      void utils.proposal.getProposal.invalidate({ itemId: proposalId });
     },
   });
 

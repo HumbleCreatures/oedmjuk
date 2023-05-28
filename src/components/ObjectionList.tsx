@@ -75,7 +75,7 @@ export function Objection({ objection }: { objection: Objection }) {
   const mutation = api.proposal.resolveObjection.useMutation({
     onSuccess() {
       void utils.proposal.getProposal.invalidate({
-        proposalId: objection.proposalId,
+        itemId: objection.proposalId,
       });
     },
   });
@@ -93,7 +93,7 @@ export function Objection({ objection }: { objection: Objection }) {
             </Text>{" "}
             by{" "}
             <Text fz="sm" fw={500} className={classes.inlineText}>
-              <UserLinkWithData userId={objection.authorId} />
+              <UserLinkWithData userId={objection.creatorId} />
             </Text>
           </Text>
 
@@ -122,9 +122,9 @@ export function Objection({ objection }: { objection: Objection }) {
                   .toRelative()}
               </Text>{" "}
               by{" "}
-              <Text fz="sm" fw={500} className={classes.inlineText}>
-                <UserLinkWithData userId={objection.resolvedById} />
-              </Text>
+              {objection.resolvedById &&<Text fz="sm" fw={500} className={classes.inlineText}>
+                 <UserLinkWithData userId={objection.resolvedById} /> 
+              </Text>}
             </Text>
 
             <div
@@ -183,18 +183,3 @@ export function Objection({ objection }: { objection: Objection }) {
     </Card>
   );
 }
-
-/*
-
-    <li key={objection.id}>
-      <div>{objection.resolvedAt ? "Resolved" : "Open"}</div>
-      {objection.body}
-      <UserButtonWithData userId={objection.authorId}></UserButtonWithData>
-
-      <div>
-        
-      </div>
-
-      
-    </li>
-    */

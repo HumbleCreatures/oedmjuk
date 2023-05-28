@@ -41,12 +41,12 @@ export const dataIndexRouter = createTRPCRouter({
             title: input.title,
             description: input.description,
             spaceId: input.spaceId,
-            authorId: ctx.session.user.id,
+            creatorId: ctx.session.user.id,
             unitTypeId: input.unitTypeId,            
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                feedEventType: SpaceFeedEventTypes.DataIndexCreated,
+                eventType: SpaceFeedEventTypes.DataIndexCreated,
               },
             },            
           },

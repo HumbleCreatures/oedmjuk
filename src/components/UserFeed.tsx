@@ -1,4 +1,4 @@
-import { Card, Group, Text, ThemeIcon, createStyles } from "@mantine/core";
+import { Card, Container, Group, SimpleGrid, Text, ThemeIcon, Title, createStyles } from "@mantine/core";
 import Link from "next/link";
 import { api } from "../utils/api";
 import {
@@ -7,13 +7,18 @@ import {
   IconChartBar,
   IconColorSwatch,
   IconNotebook,
-  IconPhoto,
   IconRecycle,
 } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { formatDateLengthBetween } from "../utils/dateFormaters";
 
 const useStyles = createStyles((theme) => ({
+  area: {
+    backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
   itemTitle: {
     backgroundColor: theme.colors.earth[9],
     borderBottom: 0,
@@ -21,6 +26,10 @@ const useStyles = createStyles((theme) => ({
   },
   inlineText: {
     display: "inline",
+  },
+  areaTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.md,
   }
 }));
 
@@ -52,10 +61,13 @@ export function UserFeed() {
                     {DateTime.fromJSDate(item.content.createdAt)
                       .setLocale("en")
                       .toRelative()}
+                       {" "}in{" "} 
+                      <Text fw={500} className={classes.inlineText}>{item.space.name}</Text>
+
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Content Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -91,10 +103,13 @@ export function UserFeed() {
                     {DateTime.fromJSDate(item.calendarEvent.createdAt)
                       .setLocale("en")
                       .toRelative()}
+                       {" "}in{" "} 
+                      <Text fw={500} className={classes.inlineText}>{item.space.name}</Text>
+
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Calendar Event Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -169,10 +184,12 @@ export function UserFeed() {
                     {DateTime.fromJSDate(item.proposal.createdAt)
                       .setLocale("en")
                       .toRelative()}
+                      {" "}in{" "} 
+                      <Text fw={500} className={classes.inlineText}>{item.space.name}</Text>
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Proposal Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -211,10 +228,12 @@ export function UserFeed() {
                     {DateTime.fromJSDate(item.selection.createdAt)
                       .setLocale("en")
                       .toRelative()}
+                       {" "}in{" "} 
+                      <Text fw={500} className={classes.inlineText}>{item.space.name}</Text>
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Selection Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -253,10 +272,12 @@ export function UserFeed() {
                     {DateTime.fromJSDate(item.feedbackRound.createdAt)
                       .setLocale("en")
                       .toRelative()}
+                       {" "}in{" "} 
+                      <Text fw={500} className={classes.inlineText}>{item.space.name}</Text>
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Feedback Round Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -295,10 +316,12 @@ export function UserFeed() {
                     {DateTime.fromJSDate(item.dataIndex.createdAt)
                       .setLocale("en")
                       .toRelative()}
+                       {" "}in{" "} 
+                      <Text fw={500} className={classes.inlineText}>{item.space.name}</Text>
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Data Index Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -324,5 +347,11 @@ export function UserFeed() {
     }
   });
 
-  return <>{itemCards}</>;
+  return <Container size="md" className={classes.area}>
+     <Title order={2} className={classes.areaTitle}>My Feed</Title>
+     <SimpleGrid cols={1}>
+      {itemCards}
+     </SimpleGrid>
+   
+    </Container>;
 }

@@ -50,7 +50,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
     return <div>Could not find content</div>;
 
   const { space, isMember } = spaceResult.data;
-  const {title, body, createdAt, authorId, updatedAt} = contentResult.data;
+  const {title, createdAt, creatorId, updatedAt} = contentResult.data;
 
   return (
     <AppLayout>
@@ -85,7 +85,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
                       .toRelative()}</Text>
                   </Text>}
 
-                  <Text fz="sm">By <Text fz="sm" fw={500} className={classes.inlineText}><UserLinkWithData userId={authorId} /></Text></Text>
+                  <Text fz="sm">By <Text fz="sm" fw={500} className={classes.inlineText}><UserLinkWithData userId={creatorId} /></Text></Text>
                 </div>
                 <Link href={`/app/space/${spaceId}/content/${itemId}/edit`} passHref>
               <Button component="a">Edit</Button>

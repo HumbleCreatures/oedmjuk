@@ -47,7 +47,7 @@ const MyCalendarPage: NextPage = () => {
     <AppLayout>
       <Container size="md">
       <div className={classes.area}>
-        <Title order={2} className={classes.areaTitle}>MyCalendar</Title>
+        <Title order={2} className={classes.areaTitle}>My Calendar</Title>
         <Calendar
         defaultView='week'
         events={events}

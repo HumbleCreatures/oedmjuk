@@ -64,7 +64,7 @@ function SelectionView({
   const { classes } = useStyles();
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const selectionResult = api.selection.getSelection.useQuery({ selectionId });
-  const voteResult = api.selection.getUserVotes.useQuery({ selectionId });
+  const voteResult = api.selection.getUserVotes.useQuery({ itemId: selectionId });
 
   const startBuyingRound = api.selection.startBuyingRound.useMutation({
     onSuccess: () => {

@@ -109,7 +109,7 @@ model SpaceFeedItem {
   id              String         @id @default(cuid())
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  feedEventType   String
+  eventType       String
   space           Space          @relation(fields: [spaceId], references: [id])
   spaceId         String
   content         Content?       @relation(fields: [contentId], references: [id])
@@ -169,8 +169,8 @@ model Content {
   body           String
   space          Space            @relation(fields: [spaceId], references: [id])
   spaceId        String
-  author         User             @relation(fields: [authorId], references: [id])
-  authorId       String
+  creator         User             @relation(fields: [creatorId], references: [id])
+  creatorId       String
   spaceFeedItem  SpaceFeedItem[]
   order          Int
   contentVersion ContentVersion[]
@@ -185,8 +185,8 @@ model ContentVersion {
   body             String
   content          Content            @relation(fields: [contentId], references: [id])
   contentId        String
-  author           User               @relation(fields: [authorId], references: [id])
-  authorId         String
+  creator           User               @relation(fields: [creatorId], references: [id])
+  creatorId         String
   ContentSignature ContentSignature[]
 }
 
@@ -207,8 +207,8 @@ model Comment {
   body      String
   content   Content  @relation(fields: [contentId], references: [id])
   contentId String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+  creator    User     @relation(fields: [creatorId], references: [id])
+  creatorId  String
 }
 
 model CalendarEvent {
@@ -221,8 +221,8 @@ model CalendarEvent {
   endAt                 DateTime
   space                 Space                   @relation(fields: [spaceId], references: [id])
   spaceId               String
-  author                User                    @relation(fields: [authorId], references: [id])
-  authorId              String
+  creator                User                    @relation(fields: [creatorId], references: [id])
+  creatorId              String
   spaceFeedItem         SpaceFeedItem[]
   userCalendar          UserCalendar[]
   calendarEventAttendee CalendarEventAttendee[]
@@ -265,8 +265,8 @@ model Proposal {
   body           String
   space          Space                 @relation(fields: [spaceId], references: [id])
   spaceId        String
-  author         User                  @relation(fields: [authorId], references: [id])
-  authorId       String
+  creator         User                  @relation(fields: [creatorId], references: [id])
+  creatorId       String
   proposalState  String                @default("ProposalCreated")
   proposalType   String                @default("Internal")
   votes          ProposalVote[]
@@ -316,8 +316,8 @@ model Objection {
   updatedAt       DateTime  @updatedAt
   proposal        Proposal  @relation(fields: [proposalId], references: [id])
   proposalId      String
-  author          User      @relation(name: "ProposalObjection", fields: [authorId], references: [id])
-  authorId        String
+  creator          User      @relation(name: "ProposalObjection", fields: [creatorId], references: [id])
+  creatorId        String
   body            String
   resolvedAt      DateTime?
   resolvedBy      User?     @relation(name: "ProposalObjectionResolves", fields: [resolvedById], references: [id])
@@ -375,8 +375,8 @@ model FeedbackItem {
   feedbackRoundId       String
   title                 String
   body                  String
-  author                User               @relation(name: "FeedbackItem", fields: [authorId], references: [id])
-  authorId              String
+  creator                User               @relation(name: "FeedbackItem", fields: [creatorId], references: [id])
+  creatorId              String
   column                FeedbackColumn?    @relation(fields: [columnId], references: [id])
   columnId              String?
   order                 Int
@@ -391,8 +391,8 @@ model FeedbackNote {
   updatedAt      DateTime     @updatedAt
   feedbackItem   FeedbackItem @relation(fields: [feedbackItemId], references: [id])
   feedbackItemId String
-  author         User         @relation(fields: [authorId], references: [id])
-  authorId       String
+  creator         User         @relation(fields: [creatorId], references: [id])
+  creatorId       String
   body           String
 }
 
@@ -422,8 +422,8 @@ model SelectionAlternative {
   updatedAt   DateTime             @updatedAt
   selection   Selection            @relation(fields: [selectionId], references: [id])
   selectionId String
-  author      User                 @relation(fields: [authorId], references: [id])
-  authorId    String
+  creator      User                 @relation(fields: [creatorId], references: [id])
+  creatorId    String
   title       String
   body        String
   votes       SelectionVoteEntry[]
@@ -460,8 +460,8 @@ model DataIndex {
   description     String
   space           Space            @relation(fields: [spaceId], references: [id])
   spaceId         String
-  author          User             @relation(fields: [authorId], references: [id])
-  authorId        String
+  creator          User             @relation(fields: [creatorId], references: [id])
+  creatorId        String
   urlToSource     String?
   nameOfSource    String?
   unitType        DataIndexType    @relation(fields: [unitTypeId], references: [id])

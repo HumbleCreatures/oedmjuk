@@ -44,7 +44,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   
   const spaceQuery = api.space.getSpace.useQuery({ spaceId });
   const proposalQuery = api.proposal.getProposal.useQuery({
-    proposalId: itemId,
+    itemId: itemId,
   });
 
 

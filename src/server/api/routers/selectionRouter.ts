@@ -48,7 +48,7 @@ export const selectionRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              feedEventType: SpaceFeedEventTypes.SelectionCreated,
+              eventType: SpaceFeedEventTypes.SelectionCreated,
             },
           },
           UserFeedItem: {
@@ -91,7 +91,7 @@ export const selectionRouter = createTRPCRouter({
           selectionId: input.selectionId,
           body: input.body,
           title: input.title,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
         },
       });
 
@@ -107,7 +107,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           selectionId: input.selectionId,
-          feedEventType: UserFeedEventTypes.SelectionAlternativeAdded,
+          eventType: UserFeedEventTypes.SelectionAlternativeAdded,
           spaceId: selection.spaceId,
         }          
        });
@@ -164,7 +164,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           selectionId: input.selectionId,
-          feedEventType: UserFeedEventTypes.SelectionVoteStarted,
+          eventType: UserFeedEventTypes.SelectionVoteStarted,
           spaceId: selection.spaceId,
         }          
        });
@@ -292,7 +292,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           selectionId: input.selectionId,
-          feedEventType: UserFeedEventTypes.SelectionVoteEnded,
+          eventType: UserFeedEventTypes.SelectionVoteEnded,
           spaceId: selection.spaceId,
         }          
        });
@@ -300,10 +300,10 @@ export const selectionRouter = createTRPCRouter({
        return updatedSelection
     }),
   getUserVotes: protectedProcedure
-    .input(z.object({ selectionId: z.string() }))
+    .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
       const selection = await ctx.prisma.selection.findUnique({
-        where: { id: input.selectionId },
+        where: { id: input.itemId },
         include: { participants: true },
       });
 
@@ -317,7 +317,7 @@ export const selectionRouter = createTRPCRouter({
       }
 
       const votes = await ctx.prisma.selectionVoteEntry.findMany({
-        where: { selectionId: input.selectionId, userId: ctx.session.user.id },
+        where: { selectionId: input.itemId, userId: ctx.session.user.id },
         orderBy: { createdAt: "desc" },
       });
       const spentOnVoting = votes.reduce(

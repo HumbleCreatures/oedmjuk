@@ -57,7 +57,7 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
   if(!dataPointsResult.data) return (<div>could not load item...</div>)
 
   const {space, isMember} = data;
-  const {title, description, unitType, createdAt, updatedAt, authorId} = dataIndexResult.data;
+  const {title, description, unitType, createdAt, updatedAt, creatorId} = dataIndexResult.data;
   
   return (
     <AppLayout>
@@ -99,7 +99,7 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
             <Text fz="sm">
               By{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
-                <UserLinkWithData userId={authorId} />
+                <UserLinkWithData userId={creatorId} />
               </Text>
             </Text>
             <Text fz="sm" fw={300}>

@@ -46,7 +46,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Content Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -85,7 +85,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Calendar Event Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -163,7 +163,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Proposal Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -205,7 +205,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Selection Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -247,7 +247,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Feedback Round Created
+                  {item.eventType}
                   </Text>
                 </div>
 
@@ -289,7 +289,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
                   </Text>
 
                   <Text fz="md" fw={500}>
-                    Data Index Created
+                  {item.eventType}
                   </Text>
                 </div>
 

@@ -58,7 +58,7 @@ export function AlternativeListItem({
     const mutation = api.selection.buyVotes.useMutation({
         onSuccess() {
         void utils.selection.getSelection.invalidate({ selectionId: alternative.selectionId });
-        void utils.selection.getUserVotes.invalidate({ selectionId: alternative.selectionId });
+        void utils.selection.getUserVotes.invalidate({ itemId: alternative.selectionId });
         },
     });
   const maxNumberOfVotes = canVote && currentVotingBalance
@@ -95,7 +95,7 @@ export function AlternativeListItem({
             </Text>{" "}
             by{" "}
             <Text fz="sm" fw={500} className={classes.inlineText}>
-              <UserLinkWithData userId={alternative.authorId} />
+              <UserLinkWithData userId={alternative.creatorId} />
             </Text>
           </Text>
       </Card.Section>

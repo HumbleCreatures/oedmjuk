@@ -18,12 +18,12 @@ export const contentRouter = createTRPCRouter({
             title: input.title,
             body: input.body,
             spaceId: input.spaceId,
-            authorId: ctx.session.user.id,
+            creatorId: ctx.session.user.id,
             order: 0,
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                feedEventType: SpaceFeedEventTypes.ContentCreated,
+                eventType: SpaceFeedEventTypes.ContentCreated,
               },
             },            
           },

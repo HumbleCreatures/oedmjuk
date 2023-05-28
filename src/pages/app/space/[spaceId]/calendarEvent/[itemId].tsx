@@ -81,7 +81,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   if (!calendarResult.data || !calendarResult.data.calendarEvent)
     return <div>calendar event not found</div>;
   const { space, isMember } = spaceResult.data;
-  const { createdAt, updatedAt, title, body, startAt, endAt, authorId } =
+  const { createdAt, updatedAt, title, body, startAt, endAt, creatorId } =
     calendarResult.data.calendarEvent;
   const amIAttending = calendarResult.data.myAttendee?.isAttending;
 
@@ -127,7 +127,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             <Text fz="sm">
               By{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
-                <UserLinkWithData userId={authorId} />
+                <UserLinkWithData userId={creatorId} />
               </Text>
             </Text>
 

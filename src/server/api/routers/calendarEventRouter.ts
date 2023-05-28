@@ -48,11 +48,11 @@ export const calendarEventRouter = createTRPCRouter({
             spaceId: input.spaceId,
             startAt: input.startAt,
             endAt: input.endAt,
-            authorId: ctx.session.user.id,
+            creatorId: ctx.session.user.id,
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                feedEventType: SpaceFeedEventTypes.CalendarEventCreated,
+                eventType: SpaceFeedEventTypes.CalendarEventCreated,
               },
             },
             userCalendar: {
@@ -101,11 +101,11 @@ export const calendarEventRouter = createTRPCRouter({
         }));
 
       if (
-        !updateUserFeedList.some((uf) => uf.userId === calendarEvent.authorId)
+        !updateUserFeedList.some((uf) => uf.userId === calendarEvent.creatorId)
       ) {
         updateUserFeedList.push({
           spaceId: calendarEvent.spaceId,
-          userId: calendarEvent.authorId,
+          userId: calendarEvent.creatorId,
           eventType: UserFeedEventTypes.CalendarEventUpdate,
           calendarEventId: calendarEvent.id,
         });
@@ -121,7 +121,7 @@ export const calendarEventRouter = createTRPCRouter({
         data: {
           spaceId: calendarEvent.spaceId,
           calendarEventId: calendarEvent.id,
-          feedEventType: SpaceFeedEventTypes.CalendarEventUpdated,
+          eventType: SpaceFeedEventTypes.CalendarEventUpdated,
         }          
        });
 

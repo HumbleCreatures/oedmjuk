@@ -19,6 +19,7 @@ import {
   IconSelector,
   IconCalendar,
   IconSettings,
+  IconClipboardList,
 } from "@tabler/icons";
 import Link from "next/link";
 import { NavbarSpaceList } from "./NavBarSpaceList";
@@ -131,6 +132,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const links = [
+  { icon: IconClipboardList, label: "My Feed", /*notifications: 3,*/ href: "/app" },
   { icon: IconCalendar, label: "My Calendar", /*notifications: 3,*/ href: "/app/my/calendar" },
   { icon: IconSettings, label: "Settings", href: "/app/settings/dataIndexTypes" },
 ];
@@ -144,11 +146,11 @@ export function NavbarSearch() {
         <link.icon size={20} className={classes.mainLinkIcon} stroke={1.5} />
         <span>{link.label}</span>
       </Link>
-      {link.notifications && (
+      {/*link.notifications && (
         <Badge size="sm" variant="filled" className={classes.mainLinkBadge}>
           {link.notifications}
         </Badge>
-      )}
+      )*/}
     </UnstyledButton>
   ));
 

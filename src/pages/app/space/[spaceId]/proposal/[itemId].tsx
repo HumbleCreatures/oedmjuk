@@ -64,7 +64,7 @@ function ProposalView({
 }) {
   const { classes } = useStyles();
   const spaceReslt = api.space.getSpace.useQuery({ spaceId });
-  const proposalResult = api.proposal.getProposal.useQuery({ proposalId });
+  const proposalResult = api.proposal.getProposal.useQuery({ itemId: proposalId });
   const voteResult = api.proposal.getUserVote.useQuery({ proposalId });
   const closeObjectionRound = api.proposal.closeObjectionRound.useMutation({
     onSuccess: () => {
@@ -373,7 +373,7 @@ export default ProposalPage;
 
 function ProposalInfo({ proposal }: { proposal: Proposal }) {
   const { classes } = useStyles();
-  const { title, body, createdAt, authorId, updatedAt, proposalState } =
+  const { title, body, createdAt, creatorId, updatedAt, proposalState } =
     proposal;
   return (
     <>
@@ -418,7 +418,7 @@ function ProposalInfo({ proposal }: { proposal: Proposal }) {
           <Text fz="sm">
             By{" "}
             <Text fz="sm" fw={500} className={classes.inlineText}>
-              <UserLinkWithData userId={authorId} />
+              <UserLinkWithData userId={creatorId} />
             </Text>
           </Text>
         </div>

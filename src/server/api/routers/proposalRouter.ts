@@ -44,11 +44,11 @@ export const proposalRouter = createTRPCRouter({
           title: input.title,
           body: input.body,
           spaceId: input.spaceId,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              feedEventType: SpaceFeedEventTypes.ProposalEventCreated,
+              eventType: SpaceFeedEventTypes.ProposalEventCreated,
             },
           },
           UserFeedItem: {
@@ -88,13 +88,13 @@ export const proposalRouter = createTRPCRouter({
         data: {
           proposalId: input.proposalId,
           body: input.body,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
         },
       });
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: proposal.authorId,
+          userId: proposal.creatorId,
           proposalId: input.proposalId,
           eventType: UserFeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
@@ -104,7 +104,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          feedEventType: UserFeedEventTypes.ProposalObjectionAdded,
+          eventType: UserFeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
         }          
        });
@@ -177,7 +177,7 @@ export const proposalRouter = createTRPCRouter({
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: updatedProposal.authorId,
+          userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
           eventType: UserFeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
@@ -187,7 +187,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          feedEventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: UserFeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }          
        });
@@ -263,7 +263,7 @@ export const proposalRouter = createTRPCRouter({
 
       await ctx.prisma.userFeedItem.create({
         data: {
-          userId: updatedProposal.authorId,
+          userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
           eventType: UserFeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
@@ -273,7 +273,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          feedEventType: UserFeedEventTypes.ProposalVotingEnded,
+          eventType: UserFeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
         }          
        });
@@ -311,10 +311,10 @@ export const proposalRouter = createTRPCRouter({
       });
     }),
   getProposal: protectedProcedure
-    .input(z.object({ proposalId: z.string() }))
+    .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
       const proposal = await ctx.prisma.proposal.findUnique({
-        where: { id: input.proposalId },
+        where: { id: input.itemId },
         include: { objections: true, participants: true },
       });
 

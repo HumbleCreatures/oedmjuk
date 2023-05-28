@@ -35,7 +35,7 @@ export const feedbackRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              feedEventType: SpaceFeedEventTypes.FeedbackRoundCreated,
+              eventType: SpaceFeedEventTypes.FeedbackRoundCreated,
             },
           },
         },
@@ -110,7 +110,7 @@ export const feedbackRouter = createTRPCRouter({
           },
           feedbackNotes: {
             include: {
-              author: true,
+              creator: true,
             },
           },
         },
@@ -123,7 +123,7 @@ export const feedbackRouter = createTRPCRouter({
       if (
         content.createdByExternalUser ||
         content.columnId ||
-        content.authorId === ctx.session.user.id
+        content.creatorId === ctx.session.user.id
       ) {
         return content;
       }
@@ -136,7 +136,7 @@ export const feedbackRouter = createTRPCRouter({
       const feedbackItems = await ctx.prisma.feedbackItem.findMany({
         where: {
           feedbackRoundId: input.itemId,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
           createdByExternalUser: false,
           columnId: null,
         },
@@ -185,7 +185,7 @@ export const feedbackRouter = createTRPCRouter({
       const numberOfFeedbackItems = await ctx.prisma.feedbackItem.count({
         where: {
           feedbackRoundId: input.feedbackRoundId,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
           columnId: null,
         },
       });
@@ -195,7 +195,7 @@ export const feedbackRouter = createTRPCRouter({
           title: input.title,
           body: input.body,
           feedbackRoundId: input.feedbackRoundId,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
           createdByExternalUser: myMembership.length === 0,
           order: (numberOfFeedbackItems + 1) * 1024,
         },
@@ -250,7 +250,7 @@ export const feedbackRouter = createTRPCRouter({
         data: {
           body: input.body,
           feedbackItemId: input.feedbackItemId,
-          authorId: ctx.session.user.id,
+          creatorId: ctx.session.user.id,
         },
       });
     }),
