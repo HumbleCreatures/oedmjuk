@@ -122,7 +122,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
           <form
             onSubmit={form.onSubmit((values) => {
               console.log(values);
-              mutation.mutate({ ...values, spaceId, itemId });
+              mutation.mutate({ ...values, itemId });
             })}
           >
             <TextInput

@@ -33,7 +33,7 @@ const CreateSpace: NextPage = () => {
   const router = useRouter();
 
   const spacesRequest = api.space.getAllSpaces.useQuery();
-  
+  const utils = api.useContext();
   const mutation = api.space.createSpace.useMutation({
     onSuccess(data) {
       void utils.space.getAllSpaces.invalidate();

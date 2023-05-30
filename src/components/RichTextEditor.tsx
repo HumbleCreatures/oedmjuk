@@ -7,7 +7,7 @@ import { MutableRefObject, useEffect } from 'react';
 
 export type VoidFunc = () => void;
 
-export function  ARichTextEditor({ onUpdate, clearForm }: { onUpdate: (html: string) => void, clearForm?: MutableRefObject<VoidFunc> | undefined }) {
+export function  ARichTextEditor({ onUpdate, clearForm }: { onUpdate: (html: string) => void, clearForm?: MutableRefObject<VoidFunc | undefined> }) {
 
   const editor = useEditor({
     extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],

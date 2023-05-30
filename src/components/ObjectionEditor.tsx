@@ -67,10 +67,10 @@ export function ObjectionEditor({ proposalId }: { proposalId: string }) {
         <Title order={2} className={classes.areaTitle}>
           Create objection
         </Title>
-        <ARichTextEditor
+        {clearForm && <ARichTextEditor
           onUpdate={(html) => form.setFieldValue("body", html)}
           clearForm={clearForm}
-        />
+        />}
 
         <Button type="submit" mt="sm">
           Create objection

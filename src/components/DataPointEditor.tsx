@@ -39,8 +39,9 @@ export function DataPointEditor({ dataIndexId }: { dataIndexId: string }) {
     <form
     onSubmit={form.onSubmit((values) => {
       console.log(values);
-      if(!values.datestamp || !values.value) return;
-      mutation.mutate({...values, dataIndexId: dataIndexId});
+      if(!values.datestamp || !values.value) 
+      return;
+      mutation.mutate({datestamp: values.datestamp, value: values.value, dataIndexId: dataIndexId});
     })}
   >
     <SimpleGrid cols={1}>

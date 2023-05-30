@@ -50,11 +50,11 @@ export function DataIndexToCalendarEventEditor({spaceId, itemId, selectedDataInd
     if(dataIndexQuery.isError) return <div>Error...</div>
     if(dataIndexQuery.data === undefined) return <div>Undefined...</div>
 
-    const dataIndexSelectValue = selectedDataIndex.map((proposal) => proposal.id);
+    const dataIndexSelectValue = selectedDataIndex.map((dataIndex) => dataIndex.id);
 
-    const dataIndexSelectedItems = dataIndexQuery.data.map((proposal) => ({
-        value: proposal.id,
-        label: proposal.title,
+    const dataIndexSelectedItems = dataIndexQuery.data.map((dataIndex) => ({
+        value: dataIndex.dataIndex.id,
+        label: dataIndex.dataIndex.title,
       }));
 
     

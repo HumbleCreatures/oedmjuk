@@ -88,7 +88,6 @@ function SelectionView({
   const selection = selectionResult.data;
   if (!selection) return <div>Could not load selection</div>;
   const {
-    state,
     title,
     body,
     createdAt,

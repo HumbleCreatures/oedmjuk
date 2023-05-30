@@ -80,10 +80,10 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
               <Text fz="sm" fw={500}>
                 Body
               </Text>
-        {clearForm  !== undefined && <ARichTextEditor
+        <ARichTextEditor
           onUpdate={(html) => form.setFieldValue("body", html)}
           clearForm={clearForm}
-        /> }
+        />
         </div>
 
         <Button type="submit" mt="sm">
