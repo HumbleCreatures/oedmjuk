@@ -1,29 +1,17 @@
 import {
   createStyles,
   Navbar,
-  TextInput,
-  Code,
+  MediaQuery,
   UnstyledButton,
-  Badge,
-  Text,
-  Group,
-  ActionIcon,
-  Tooltip,
+
 } from "@mantine/core";
 import {
-  IconBulb,
-  IconUser,
-  IconCheckbox,
-  IconSearch,
-  IconPlus,
-  IconSelector,
   IconCalendar,
   IconSettings,
   IconClipboardList,
 } from "@tabler/icons";
 import Link from "next/link";
 import { NavbarSpaceList } from "./NavBarSpaceList";
-import { UserButton } from "./UserButton";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -36,7 +24,7 @@ const useStyles = createStyles((theme) => ({
     marginLeft: -theme.spacing.md,
     marginRight: -theme.spacing.md,
     marginBottom: theme.spacing.md,
-    backgroundColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: 'rgba(255,255,255,1.0)',
     borderRadius : theme.radius.md,
     padding: theme.spacing.md,
   },
@@ -156,14 +144,18 @@ export function NavbarSearch() {
 
   return (
     <Navbar width={{ sm: 300 }} p="md" className={classes.navbar}>
+      <MediaQuery largerThan="sm" styles={{ display: 'rgba(255,255,255,0.4)' }}>
 
+      
       <Navbar.Section className={classes.section}>
         <div className={classes.mainLinks}>{mainLinks}</div>
       </Navbar.Section>
-
+      </MediaQuery>
+      <MediaQuery smallerThan="sm" styles={{ display: 'rgba(255,255,255,0.4)' }}>
       <Navbar.Section className={classes.section}>
       <NavbarSpaceList />
       </Navbar.Section>
+      </MediaQuery>
     </Navbar>
   );
 }

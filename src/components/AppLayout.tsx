@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { NavbarSearch } from "../components/NavBar";
-import { AppShell, createStyles, Header, Navbar } from "@mantine/core";
+import { AppShell, createStyles, Header, Navbar,MediaQuery, Aside,
+  Burger,useMantineTheme, Text } from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
     main: {
@@ -18,6 +20,9 @@ const useStyles = createStyles((theme) => ({
     navbar: {
       background: 'none',
       border: 'none',
+    },
+    nameLogo: {
+      display: 'inline-block',
     }
 }));
 export default function AppLayout({
@@ -25,14 +30,28 @@ export default function AppLayout({
   }: {
     children: React.ReactNode,
   }) {
+    const theme = useMantineTheme();
+    const [opened, setOpened] = useState(false);
 
-    const styles = useStyles();
+    const {classes} = useStyles();
     return (
-      <main className={styles.classes.main}>
+      <main className={classes.main}>
         <AppShell
         padding="md"
-        navbar={<Navbar width={{ base: 300 }} height={500} p="xs" className={styles.classes.navbar}><NavbarSearch /></Navbar>}
-        header={<Header height={42} p="xs" className={styles.classes.header}>Oedmjuk</Header>}
+        navbarOffsetBreakpoint="sm"
+        asideOffsetBreakpoint="sm"
+        navbar={<Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} className={classes.navbar}><NavbarSearch /></Navbar>}
+        header={<Header  height={{ base: 50, md: 70 }} p="md" className={classes.header}>
+           <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+              <Burger
+                opened={opened}
+                onClick={() => setOpened((o) => !o)}
+                size="sm"
+                color={theme.colors.gray[6]}
+                mr="xl"
+              />
+            </MediaQuery>
+            <Text className={classes.nameLogo}>Oedmjuk</Text></Header>}
         styles={(theme) => ({
           main: {  },
         })}

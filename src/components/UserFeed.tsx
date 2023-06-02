@@ -347,7 +347,7 @@ export function UserFeed() {
     }
   });
 
-  return <Container size="md" className={classes.area}>
+  return <Container size="sm" className={classes.area}>
      <Title order={2} className={classes.areaTitle}>My Feed</Title>
      <SimpleGrid cols={1}>
       {itemCards}
