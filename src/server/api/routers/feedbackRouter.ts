@@ -145,6 +145,20 @@ export const feedbackRouter = createTRPCRouter({
 
       return feedbackItems;
     }),
+    getNamedFeedbackItems: protectedProcedure
+    .input(z.object({ itemId: z.string(), columnName: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const feedbackItems = await ctx.prisma.feedbackItem.findMany({
+        where: {
+          feedbackRoundId: input.itemId,
+          column: {
+            title: input.columnName
+          }
+        },
+      });
+
+      return feedbackItems;
+    }),
   getExternalFeedbackItems: protectedProcedure
     .input(z.object({ itemId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -171,8 +185,8 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback round not found");
       }
 
-      if (feedbackRound.state !== FeedbackRoundStates.Created) {
-        throw new Error("Feedback round closed");
+      if (feedbackRound.state !== FeedbackRoundStates.Started) {
+        throw new Error("Feedback round not ready");
       }
 
       const myMembership = await ctx.prisma.spaceMember.findMany({
@@ -226,6 +240,34 @@ export const feedbackRouter = createTRPCRouter({
         },
       });
     }),
+    startFeedbackRound: protectedProcedure
+    .input(
+      z.object({
+        itemId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const feedbackRound = await ctx.prisma.feedbackRound.findUnique({
+        where: { id: input.itemId },
+      });
+
+      if (!feedbackRound) {
+        throw new Error("Feedback item not found");
+      }
+
+      if (feedbackRound.state !== FeedbackRoundStates.Created) {
+        throw new Error("Feedback can only be started if it is created.");
+      }
+
+      return ctx.prisma.feedbackRound.update({
+        where: {
+          id: input.itemId,
+        },
+        data: {
+          state: FeedbackRoundStates.Started
+        },
+      });
+    }),
   addFeedbackNote: protectedProcedure
     .input(
       z.object({
@@ -274,8 +316,8 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback item not found");
       }
 
-      if (currentItem.feedbackRound.state !== FeedbackRoundStates.Created) {
-        throw new Error("Feedback round closed");
+      if (currentItem.feedbackRound.state !== FeedbackRoundStates.Started) {
+        throw new Error("Feedback needs to be started to be moved.");
       }
 
       const nextItem =
@@ -312,6 +354,16 @@ export const feedbackRouter = createTRPCRouter({
           },
         });
       }
+      if(input.feedbackColumnId) {
+        const feedbackColumn = await ctx.prisma.feedbackColumn.findUnique({ where: { id: input.feedbackColumnId }, include: { feedbackItems: true }});
+        if(!feedbackColumn) {
+          throw new Error("Feedback column not found");
+        }
+
+        if(feedbackColumn.wipLimit && feedbackColumn.wipLimit <= feedbackColumn.feedbackItems.length) {
+          throw new Error("Feedback column is full");
+        }
+      }    
 
       return ctx.prisma.feedbackItem.update({
         where: { id: input.feedbackItemId },

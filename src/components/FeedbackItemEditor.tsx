@@ -12,6 +12,9 @@ const useStyles = createStyles((theme) => ({
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.xs,
   },
+  editorContainer: {
+    width: 300,
+  }
  
 }));
 
@@ -46,9 +49,9 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
   });
 
   return (
-    <Container>
+    <Container className={classes.editorContainer}>
         <Title order={3} className={classes.areaTitle}>
-              My feedback items
+              Create feedback item
             </Title>
         <form
         onSubmit={form.onSubmit((values) => {

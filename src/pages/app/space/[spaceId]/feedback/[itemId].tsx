@@ -10,6 +10,7 @@ import {
   ThemeIcon,
   Grid,
   Button,
+  SimpleGrid,
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
@@ -23,6 +24,7 @@ import { UserLinkWithData } from "../../../../../components/UserButton";
 import { useState } from "react";
 import Link from "next/link";
 import { FeedbackRoundStates } from "../../../../../utils/enums";
+import { NamedFeedbackItemCardList } from "../../../../../containers/NamedFeedbackItemCardList";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -59,20 +61,18 @@ const useStyles = createStyles((theme) => ({
     backgroundColor: theme.colors.gray[4],
     borderRadius: theme.radius.md,
     padding: theme.spacing.md,
-    width: 300,
   },
   editColumnSection: {
     backgroundColor: theme.white,
     borderRadius: theme.radius.md,
     padding: theme.spacing.md,
-    width: 300,
-    marginTop: theme.spacing.md,
   },
   itemColumnContainer: {
-    width: 1300,
-    maxWidth: 1300,
     marginTop: theme.spacing.xl,
   },
+  alignItemsStart: {
+    alignItems: "start"
+  }
 }));
 
 function FeedbackView({
@@ -93,7 +93,12 @@ function FeedbackView({
       void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
     }
   });
-  const [showEditor, setShowEditor] = useState(false);
+
+  const startMutation = api.feedback.startFeedbackRound.useMutation( {
+    onSuccess: () => { 
+      void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
+    }
+  });
 
   if (feedbackResult.isLoading || spaceResult.isLoading)
     return <div>loading...</div>;
@@ -158,7 +163,9 @@ function FeedbackView({
           <Link href={`/app/space/${spaceId}/feedback/${feedbackRoundId}/edit`} passHref>
               <Button component="a">Edit</Button>
             </Link>
-            <Button onClick={() => closeMutation.mutate({itemId: feedbackRoundId})}>Close feedback round</Button>
+            {feedbackRound.state === FeedbackRoundStates.Created && <Button onClick={() => startMutation.mutate({itemId: feedbackRoundId})}>Start feedback round</Button>}
+            {feedbackRound.state === FeedbackRoundStates.Started &&<Button onClick={() => closeMutation.mutate({itemId: feedbackRoundId})}>Close feedback round</Button>}
+            
             </Group>
         </Container>
 
@@ -166,9 +173,25 @@ function FeedbackView({
           <div dangerouslySetInnerHTML={{ __html: body }} />
         </Container>
       </Container>
-      <Container className={classes.itemColumnContainer}>
-        <Grid gutter="md">
-          <Grid.Col span={3}>
+      <Container size="sm" className={classes.bodyArea}>
+              <Title order={3} className={classes.areaTitle}>
+                Current item being discussed
+              </Title>
+
+              <NamedFeedbackItemCardList
+                feedbackRoundId={feedbackRoundId}
+                feedbackColumns={feedbackRound.feedbackColumns}
+                feedbackRound={feedbackRound}
+                columnName="Ongoing"
+              />
+      </Container>
+      
+      <Container size="sm" className={classes.itemColumnContainer}>
+        <Group position="center" className={classes.alignItemsStart} >
+
+        {feedbackRound.state !== FeedbackRoundStates.Closed && <div className={classes.editColumnSection}>
+                <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
+            </div>}
             <div className={classes.itemColumn}>
               <Title order={3} className={classes.areaTitle}>
                 My feedback items
@@ -180,36 +203,41 @@ function FeedbackView({
               />
             </div>
             
-            {feedbackRound.state === FeedbackRoundStates.Created && <div className={classes.editColumnSection}>
-              {!showEditor && (
-                <Button onClick={() => setShowEditor(true)}>Add item</Button>
-              )}
-              {showEditor && (
-                <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
-              )}
-            </div>}
-          </Grid.Col>
-          <Grid.Col span={3}>
-            <div className={classes.itemColumn}>
+            
+        </Group>
+
+        
+      </Container>
+
+
+      <Container size="sm" className={classes.area}>
+
               <Title order={3} className={classes.areaTitle}>
                 External feedback items
               </Title>
+              <Group position="center" className={classes.alignItemsStart}>
               <ExternalFeedbackItemCardList
                 feedbackRoundId={feedbackRoundId}
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
               />
-            </div>
-          </Grid.Col>
-
-          <FeedbackColumns
-            feedbackColumns={feedbackRound.feedbackColumns}
-            feedbackRound={feedbackRound}
-          />
-        </Grid>
+              </Group>
       </Container>
 
-      <Container></Container>
+      <Container size="sm" className={classes.area}>
+
+              <Title order={3} className={classes.areaTitle}>
+                Archived items
+              </Title>
+              <Group position="center" className={classes.alignItemsStart}>
+              <NamedFeedbackItemCardList
+                feedbackRoundId={feedbackRoundId}
+                feedbackColumns={feedbackRound.feedbackColumns}
+                feedbackRound={feedbackRound}
+                columnName="Done"
+              />
+              </Group>
+      </Container>
     </AppLayout>
   );
 }

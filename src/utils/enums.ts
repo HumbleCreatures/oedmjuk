@@ -44,6 +44,7 @@ export enum SelectionStates {
 
 export enum FeedbackRoundStates { 
     Created = 'Created',
+    Started = 'Started',
     Closed = 'Closed',
 }
 

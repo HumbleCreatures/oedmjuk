@@ -10,12 +10,9 @@ const useStyles = createStyles((theme) => ({
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.xs,
   },
-  area: {
-    backgroundColor: theme.colors.gray[4],
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
+  cardWrapper: {
     width: 300,
-  },
+  }
 }));
 
 export function FeedbackItemCard({
@@ -45,7 +42,7 @@ export function FeedbackItemCard({
   });
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
+    <Card shadow="sm" padding="lg" radius="md" withBorder mb="md" className={classes.cardWrapper}>
       <Card.Section p="sm">
         <Link
           href={`/app/space/${feedbackRound.spaceId}/feedback/${feedbackRound.id}/item/${feedbackItem.id}`}
@@ -61,9 +58,9 @@ export function FeedbackItemCard({
 
       <Card.Section withBorder p="sm">
         <Group>
-        {feedbackRound.state === FeedbackRoundStates.Created && <Menu shadow="md" width={200}>
+        {feedbackRound.state !== FeedbackRoundStates.Closed && <Menu shadow="md" width={200}>
           <Menu.Target>
-            <Button>Move</Button>
+            <Button disabled={feedbackRound.state !== FeedbackRoundStates.Started}>Move</Button>
           </Menu.Target>
 
           <Menu.Dropdown>
