@@ -7,6 +7,7 @@ import {
 } from "../../../utils/enums";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import type { ProposalVote } from "@prisma/client";
+import sanitizeHtml from 'sanitize-html';
 
 export const proposalRouter = createTRPCRouter({
   createProposal: protectedProcedure
@@ -42,7 +43,7 @@ export const proposalRouter = createTRPCRouter({
       return await ctx.prisma.proposal.create({
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
           spaceFeedItem: {
@@ -70,7 +71,7 @@ export const proposalRouter = createTRPCRouter({
         where: { id: input.itemId },
         data: {
           title: input.title,
-          body: input.body,          
+          body: sanitizeHtml(input.body),          
         },
       });
     }),
@@ -87,7 +88,7 @@ export const proposalRouter = createTRPCRouter({
       const objection = await ctx.prisma.objection.create({
         data: {
           proposalId: input.proposalId,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           creatorId: ctx.session.user.id,
         },
       });

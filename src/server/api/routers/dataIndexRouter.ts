@@ -3,6 +3,7 @@ import { SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { getDatesBetween } from "../../../utils/dateFormaters";
+import sanitizeHtml from 'sanitize-html';
 
 export const dataIndexRouter = createTRPCRouter({
     createDataIndexType: protectedProcedure
@@ -17,7 +18,7 @@ export const dataIndexRouter = createTRPCRouter({
         return ctx.prisma.dataIndexType.create({
           data: {
             name: input.name,
-            description: input.description,
+            description: input.description && sanitizeHtml(input.description),
             unitName: input.unitName,            
           },
         })

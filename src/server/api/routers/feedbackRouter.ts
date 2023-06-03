@@ -2,6 +2,7 @@ import { z } from "zod";
 import { FeedbackRoundStates, SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import sanitizeHtml from 'sanitize-html';
 
 export const feedbackRouter = createTRPCRouter({
   createFeedbackRound: protectedProcedure
@@ -16,7 +17,7 @@ export const feedbackRouter = createTRPCRouter({
       return ctx.prisma.feedbackRound.create({
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
           feedbackColumns: {
@@ -54,7 +55,7 @@ export const feedbackRouter = createTRPCRouter({
         where: { id: input.itemId },
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
         },
       });
     }),
@@ -193,7 +194,7 @@ export const feedbackRouter = createTRPCRouter({
       return ctx.prisma.feedbackItem.create({
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           feedbackRoundId: input.feedbackRoundId,
           creatorId: ctx.session.user.id,
           createdByExternalUser: myMembership.length === 0,
@@ -248,7 +249,7 @@ export const feedbackRouter = createTRPCRouter({
 
       return ctx.prisma.feedbackNote.create({
         data: {
-          body: input.body,
+          body: sanitizeHtml(input.body),
           feedbackItemId: input.feedbackItemId,
           creatorId: ctx.session.user.id,
         },

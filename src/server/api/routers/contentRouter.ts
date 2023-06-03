@@ -2,6 +2,7 @@ import { z } from "zod";
 import { SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import sanitizeHtml from 'sanitize-html';
 
 export const contentRouter = createTRPCRouter({
   createContent: protectedProcedure
@@ -16,7 +17,7 @@ export const contentRouter = createTRPCRouter({
         return ctx.prisma.content.create({
           data: {
             title: input.title,
-            body: input.body,
+            body: sanitizeHtml(input.body),
             spaceId: input.spaceId,
             creatorId: ctx.session.user.id,
             order: 0,
@@ -42,7 +43,7 @@ export const contentRouter = createTRPCRouter({
           where: { id: input.itemId},
           data: {
             title: input.title,
-            body: input.body,                        
+            body: sanitizeHtml(input.body),                        
           },
         })
     }),

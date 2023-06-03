@@ -2,6 +2,7 @@ import { z } from "zod";
 import { SpaceFeedEventTypes, UserFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import sanitizeHtml from 'sanitize-html';
 
 export const calendarEventRouter = createTRPCRouter({
   createCalendarEvent: protectedProcedure
@@ -44,7 +45,7 @@ export const calendarEventRouter = createTRPCRouter({
         ctx.prisma.calendarEvent.create({
           data: {
             title: input.title,
-            body: input.body,
+            body: sanitizeHtml(input.body),
             spaceId: input.spaceId,
             startAt: input.startAt,
             endAt: input.endAt,
@@ -129,7 +130,7 @@ export const calendarEventRouter = createTRPCRouter({
         where: { id: input.itemId },
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           startAt: input.startAt,
           endAt: input.endAt,
         },

@@ -6,6 +6,7 @@ import {
 } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import sanitizeHtml from 'sanitize-html';
 
 export const selectionRouter = createTRPCRouter({
   createSelection: protectedProcedure
@@ -42,7 +43,7 @@ export const selectionRouter = createTRPCRouter({
       return await ctx.prisma.selection.create({
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
           spaceFeedItem: {
@@ -70,7 +71,7 @@ export const selectionRouter = createTRPCRouter({
         where: { id: input.itemId },
         data: {
           title: input.title,
-          body: input.body,
+          body: sanitizeHtml(input.body),
         },
       });
     }),
@@ -89,7 +90,7 @@ export const selectionRouter = createTRPCRouter({
       const alternative = await ctx.prisma.selectionAlternative.create({
         data: {
           selectionId: input.selectionId,
-          body: input.body,
+          body: sanitizeHtml(input.body),
           title: input.title,
           creatorId: ctx.session.user.id,
         },
