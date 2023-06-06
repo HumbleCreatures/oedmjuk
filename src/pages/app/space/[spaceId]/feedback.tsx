@@ -44,7 +44,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
       <div className={classes.area}>
         <Title order={2} className={classes.areaTitle}>Selections</Title>
         <SimpleGrid cols={1}>
-            {feedbackRequest.data.map((feedbackRound) => (<Link href={`/app/space/${feedbackRound.spaceId}/selection/${feedbackRound.id}`} key={feedbackRound.id}><Card>
+            {feedbackRequest.data.map((feedbackRound) => (<Link href={`/app/space/${feedbackRound.spaceId}/feedback/${feedbackRound.id}`} key={feedbackRound.id}><Card>
             <Text fz="lg" fw={500}>{feedbackRound.title}</Text>
             <div>
                 <Text fz="sm" fw={300}>
