@@ -48,6 +48,13 @@ export enum FeedbackRoundStates {
     Closed = 'Closed',
 }
 
+export enum RequestAccessStates { 
+    Created = 'Created',
+    Approved = 'Approved',
+    Denied = 'Denied',
+    Executed = 'Executed',
+}
+
 export enum VoteValue {
     Accept = 'Accept',
     Reject = 'Reject',
