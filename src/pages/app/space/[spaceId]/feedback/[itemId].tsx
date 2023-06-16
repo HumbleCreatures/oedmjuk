@@ -100,6 +100,12 @@ function FeedbackView({
     }
   });
 
+  api.feedback.onFeedbackItemChanged.useSubscription({ feedbackRoundId }, {
+    onData(msgData) {
+      console.log("onFeedbackItemChanged", msgData)
+    },
+  });
+
   if (feedbackResult.isLoading || spaceResult.isLoading)
     return <div>loading...</div>;
 

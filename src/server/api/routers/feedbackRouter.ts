@@ -2,7 +2,9 @@ import { z } from "zod";
 import { FeedbackRoundStates, SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { observable } from "@trpc/server/observable";
 import sanitizeHtml from 'sanitize-html';
+import { FeedbackItem } from "@prisma/client";
 
 export const feedbackRouter = createTRPCRouter({
   createFeedbackRound: protectedProcedure
@@ -365,7 +367,7 @@ export const feedbackRouter = createTRPCRouter({
         }
       }    
 
-      return ctx.prisma.feedbackItem.update({
+      const updatedFeebackItem = await ctx.prisma.feedbackItem.update({
         where: { id: input.feedbackItemId },
         data: {
           columnId: input.feedbackColumnId,
@@ -377,6 +379,29 @@ export const feedbackRouter = createTRPCRouter({
             },
           },
         },
+      });
+
+      ctx.eventEmitter.emit("feedbackRound" + updatedFeebackItem.feedbackRoundId, updatedFeebackItem);
+    }),
+    onFeedbackItemChanged: protectedProcedure
+    .input(z.object({ feedbackRoundId: z.string() }))
+    .subscription(({ ctx, input }) => {
+      // return an `observable` with a callback which is triggered immediately
+      return observable<FeedbackItem>((emit) => {
+        const onAdd = (data: FeedbackItem) => {
+          // emit data to client
+          if (input.feedbackRoundId === data.feedbackRoundId) {
+            emit.next(data);
+          }
+        };
+        // Todo: Check if user is part of conversation.
+        ctx.eventEmitter.on("feedbackRound" + input.feedbackRoundId, onAdd);
+        // trigger `onAdd()` when `add` is triggered in our event emitter
+
+        // unsubscribe function when client disconnects or stops subscribing
+        return () => {
+          ctx.eventEmitter.off("feedbackRound" + input.feedbackRoundId, onAdd);
+        };
       });
     }),
 });
