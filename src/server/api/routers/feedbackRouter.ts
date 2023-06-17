@@ -1,8 +1,22 @@
 import { z } from "zod";
-import { FeedbackRoundStates, SpaceFeedEventTypes } from "../../../utils/enums";
+import { ChannelEventTypes, EventChannels, FeedbackRoundStates, SpaceFeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import sanitizeHtml from 'sanitize-html';
+
+import * as Pusher from "pusher"
+import { env } from "../../../env/server.mjs";
+
+
+const pusher = new Pusher.default({
+  appId: env.PUSHER_APP_ID,
+  key: env.PUHSER_KEY,
+  secret: env.PUSHER_SECRET,
+  cluster: env.PUSHER_CLUSTER,
+  useTLS: true
+});
+
+
 
 export const feedbackRouter = createTRPCRouter({
   createFeedbackRound: protectedProcedure
@@ -345,7 +359,10 @@ export const feedbackRouter = createTRPCRouter({
       }
 
       //TODO: if order exits, recalculate order for all items in the column
-
+      pusher.trigger(EventChannels.FeedbackRound + currentItem.feedbackRoundId, ChannelEventTypes.FeedbackItemMoved, {
+        message: "move executed"
+      });
+      
       if (currentItem.columnId === input.feedbackColumnId) {
         return ctx.prisma.feedbackItem.update({
           where: { id: input.feedbackItemId },

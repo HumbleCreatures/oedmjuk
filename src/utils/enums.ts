@@ -60,3 +60,11 @@ export enum VoteValue {
     Reject = 'Reject',
     Abstain = 'Abstain',
 }
+
+export enum EventChannels {
+    FeedbackRound = 'FeedbackRound'
+}
+
+export enum ChannelEventTypes {
+    FeedbackItemMoved = 'FeedbackItemMoved'
+}

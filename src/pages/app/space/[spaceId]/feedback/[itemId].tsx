@@ -21,10 +21,18 @@ import { FeedbackColumns } from "../../../../../components/FeedbackColumns";
 import { IconRecycle } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FeedbackRoundStates } from "../../../../../utils/enums";
+import { ChannelEventTypes, EventChannels, FeedbackRoundStates } from "../../../../../utils/enums";
 import { NamedFeedbackItemCardList } from "../../../../../containers/NamedFeedbackItemCardList";
+import Pusher from 'pusher-js';
+import { env } from "../../../../../env/client.mjs";
+
+Pusher.logToConsole = true;
+
+const pusher = new Pusher(env.NEXT_PUBLIC_PUHSER_KEY, {
+  cluster: env.NEXT_PUBLIC_PUSHER_CLUSTER
+});
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -99,6 +107,14 @@ function FeedbackView({
       void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
     }
   });
+
+  useEffect(() => {
+    const channel = pusher.subscribe(EventChannels.FeedbackRound + feedbackRoundId);
+    channel.bind(ChannelEventTypes.FeedbackItemMoved, function(data:any) {
+      console.log(JSON.stringify(data));
+      void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
+    });
+  }, [pusher]);
 
   if (feedbackResult.isLoading || spaceResult.isLoading)
     return <div>loading...</div>;

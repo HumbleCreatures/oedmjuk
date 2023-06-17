@@ -26,6 +26,10 @@ export const serverSchema = z.object({
   AZURE_AD_CLIENT_ID: z.string(),
   AZURE_AD_CLIENT_SECRET: z.string(),
   AZURE_AD_TENANT_ID: z.string(),
+  PUSHER_APP_ID: z.string(),
+  PUHSER_KEY: z.string(),
+  PUSHER_SECRET: z.string(),
+  PUSHER_CLUSTER: z.string(),
 });
 
 /**
@@ -45,6 +49,10 @@ export const serverEnv = {
   AZURE_AD_CLIENT_ID: process.env.AZURE_AD_CLIENT_ID,
   AZURE_AD_CLIENT_SECRET: process.env.AZURE_AD_CLIENT_SECRET,
   AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
+  PUSHER_APP_ID: process.env.PUSHER_APP_ID,
+  PUHSER_KEY: process.env.PUHSER_KEY,
+  PUSHER_SECRET: process.env.PUSHER_SECRET,
+  PUSHER_CLUSTER: process.env.PUSHER_CLUSTER,
 };
 
 /**
@@ -54,6 +62,8 @@ export const serverEnv = {
  */
 export const clientSchema = z.object({
   // NEXT_PUBLIC_CLIENTVAR: z.string(),
+  NEXT_PUBLIC_PUHSER_KEY: z.string(),
+  NEXT_PUBLIC_PUSHER_CLUSTER: z.string(),
 });
 
 /**
@@ -64,4 +74,6 @@ export const clientSchema = z.object({
  */
 export const clientEnv = {
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  NEXT_PUBLIC_PUHSER_KEY: process.env.NEXT_PUBLIC_PUHSER_KEY,
+  NEXT_PUBLIC_PUSHER_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
 };
