@@ -85,7 +85,7 @@ export const proposalRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const proposal = await ctx.prisma.proposal.findUnique({ where: { id: input.proposalId } });
       if(!proposal) throw new Error("Proposal not found");
-      const objection = await ctx.prisma.objection.create({
+      const objection = await ctx.prisma.proposalObjection.create({
         data: {
           proposalId: input.proposalId,
           body: sanitizeHtml(input.body),
@@ -120,7 +120,7 @@ export const proposalRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const objection = await ctx.prisma.objection.findUnique({
+      const objection = await ctx.prisma.proposalObjection.findUnique({
         where: { id: input.objectionId },
       });
 
@@ -128,7 +128,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (objection.resolvedAt) throw new Error("Objection already resolved");
 
-      return await ctx.prisma.objection.update({
+      return await ctx.prisma.proposalObjection.update({
         where: {
           id: input.objectionId,
         },
