@@ -359,7 +359,7 @@ export const feedbackRouter = createTRPCRouter({
       }
 
       //TODO: if order exits, recalculate order for all items in the column
-      pusher.trigger(EventChannels.FeedbackRound + currentItem.feedbackRoundId, ChannelEventTypes.FeedbackItemMoved, {
+      void pusher.trigger(EventChannels.FeedbackRound + currentItem.feedbackRoundId, ChannelEventTypes.FeedbackItemMoved, {
         message: "move executed"
       });
       
