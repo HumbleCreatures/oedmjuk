@@ -9,7 +9,7 @@ import {
   createStyles,
   Title,
 } from "@mantine/core";
-import { Objection } from "@prisma/client";
+import { ProposalObjection } from "@prisma/client";
 import { ARichTextEditor } from "./RichTextEditor";
 import { UserButtonWithData, UserLinkWithData } from "./UserButton";
 import { useState } from "react";
@@ -48,7 +48,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function ListOfObjections({ objections }: { objections: Objection[] }) {
+export function ListOfObjections({ objections }: { objections: ProposalObjection[] }) {
   return (
     <SimpleGrid cols={1}>
       {objections.map((objection) => (
@@ -58,7 +58,7 @@ export function ListOfObjections({ objections }: { objections: Objection[] }) {
   );
 }
 
-export function Objection({ objection }: { objection: Objection }) {
+export function Objection({ objection }: { objection: ProposalObjection }) {
   const { classes } = useStyles();
   const [showResolveEditor, setShowResolveEditor] = useState(false);
   const form = useForm({
