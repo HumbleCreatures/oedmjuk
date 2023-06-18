@@ -10,6 +10,7 @@ import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { RichTextEditor } from '@mantine/tiptap';
+import { BlockEditor } from '../../../../../components/BlockEditor';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -115,6 +116,8 @@ function SpaceView({spaceId}: {spaceId: string}) {
           </div>
 
           </Box>
+
+          
           <Button type="submit" mt="sm">
             Create
           </Button>
@@ -123,7 +126,6 @@ function SpaceView({spaceId}: {spaceId: string}) {
            <Alert icon={<IconAlertCircle size={16} />} title="Bummer!" color="red">Something went wrong! {mutation.error.message}</Alert>}
         </form>
       </Container>
-
 
       </Container>
     </AppLayout>

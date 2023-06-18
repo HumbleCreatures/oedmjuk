@@ -100,6 +100,10 @@ export function SettingsNavBar() {
             Data Index Types
             </Link>
 
+            <Link href={`/app/settings/templates`} className={classes.link}>
+            Templates
+            </Link>   
+
             <Link href={`/app/settings`} className={classes.link}>
             General
             </Link>         

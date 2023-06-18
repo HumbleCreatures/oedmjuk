@@ -562,7 +562,7 @@ model BodyTemplate {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   deletedAt           DateTime?
-  BodyTemplateVersion BodyTemplateVersion[] @relation("versions")
+  bodyTemplateVersions BodyTemplateVersion[] @relation("versions")
 }
 
 model BodyTemplateVersion {

@@ -31,6 +31,7 @@ export enum UserFeedEventTypes {
 
 export enum ProposalStates { 
     ProposalCreated = 'ProposalCreated',
+    ProposalOpen = 'ProposalOpen',
     ObjectionsResolved = 'ObjectionsResolved',
     VoteClosed = 'VoteClosed',
     ProposalClosed = 'ProposalClosed',

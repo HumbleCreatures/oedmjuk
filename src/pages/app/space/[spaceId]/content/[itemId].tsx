@@ -8,10 +8,20 @@ import { DateTime } from "luxon";
 import { IconAlignBoxLeftMiddle } from "@tabler/icons";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { OutputData } from "@editorjs/editorjs";
+import { useState } from "react";
+import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   area: {
     backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  textArea: {
+    backgroundColor: theme.white,
     borderRadius: theme.radius.md,
     marginTop: theme.spacing.md,
     padding: theme.spacing.md,
@@ -39,10 +49,17 @@ const useStyles = createStyles((theme) => ({
   }
 }));
 
+const DynamicEditor = dynamic(() => import("../../../../../components/BlockEditor"), {
+  ssr: false,
+})
+
 function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const { classes } = useStyles();
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const contentResult = api.content.getContent.useQuery({ itemId });
+
+  const [data, setData] = useState<OutputData>();
+
   if (spaceResult.isLoading) return <div>loading...</div>;
   if (contentResult.isLoading) return <div>loading...</div>;
 
@@ -97,7 +114,17 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             />
             </Container>
 
+            <Container size="sm" className={classes.textArea}>
+        
+      <DynamicEditor data={data} onChange={setData} holder="editorjs-container" />
+
+        </Container>
+
+        <Container size="sm" className={classes.textArea}>{data && <EditorJsRenderer data={data} />}</Container>
+
       </Container>
+
+      
     </AppLayout>
   );
 }

@@ -9,6 +9,7 @@ import { StarterKit } from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { RichTextEditor } from '@mantine/tiptap';
 import { SettingsNavBar } from "../../../components/SettingsNavBar";
+import { SettingsLoader } from "../../../components/Loaders/SettingsLoader";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -17,6 +18,12 @@ const useStyles = createStyles((theme) => ({
     marginBottom: theme.spacing.md,
     marginTop: theme.spacing.md,
     padding: theme.spacing.md,
+  },
+  clearArea: {
+    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    color: theme.white,
+    padding: 0
   },
   editArea: {
     backgroundColor: theme.colors.gray[0],
@@ -41,25 +48,19 @@ const DataIndexTypesPage: NextPage = () => {
   const form = useForm({
     initialValues: {
       name: "",
-      unitName: "",
       description: "",
     },
     validate: {
         name: (value) =>
-        value.length < 2 ? "Name must have at least 2 letters" : null,
-        unitName: (value) => {
-          if(value.length < 1) return "Name must have at least 1 letters";
-          if(value.length > 10) return "Name must have at most 10 letters";
-        }
-        
+        value.length < 2 ? "Name must have at least 2 letters" : null        
     },
   });
 
   const utils = api.useContext();
-  const query = api.dataIndex.getAllIndexTypes.useQuery();
-  const mutation = api.dataIndex.createDataIndexType.useMutation({
+  const query = api.bodyTemplate.getAllTemplates.useQuery();
+  const mutation = api.bodyTemplate.createTemplate.useMutation({
     onSuccess() {
-      void utils.dataIndex.getAllIndexTypes.invalidate();
+      void utils.bodyTemplate.getAllTemplates.invalidate();
     },
   });
 
@@ -71,7 +72,7 @@ const DataIndexTypesPage: NextPage = () => {
     },
   });
 
-  if(query.isLoading) return (<div>loading...</div>);
+  if(query.isLoading) return (<SettingsLoader />);
   if(!query.data) return (<div>could not load types...</div>);
 
 
@@ -80,24 +81,24 @@ const DataIndexTypesPage: NextPage = () => {
     <AppLayout>
       <Container size="sm">
       <SettingsNavBar />
-      <Container size="sm" className={classes.area}>
-      <Title className={classes.areaTitle} order={2}>Data index types</Title>
+      <Container size="sm" className={classes.clearArea}>
+      <Title className={classes.areaTitle} order={2}>Content Templates</Title>
       <Accordion variant="filled" >
       
 
-      {query.data.map((indexType) =>{
+      {query.data.map((template) =>{
         return (
 
-          <Accordion.Item key={indexType.id} value={indexType.id}>
-          <Accordion.Control><Text>{indexType.name}</Text> <Text size="sm" color="dimmed" weight={400}>{indexType.unitName}</Text></Accordion.Control>
-          <Accordion.Panel><div dangerouslySetInnerHTML={{__html: indexType.description ? indexType.description : ''}}></div></Accordion.Panel>
+          <Accordion.Item key={template.id} value={template.id}>
+          <Accordion.Control><Text>{template.bodyTemplateVersions}</Text> <Text size="sm" color="dimmed" weight={400}>{template.unitName}</Text></Accordion.Control>
+          <Accordion.Panel><div dangerouslySetInnerHTML={{__html: template.description ? template.description : ''}}></div></Accordion.Panel>
         </Accordion.Item>
         )
       })}
       </Accordion>
       </Container>
       <Container size="sm" className={classes.editArea}>
-        <Title order={1}>Create a new data index type</Title>
+        <Title order={2} className={classes.areaTitle}>Create a new template</Title>
 
         <form
           onSubmit={form.onSubmit((values) => {
@@ -109,12 +110,8 @@ const DataIndexTypesPage: NextPage = () => {
             placeholder="Name"
             {...form.getInputProps("name")}
           />
-          <TextInput
-            label="Unit Name"
-            placeholder="Unit Name"
-            {...form.getInputProps("unitName")}
-          />
-          <div>Body</div>
+         
+          <div>Template Body</div>
           <RichTextEditor editor={editor}>
           <RichTextEditor.Toolbar sticky stickyOffset={60}>
         <RichTextEditor.ControlsGroup>
