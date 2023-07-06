@@ -1,15 +1,14 @@
 import { type NextPage } from "next";
 import AppLayout from "../../../components/AppLayout";
 import { useForm } from "@mantine/form";
-import { TextInput, Button, Container, Title, Alert, Text, createStyles, Accordion } from "@mantine/core";
+import { TextInput, Button, Container, Title, Alert, Text, createStyles, SimpleGrid } from "@mantine/core";
 import { api } from "../../../utils/api";
 import { IconAlertCircle } from '@tabler/icons';
-import { useEditor } from '@tiptap/react';
-import { StarterKit } from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import { RichTextEditor } from '@mantine/tiptap';
 import { SettingsNavBar } from "../../../components/SettingsNavBar";
 import { SettingsLoader } from "../../../components/Loaders/SettingsLoader";
+import { DynamicBlockEditor } from "../../../components/DynamicBlockEditor";
+import { OutputData } from "@editorjs/editorjs";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -28,7 +27,7 @@ const useStyles = createStyles((theme) => ({
   editArea: {
     backgroundColor: theme.colors.gray[0],
     borderRadius: theme.radius.md,
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xl,
     padding: theme.spacing.md,
   },
   areaTitle: {
@@ -41,14 +40,25 @@ const useStyles = createStyles((theme) => ({
   fullWidth: {
     width: "100%",
   },
+  listLinkItem: {
+    borderRadius: theme.radius.md,
+    boxShadow: theme.shadows.sm,
+    backgroundColor: theme.white,
+    padding: theme.spacing.md,
+    color: theme.black,
+    '&:hover': { 
+      borderLeft: `0.5rem solid ${theme.colors.earth[2]}`,
+      paddingLeft: '0.5rem', 
+    }
+  }
 }));
 
 const DataIndexTypesPage: NextPage = () => {
   const { classes } = useStyles();
-  const form = useForm({
+  const form = useForm<{name: string, body: OutputData | undefined}>({
     initialValues: {
       name: "",
-      description: "",
+      body: undefined,
     },
     validate: {
         name: (value) =>
@@ -64,14 +74,6 @@ const DataIndexTypesPage: NextPage = () => {
     },
   });
 
-  const editor = useEditor({
-    extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],
-    content: '',
-    onUpdate({ editor }) {
-      form.setFieldValue('description', editor.getHTML())
-    },
-  });
-
   if(query.isLoading) return (<SettingsLoader />);
   if(!query.data) return (<div>could not load types...</div>);
 
@@ -83,19 +85,22 @@ const DataIndexTypesPage: NextPage = () => {
       <SettingsNavBar />
       <Container size="sm" className={classes.clearArea}>
       <Title className={classes.areaTitle} order={2}>Content Templates</Title>
-      <Accordion variant="filled" >
+      
+      <SimpleGrid cols={1} spacing="xs">
+
+    
       
 
       {query.data.map((template) =>{
-        return (
+        const currentVersion = template.bodyTemplateVersions[0];
 
-          <Accordion.Item key={template.id} value={template.id}>
-          <Accordion.Control><Text>{template.bodyTemplateVersions}</Text> <Text size="sm" color="dimmed" weight={400}>{template.unitName}</Text></Accordion.Control>
-          <Accordion.Panel><div dangerouslySetInnerHTML={{__html: template.description ? template.description : ''}}></div></Accordion.Panel>
-        </Accordion.Item>
+        return (
+          <Link className={classes.listLinkItem} key={template.id} href={`/app/settings/templates/${template.id}`}>
+          {currentVersion && <Text>{currentVersion.name}</Text>}
+          </Link>
         )
       })}
-      </Accordion>
+      </SimpleGrid>
       </Container>
       <Container size="sm" className={classes.editArea}>
         <Title order={2} className={classes.areaTitle}>Create a new template</Title>
@@ -110,37 +115,10 @@ const DataIndexTypesPage: NextPage = () => {
             placeholder="Name"
             {...form.getInputProps("name")}
           />
-         
-          <div>Template Body</div>
-          <RichTextEditor editor={editor}>
-          <RichTextEditor.Toolbar sticky stickyOffset={60}>
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.Bold />
-          <RichTextEditor.Italic />
-          <RichTextEditor.Strikethrough />
-          <RichTextEditor.ClearFormatting />
-          <RichTextEditor.Highlight />
-          <RichTextEditor.Code />
-        </RichTextEditor.ControlsGroup>
-
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.H1 />
-          <RichTextEditor.H2 />
-          <RichTextEditor.H3 />
-          <RichTextEditor.H4 />
-        </RichTextEditor.ControlsGroup>
-
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.Blockquote />
-          <RichTextEditor.Hr />
-          <RichTextEditor.BulletList />
-          <RichTextEditor.OrderedList />
-        </RichTextEditor.ControlsGroup>
-
-
-      </RichTextEditor.Toolbar>
-            <RichTextEditor.Content />
-          </RichTextEditor>
+         <div className={classes.editorWrapper}>
+          <Text fz="sm" fw={500}>Template Body</Text>
+              <DynamicBlockEditor holder="blockeditor-container" onChange={(data) => form.setFieldValue('body', data)}  />
+              </div>
           <Button type="submit" mt="sm">
             Submit
           </Button>

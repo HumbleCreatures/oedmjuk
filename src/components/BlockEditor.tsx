@@ -1,5 +1,5 @@
 //./components/Editor
-import React, { memo, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
 import { EDITOR_TOOLS } from "./EditorTools";
 
@@ -14,6 +14,7 @@ const BlockEditor = ({ data, onChange, holder }: Props) => {
   //add a reference to editor
   const ref = useRef<EditorJS>();
 
+
   //initialize editorjs
   useEffect(() => {
     //initialize editor if we don't have a reference
@@ -21,6 +22,7 @@ const BlockEditor = ({ data, onChange, holder }: Props) => {
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
+        minHeight: 150,
         data,
         async onChange(api, event) {
           const data = await api.saver.save();
@@ -42,4 +44,13 @@ const BlockEditor = ({ data, onChange, holder }: Props) => {
   return <div id={holder} />;
 };
 
-export default BlockEditor;
+function AnotherBlockEditor({ data, onChange, holder }: Props) {
+return <div style={{borderColor: '#ced4da', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.25rem', paddingLeft: 10, paddingRight: 10 }}>
+  <BlockEditor data={data} onChange={onChange} holder={holder} />
+</div>
+}
+export default AnotherBlockEditor;
+
+
+
+

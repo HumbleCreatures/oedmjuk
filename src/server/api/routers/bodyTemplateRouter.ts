@@ -9,7 +9,7 @@ export const bodyTemplateRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        body: z.string(),
+        body: z.any(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -18,7 +18,7 @@ export const bodyTemplateRouter = createTRPCRouter({
           bodyTemplateVersions: {
             create: {
               name: input.name,
-              body: input.body,
+              body: JSON.stringify(input.body),
               isCurrentVersion: true
             }
           }
@@ -30,7 +30,7 @@ export const bodyTemplateRouter = createTRPCRouter({
       z.object({
         templateId: z.string(),
         name: z.string(),
-        body: z.string(),
+        body: z.any(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -54,7 +54,7 @@ export const bodyTemplateRouter = createTRPCRouter({
         ctx.prisma.bodyTemplateVersion.create({
           data: {
             name: input.name,
-            body: input.body,
+            body: JSON.stringify(input.body),
             isCurrentVersion: true,
             bodyTemplateId: input.templateId,
           },

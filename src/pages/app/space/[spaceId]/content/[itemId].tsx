@@ -8,10 +8,10 @@ import { DateTime } from "luxon";
 import { IconAlignBoxLeftMiddle } from "@tabler/icons";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
 import { useState } from "react";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
+import { DynamicBlockEditor } from "../../../../../components/DynamicBlockEditor";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -49,9 +49,6 @@ const useStyles = createStyles((theme) => ({
   }
 }));
 
-const DynamicEditor = dynamic(() => import("../../../../../components/BlockEditor"), {
-  ssr: false,
-})
 
 function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const { classes } = useStyles();
@@ -116,7 +113,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
 
             <Container size="sm" className={classes.textArea}>
         
-      <DynamicEditor data={data} onChange={setData} holder="editorjs-container" />
+      <DynamicBlockEditor data={data} onChange={setData} holder="editorjs-container" />
 
         </Container>
 
