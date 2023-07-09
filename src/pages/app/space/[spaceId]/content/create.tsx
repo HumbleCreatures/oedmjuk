@@ -6,11 +6,8 @@ import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from '../../../../../components/SpaceNavBar';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle } from '@tabler/icons';
-import { useEditor } from '@tiptap/react';
-import { StarterKit } from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import { RichTextEditor } from '@mantine/tiptap';
-import { BlockEditor } from '../../../../../components/BlockEditor';
+import { DynamicTemplatedBlockEditor } from '../../../../../components/DynamicTemplatedBlockEditor';
+import type { OutputData } from '@editorjs/editorjs';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -32,10 +29,10 @@ const useStyles = createStyles((theme) => ({
 function SpaceView({spaceId}: {spaceId: string}) {
   const { classes } = useStyles();
   const data = api.space.getSpace.useQuery({spaceId}).data;
-  const form = useForm({
+  const form = useForm<{title: string, body: OutputData | undefined}>({
     initialValues: {
       title: "",
-      body: "",
+      body: undefined,
     },
     validate: {
       title: (value) =>
@@ -52,13 +49,6 @@ function SpaceView({spaceId}: {spaceId: string}) {
 
   const router = useRouter();
 
-  const editor = useEditor({
-    extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],
-    content: '',
-    onUpdate({ editor }) {
-      form.setFieldValue('body', editor.getHTML())
-    },
-  });
   if(!data || !data.space) return (<div>loading...</div>)
   const {space, isMember} = data;
 
@@ -84,35 +74,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
           />
           <div className={classes.editorWrapper}>
           <Text fz="sm" fw={500}>Body</Text>
-          <RichTextEditor editor={editor}>
-          <RichTextEditor.Toolbar sticky stickyOffset={60}>
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.Bold />
-          <RichTextEditor.Italic />
-          <RichTextEditor.Strikethrough />
-          <RichTextEditor.ClearFormatting />
-          <RichTextEditor.Highlight />
-          <RichTextEditor.Code />
-        </RichTextEditor.ControlsGroup>
-
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.H1 />
-          <RichTextEditor.H2 />
-          <RichTextEditor.H3 />
-          <RichTextEditor.H4 />
-        </RichTextEditor.ControlsGroup>
-
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.Blockquote />
-          <RichTextEditor.Hr />
-          <RichTextEditor.BulletList />
-          <RichTextEditor.OrderedList />
-        </RichTextEditor.ControlsGroup>
-
-
-      </RichTextEditor.Toolbar>
-            <RichTextEditor.Content />
-          </RichTextEditor>
+          <DynamicTemplatedBlockEditor data={form.getInputProps('body').value as OutputData} holder="blockeditor-container" onChange={(data:OutputData) => form.setFieldValue('body', data)}  />
           </div>
 
           </Box>

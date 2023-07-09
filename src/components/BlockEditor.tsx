@@ -4,13 +4,13 @@ import EditorJS, { OutputData } from "@editorjs/editorjs";
 import { EDITOR_TOOLS } from "./EditorTools";
 
 //props
-type Props = {
+export type BlockEditorInput = {
   data?: OutputData;
   onChange(val: OutputData): void;
   holder: string;
 };
 
-const BlockEditor = ({ data, onChange, holder }: Props) => {
+export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
   //add a reference to editor
   const ref = useRef<EditorJS>();
 
@@ -29,6 +29,7 @@ const BlockEditor = ({ data, onChange, holder }: Props) => {
           onChange(data);
         },
       });
+      
       ref.current = editor;
     }
 
@@ -40,11 +41,17 @@ const BlockEditor = ({ data, onChange, holder }: Props) => {
     };
   }, []);
 
+  useEffect(() => { 
+    if (ref.current && ref.current.render && data) {
+      void ref.current.render(data);
+    }
+  }, [data]);
+
 
   return <div id={holder} />;
 };
 
-function AnotherBlockEditor({ data, onChange, holder }: Props) {
+function AnotherBlockEditor({ data, onChange, holder }: BlockEditorInput) {
 return <div style={{borderColor: '#ced4da', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.25rem', paddingLeft: 10, paddingRight: 10 }}>
   <BlockEditor data={data} onChange={onChange} holder={holder} />
 </div>

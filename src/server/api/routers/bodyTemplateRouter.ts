@@ -1,8 +1,6 @@
 import { z } from "zod";
-import { SpaceFeedEventTypes } from "../../../utils/enums";
-
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import sanitizeHtml from 'sanitize-html';
+
 
 export const bodyTemplateRouter = createTRPCRouter({
   createTemplate: protectedProcedure
@@ -70,9 +68,7 @@ export const bodyTemplateRouter = createTRPCRouter({
       const content = await ctx.prisma.bodyTemplate.findUnique({
         where: { id: input.templateId },
         include: { 
-          bodyTemplateVersions: {
-            where: { isCurrentVersion: true }
-          }
+          bodyTemplateVersions: true
         }
       });
 
@@ -88,7 +84,22 @@ export const bodyTemplateRouter = createTRPCRouter({
         }
       });
       return content;
-    })
+    }),
+    getAllSelectableTemplates: protectedProcedure
+    .query(async ({ ctx }) => {
+      const content = await ctx.prisma.bodyTemplate.findMany({
+        include: { 
+          bodyTemplateVersions: {
+            where: { isCurrentVersion: true }
+          }
+        }
+      });
+      return content.filter(x => x.bodyTemplateVersions.length > 0).map(template => ({
+        id: template.id,
+        name: template.bodyTemplateVersions[0]?.name,
+        body: template.bodyTemplateVersions[0]?.body,
+      }))
+    }),
   /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
     return ctx.prisma.space.findMany();
   }),

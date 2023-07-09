@@ -9,7 +9,7 @@ export const contentRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string(),
-        body: z.string(),
+        body: z.any(),
         spaceId: z.string(),
       })
     )
@@ -17,7 +17,7 @@ export const contentRouter = createTRPCRouter({
         return ctx.prisma.content.create({
           data: {
             title: input.title,
-            body: sanitizeHtml(input.body),
+            body: JSON.stringify(input.body),
             spaceId: input.spaceId,
             creatorId: ctx.session.user.id,
             order: 0,
