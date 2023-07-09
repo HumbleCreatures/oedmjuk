@@ -15,11 +15,10 @@ import { api } from "../../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../../components/SpaceNavBar";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
-import { useEditor } from "@tiptap/react";
-import { StarterKit } from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { RichTextEditor } from "@mantine/tiptap";
 import { useEffect } from "react";
+import { OutputData } from "@editorjs/editorjs";
+import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -70,28 +69,14 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
     },
   });
 
-
-
   const router = useRouter();
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder: "This is placeholder" }),
-    ],
-    content: "",
-    onUpdate({ editor }) {
-      form.setFieldValue("description", editor.getHTML());
-    },
-  });
   useEffect(() => {
     if (dataIndexQuery.data) {
       form.setValues(dataIndexQuery.data);
-      if(editor) {
-        editor.commands.setContent(dataIndexQuery.data.description);
-      }
     }
-   }, [editor, dataIndexQuery.data])
+   }, [dataIndexQuery.data])
+
   if (spaceQuery.isPlaceholderData) return <div>Loading ...</div>;
   if (!spaceQuery.data) return <div>Did not find space.</div>;
   if (dataIndexQuery.isLoading) return <div>Loading ...</div>;
@@ -100,11 +85,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   if(!indexTypeQuery.data) return (<div>could not load types...</div>);
 
   const indexTypes = indexTypeQuery.data.map((indexType) => { return { label: indexType.name, value: indexType.id }});
-
-
   const { space, isMember } = spaceQuery.data;
-  
-
 
   return (
     <AppLayout>
@@ -117,7 +98,6 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
 
           <form
             onSubmit={form.onSubmit((values) => {
-              console.log(values);
               mutation.mutate({ ...values, itemId });
             })}
           >
@@ -141,33 +121,10 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <Text fz="sm" fw={500}>
                 Description
               </Text>
-              <RichTextEditor editor={editor}>
-                <RichTextEditor.Toolbar sticky stickyOffset={60}>
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Bold />
-                    <RichTextEditor.Italic />
-                    <RichTextEditor.Strikethrough />
-                    <RichTextEditor.ClearFormatting />
-                    <RichTextEditor.Highlight />
-                    <RichTextEditor.Code />
-                  </RichTextEditor.ControlsGroup>
-
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.H1 />
-                    <RichTextEditor.H2 />
-                    <RichTextEditor.H3 />
-                    <RichTextEditor.H4 />
-                  </RichTextEditor.ControlsGroup>
-
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Blockquote />
-                    <RichTextEditor.Hr />
-                    <RichTextEditor.BulletList />
-                    <RichTextEditor.OrderedList />
-                  </RichTextEditor.ControlsGroup>
-                </RichTextEditor.Toolbar>
-                <RichTextEditor.Content />
-              </RichTextEditor>
+              <DynamicBlockEditor data={dataIndexQuery.data.description ? JSON.parse(dataIndexQuery.data.description) as OutputData : undefined} holder="blockeditor-container" 
+              onChange={(data:OutputData) => {
+                form.setFieldValue('description', JSON.stringify(data))
+              }}  />
             </div>
 
             <Button type="submit" mt="sm">

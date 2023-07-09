@@ -2,8 +2,9 @@ import { Alert, Button, TextInput, Title, createStyles, Text } from "@mantine/co
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
 import { api } from "../utils/api";
-import { ARichTextEditor, VoidFunc } from "./RichTextEditor";
-import { useRef } from "react";
+
+import { OutputData } from "@editorjs/editorjs";
+import { DynamicBlockEditor } from "./DynamicBlockEditor";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -38,7 +39,6 @@ const useStyles = createStyles((theme) => ({
 
 export function AlternativeEditor({ selectionId }: { selectionId: string }) {
   const { classes } = useStyles();
-  const clearForm = useRef<VoidFunc>();
 
   const form = useForm({
     initialValues: {
@@ -64,7 +64,7 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
       <form
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, selectionId });
-          clearForm.current?.();
+          form.reset();
         })}
       >
         <Title order={2} className={classes.areaTitle}>
@@ -80,10 +80,9 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
               <Text fz="sm" fw={500}>
                 Body
               </Text>
-        <ARichTextEditor
-          onUpdate={(html) => form.setFieldValue("body", html)}
-          clearForm={clearForm}
-        />
+        
+        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
         </div>
 
         <Button type="submit" mt="sm">

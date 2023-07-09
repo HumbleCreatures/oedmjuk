@@ -4,6 +4,7 @@ import { UserButtonWithData, UserLinkWithData } from "./UserButton";
 import { forwardRef } from "react";
 import { api } from "../utils/api";
 import { DateTime } from "luxon";
+import EditorJsRenderer from "./EditorJsRenderer";
 
 
 const useStyles = createStyles((theme) => ({
@@ -104,7 +105,7 @@ export function AlternativeListItem({
           <Text fz="lg" fw={500}>
             {alternative.title}
           </Text>
-          <div dangerouslySetInnerHTML={{__html:alternative.body }} />
+          {alternative.body && <EditorJsRenderer data={alternative.body} />}
           
           </Card.Section>
           <Card.Section withBorder mt="md" inheritPadding py="xs">
