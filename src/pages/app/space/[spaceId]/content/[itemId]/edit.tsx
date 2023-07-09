@@ -15,7 +15,6 @@ import { SpaceNavBar } from "../../../../../../components/SpaceNavBar";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
 import { useEffect } from "react";
-import { DynamicTemplatedBlockEditor } from "../../../../../../components/DynamicTemplatedBlockEditor";
 import { OutputData } from "@editorjs/editorjs";
 import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
 

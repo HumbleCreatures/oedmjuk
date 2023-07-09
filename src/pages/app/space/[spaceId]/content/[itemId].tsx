@@ -103,10 +103,6 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             </Link>
         </Container>
         <Container size="sm" className={classes.textArea}>{body && <EditorJsRenderer data={body} />}</Container>
-
-
-        
-
       </Container>
 
       

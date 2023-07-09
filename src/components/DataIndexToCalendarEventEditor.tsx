@@ -60,7 +60,7 @@ export function DataIndexToCalendarEventEditor({spaceId, itemId, selectedDataInd
     
     return <Container size="sm" className={classes.area}>
     <Title className={classes.areaTitle} order={2}>
-      Proposals
+      Data indies
     </Title>
     <MultiSelect
       data={dataIndexSelectedItems}
