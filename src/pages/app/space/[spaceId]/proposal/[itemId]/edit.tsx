@@ -19,6 +19,8 @@ import { StarterKit } from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { RichTextEditor } from "@mantine/tiptap";
 import { useEffect } from "react";
+import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
+import { OutputData } from "@editorjs/editorjs";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -70,24 +72,11 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
 
   const router = useRouter();
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder: "This is placeholder" }),
-    ],
-    content: "",
-    onUpdate({ editor }) {
-      form.setFieldValue("body", editor.getHTML());
-    },
-  });
   useEffect(() => {
     if (proposalQuery.data) {
       form.setValues(proposalQuery.data.proposal);
-      if(editor) {
-        editor.commands.setContent(proposalQuery.data.proposal.body);
-      }
     }
-   }, [editor, proposalQuery.data])
+   }, [proposalQuery.data])
   if (spaceQuery.isPlaceholderData) return <div>Loading ...</div>;
   if (!spaceQuery.data) return <div>Did not find space.</div>;
   if (proposalQuery.isLoading) return <div>Loading ...</div>;
@@ -122,33 +111,8 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <Text fz="sm" fw={500}>
                 Body
               </Text>
-              <RichTextEditor editor={editor}>
-                <RichTextEditor.Toolbar sticky stickyOffset={60}>
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Bold />
-                    <RichTextEditor.Italic />
-                    <RichTextEditor.Strikethrough />
-                    <RichTextEditor.ClearFormatting />
-                    <RichTextEditor.Highlight />
-                    <RichTextEditor.Code />
-                  </RichTextEditor.ControlsGroup>
-
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.H1 />
-                    <RichTextEditor.H2 />
-                    <RichTextEditor.H3 />
-                    <RichTextEditor.H4 />
-                  </RichTextEditor.ControlsGroup>
-
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Blockquote />
-                    <RichTextEditor.Hr />
-                    <RichTextEditor.BulletList />
-                    <RichTextEditor.OrderedList />
-                  </RichTextEditor.ControlsGroup>
-                </RichTextEditor.Toolbar>
-                <RichTextEditor.Content />
-              </RichTextEditor>
+              <DynamicBlockEditor data={form.getInputProps('body').value ? JSON.parse(form.getInputProps('body').value as string) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
             </div>
 
             <Button type="submit" mt="sm">

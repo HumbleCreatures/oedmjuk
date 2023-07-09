@@ -2,9 +2,10 @@ import { Alert, Button, createStyles, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
 import { api } from "../utils/api";
-import { ARichTextEditor, VoidFunc } from "./RichTextEditor";
 import { useRef } from "react";
+import { DynamicBlockEditor } from "./DynamicBlockEditor";
 
+import { OutputData } from "@editorjs/editorjs";
 const useStyles = createStyles((theme) => ({
   area: {
     backgroundColor: theme.colors.gray[4],
@@ -37,7 +38,6 @@ const useStyles = createStyles((theme) => ({
 
 export function ObjectionEditor({ proposalId }: { proposalId: string }) {
   const { classes } = useStyles();
-  const clearForm = useRef<VoidFunc>();
 
   const form = useForm({
     initialValues: {
@@ -61,19 +61,17 @@ export function ObjectionEditor({ proposalId }: { proposalId: string }) {
       <form
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, proposalId });
-          clearForm.current?.();
+          form.reset();
         })}
       >
         <Title order={2} className={classes.areaTitle}>
           Create objection
         </Title>
-        {clearForm && <ARichTextEditor
-          onUpdate={(html) => form.setFieldValue("body", html)}
-          clearForm={clearForm}
-        />}
+        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
 
         <Button type="submit" mt="sm">
-          Create objection
+          Create
         </Button>
 
         {mutation.error && (

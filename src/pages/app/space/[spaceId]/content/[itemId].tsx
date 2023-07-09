@@ -11,7 +11,6 @@ import Link from "next/link";
 import { OutputData } from "@editorjs/editorjs";
 import { useState } from "react";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
-import { DynamicBlockEditor } from "../../../../../components/DynamicBlockEditor";
 
 const useStyles = createStyles((theme) => ({
   area: {
