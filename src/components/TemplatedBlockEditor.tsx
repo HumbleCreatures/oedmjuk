@@ -29,9 +29,9 @@ function TemplatedBlockEditor({ data, onChange, holder }: BlockEditorInput) {
   }, [data]);
 
   function applyTemplate() {
-    console.log('apply template')
-    if (selectedTemplate) {
+    if (selectedTemplate && selectedTemplate.body) {
       setCurrentData(selectedTemplate.body);
+      onChange(selectedTemplate.body);
     }
   }
 

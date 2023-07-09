@@ -64,7 +64,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
     return <div>Could not find content</div>;
 
   const { space, isMember } = spaceResult.data;
-  const {title, createdAt, creatorId, updatedAt} = contentResult.data;
+  const {title, createdAt, creatorId, updatedAt, body} = contentResult.data;
 
   return (
     <AppLayout>
@@ -81,9 +81,6 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
           <ThemeIcon size="xl">
                   <IconAlignBoxLeftMiddle />
                 </ThemeIcon>
-                
-
-                
               </Group>
               <div>
                   
@@ -105,19 +102,10 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <Button component="a">Edit</Button>
             </Link>
         </Container>
-        <Container size="sm" className={classes.bodyArea}> 
-            <div
-              dangerouslySetInnerHTML={{ __html: contentResult.data.body }}
-            />
-            </Container>
+        <Container size="sm" className={classes.textArea}>{body && <EditorJsRenderer data={body} />}</Container>
 
-            <Container size="sm" className={classes.textArea}>
+
         
-      <DynamicBlockEditor data={data} onChange={setData} holder="editorjs-container" />
-
-        </Container>
-
-        <Container size="sm" className={classes.textArea}>{data && <EditorJsRenderer data={data} />}</Container>
 
       </Container>
 

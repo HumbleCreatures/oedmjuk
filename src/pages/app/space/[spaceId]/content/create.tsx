@@ -29,10 +29,10 @@ const useStyles = createStyles((theme) => ({
 function SpaceView({spaceId}: {spaceId: string}) {
   const { classes } = useStyles();
   const data = api.space.getSpace.useQuery({spaceId}).data;
-  const form = useForm<{title: string, body: OutputData | undefined}>({
+  const form = useForm({
     initialValues: {
       title: "",
-      body: undefined,
+      body: "",
     },
     validate: {
       title: (value) =>
@@ -59,7 +59,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
       <Container size="sm">
       <SpaceNavBar space={space} isMember={isMember}/>
       <Container size="sm" className={classes.area}>
-        <Title className={classes.areaTitle} order={2}>Create a new space</Title>
+        <Title className={classes.areaTitle} order={2}>Create a new content page</Title>
 
         <form
           onSubmit={form.onSubmit((values) => {
@@ -74,12 +74,11 @@ function SpaceView({spaceId}: {spaceId: string}) {
           />
           <div className={classes.editorWrapper}>
           <Text fz="sm" fw={500}>Body</Text>
-          <DynamicTemplatedBlockEditor data={form.getInputProps('body').value as OutputData} holder="blockeditor-container" onChange={(data:OutputData) => form.setFieldValue('body', data)}  />
+          <DynamicTemplatedBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
           </div>
-
           </Box>
 
-          
           <Button type="submit" mt="sm">
             Create
           </Button>
@@ -98,8 +97,7 @@ const LoadingSpaceView: NextPage = () => {
   
   const { spaceId } = router.query;
   if(!spaceId) return (<div>loading...</div>);
-
-  
+ 
   return (
     <SpaceView spaceId={spaceId as string} />
   );

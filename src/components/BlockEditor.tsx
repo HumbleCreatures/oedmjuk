@@ -43,6 +43,7 @@ export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
 
   useEffect(() => { 
     if (ref.current && ref.current.render && data) {
+      console.log('rendering data', typeof data);
       void ref.current.render(data);
     }
   }, [data]);
