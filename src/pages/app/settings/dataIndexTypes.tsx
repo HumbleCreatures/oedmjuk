@@ -4,11 +4,9 @@ import { useForm } from "@mantine/form";
 import { TextInput, Button, Container, Title, Alert, Text, createStyles, Accordion } from "@mantine/core";
 import { api } from "../../../utils/api";
 import { IconAlertCircle } from '@tabler/icons';
-import { useEditor } from '@tiptap/react';
-import { StarterKit } from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import { RichTextEditor } from '@mantine/tiptap';
 import { SettingsNavBar } from "../../../components/SettingsNavBar";
+import { DynamicBlockEditor } from "../../../components/DynamicBlockEditor";
+import type { OutputData } from '@editorjs/editorjs';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -63,13 +61,6 @@ const DataIndexTypesPage: NextPage = () => {
     },
   });
 
-  const editor = useEditor({
-    extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],
-    content: '',
-    onUpdate({ editor }) {
-      form.setFieldValue('description', editor.getHTML())
-    },
-  });
 
   if(query.isLoading) return (<div>loading...</div>);
   if(!query.data) return (<div>could not load types...</div>);
@@ -115,35 +106,8 @@ const DataIndexTypesPage: NextPage = () => {
             {...form.getInputProps("unitName")}
           />
           <div>Body</div>
-          <RichTextEditor editor={editor}>
-          <RichTextEditor.Toolbar sticky stickyOffset={60}>
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.Bold />
-          <RichTextEditor.Italic />
-          <RichTextEditor.Strikethrough />
-          <RichTextEditor.ClearFormatting />
-          <RichTextEditor.Highlight />
-          <RichTextEditor.Code />
-        </RichTextEditor.ControlsGroup>
-
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.H1 />
-          <RichTextEditor.H2 />
-          <RichTextEditor.H3 />
-          <RichTextEditor.H4 />
-        </RichTextEditor.ControlsGroup>
-
-        <RichTextEditor.ControlsGroup>
-          <RichTextEditor.Blockquote />
-          <RichTextEditor.Hr />
-          <RichTextEditor.BulletList />
-          <RichTextEditor.OrderedList />
-        </RichTextEditor.ControlsGroup>
-
-
-      </RichTextEditor.Toolbar>
-            <RichTextEditor.Content />
-          </RichTextEditor>
+          <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('description', JSON.stringify(data))}}  />
           <Button type="submit" mt="sm">
             Submit
           </Button>

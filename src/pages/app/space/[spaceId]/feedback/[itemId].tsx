@@ -8,9 +8,7 @@ import {
   createStyles,
   Group,
   ThemeIcon,
-  Grid,
   Button,
-  SimpleGrid,
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
@@ -27,6 +25,7 @@ import { ChannelEventTypes, EventChannels, FeedbackRoundStates } from "../../../
 import { NamedFeedbackItemCardList } from "../../../../../containers/NamedFeedbackItemCardList";
 import Pusher from 'pusher-js';
 import { env } from "../../../../../env/client.mjs";
+import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 
 Pusher.logToConsole = true;
 
@@ -186,7 +185,7 @@ function FeedbackView({
         </Container>
 
         <Container size="sm" className={classes.bodyArea}>
-          <div dangerouslySetInnerHTML={{ __html: body }} />
+          {body && <EditorJsRenderer data={body} />}
         </Container>
       </Container>
       <Container size="sm" className={classes.bodyArea}>

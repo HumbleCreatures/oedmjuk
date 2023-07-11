@@ -1,10 +1,8 @@
-import { RichTextEditor } from "@mantine/tiptap";
 import { Button, Container, TextInput, createStyles, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
 import { api } from "../utils/api";
+import { DynamicBlockEditor } from "./DynamicBlockEditor";
+import type { OutputData } from '@editorjs/editorjs';
 
 const useStyles = createStyles((theme) => ({
 
@@ -28,14 +26,6 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
     validate: {
       title: (value) =>
         value.length < 2 ? "Name must have at least 2 letters" : null,
-    },
-  });
-
-  const editor = useEditor({
-    extensions: [StarterKit, Placeholder.configure({ placeholder: 'This is placeholder' })],
-    content: '',
-    onUpdate({ editor }) {
-      form.setFieldValue('body', editor.getHTML())
     },
   });
 
@@ -64,20 +54,8 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
           {...form.getInputProps("title")}
         />
         <div>Body</div>
-        <RichTextEditor editor={editor}>
-          <RichTextEditor.Toolbar sticky stickyOffset={60}>
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.Bold />
-              <RichTextEditor.Italic />
-              <RichTextEditor.Strikethrough />
-              <RichTextEditor.ClearFormatting />
-              <RichTextEditor.Highlight />
-              <RichTextEditor.Code />
-            </RichTextEditor.ControlsGroup>
-
-          </RichTextEditor.Toolbar>
-          <RichTextEditor.Content />
-        </RichTextEditor>
+        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+              form.setFieldValue('body', JSON.stringify(data))}} />
         <Button type="submit" mt="sm">
           Create feedback item
         </Button>
