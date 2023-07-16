@@ -107,7 +107,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <Text fz="sm" fw={500}>
                 Body
               </Text>
-              <DynamicBlockEditor data={form.getInputProps('body').value ? JSON.parse(form.getInputProps('body').value as string) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
+              <DynamicBlockEditor data={contentQuery.data.body ? JSON.parse(contentQuery.data.body) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
             form.setFieldValue('body', JSON.stringify(data))}}  />
             </div>
 

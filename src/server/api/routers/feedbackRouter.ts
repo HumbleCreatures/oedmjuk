@@ -299,8 +299,8 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback item not found");
       }
 
-      if (feedbackItem.feedbackRound.state !== FeedbackRoundStates.Created) {
-        throw new Error("Feedback round closed");
+      if (feedbackItem.feedbackRound.state !== FeedbackRoundStates.Started) {
+        throw new Error("Feedback must be started");
       }
 
       return ctx.prisma.feedbackNote.create({

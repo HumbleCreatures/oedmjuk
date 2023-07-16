@@ -43,21 +43,13 @@ export const proposalRouter = createTRPCRouter({
       return await ctx.prisma.proposal.create({
         data: {
           title: input.title,
-          body: sanitizeHtml(input.body),
+          body: input.body,
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
-          spaceFeedItem: {
-            create: {
-              spaceId: input.spaceId,
-              eventType: SpaceFeedEventTypes.ProposalEventCreated,
-            },
-          },
-          UserFeedItem: {
-            create: userFeedItems,
-          },
         },
       });
     }),
+    
     updateProposal: protectedProcedure
     .input(
       z.object({
@@ -75,6 +67,74 @@ export const proposalRouter = createTRPCRouter({
         },
       });
     }),
+    openObjectionRound: protectedProcedure
+    .input(
+      z.object({
+        proposalId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const proposal = await ctx.prisma.proposal.findUnique({
+        where: { id: input.proposalId }
+      });
+
+      if (!proposal) throw new Error("Objection not found");
+
+      if(proposal.proposalState !== ProposalStates.ProposalCreated) 
+          throw new Error("Can only open created proposal");
+
+      const space = await ctx.prisma.space.findUnique({where: {id: proposal.spaceId},
+        include: {spaceMembers: true}});
+
+      if(!space) throw new Error("Space not found");
+      
+      const isMember = space.spaceMembers.some((sm) => sm.userId === ctx.session.user.id);
+      if(!isMember && proposal.creatorId !== ctx.session.user.id) 
+        throw new Error("You are not a member of this space");
+
+      const userFeedItems = space.spaceMembers.map((sm) => ({ 
+        spaceId: proposal.spaceId,
+        userId: sm.userId,
+        eventType: UserFeedEventTypes.ProposalEventCreated,
+      }))
+
+      const updatedProposal = await ctx.prisma.proposal.update({
+        where: {
+          id: input.proposalId,
+        },
+        data: {
+          proposalState: ProposalStates.ProposalOpen,
+          spaceFeedItem: {
+            create: {
+              spaceId: proposal.spaceId,
+              eventType: SpaceFeedEventTypes.ProposalEventCreated,
+            },
+          },
+          UserFeedItem: {
+            create: userFeedItems,
+          },
+        },
+      });
+
+      await ctx.prisma.userFeedItem.create({
+        data: {
+          userId: updatedProposal.creatorId,
+          proposalId: input.proposalId,
+          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          spaceId: proposal.spaceId,
+        }
+      });
+
+      await ctx.prisma.spaceFeedItem.create({
+        data: {
+          proposalId: input.proposalId,
+          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          spaceId: proposal.spaceId,
+        }          
+       });
+
+      return updatedProposal
+    }),
   addObjection: protectedProcedure
     .input(
       z.object({
@@ -85,6 +145,9 @@ export const proposalRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const proposal = await ctx.prisma.proposal.findUnique({ where: { id: input.proposalId } });
       if(!proposal) throw new Error("Proposal not found");
+      if(proposal.proposalState !== ProposalStates.ProposalOpen) 
+        throw new Error("Proposal needs to be open for objections");
+
       const objection = await ctx.prisma.proposalObjection.create({
         data: {
           proposalId: input.proposalId,
@@ -153,6 +216,8 @@ export const proposalRouter = createTRPCRouter({
       });
 
       if (!proposal) throw new Error("Objection not found");
+      if (proposal.proposalState !== ProposalStates.ProposalOpen) 
+        throw new Error("Can only close open proposals");
 
       const openObjections = proposal.objections.filter((o) => !o.resolvedAt);
       if (openObjections.length > 0)
@@ -215,17 +280,17 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Objection not found");
 
-      const isParticipant = proposal.participants.some(p => p.participantId === ctx.session.user.id);
-      if(!isParticipant) throw new Error("You are not a participant of this proposal");
-
       if (proposal.proposalState !== ProposalStates.ObjectionsResolved)
         throw new Error("Proposal not in votable state");
+
+      const isParticipant = proposal.participants.some(p => p.participantId === ctx.session.user.id);
+      if(!isParticipant) throw new Error("You are not a participant of this proposal");
 
       if (
         input.myPickId &&
         !proposal.participants.some((p) => p.participantId === input.myPickId)
       )
-        throw new Error("Your myPick is invalid.");
+        throw new Error("Your my Pick is invalid.");
 
       return await ctx.prisma.proposalVote.create({
         data: {
@@ -252,6 +317,9 @@ export const proposalRouter = createTRPCRouter({
       });
 
       if (!proposal) throw new Error("Proposal not found");
+
+      if (proposal.proposalState !== ProposalStates.ObjectionsResolved) 
+        throw new Error("Can only end voting on resolved proposals");
 
       const updatedProposal = await ctx.prisma.proposal.update({
         where: {
@@ -326,7 +394,7 @@ export const proposalRouter = createTRPCRouter({
           where: { proposalId: proposal.id },
         });
 
-        const uniqeVotes = votes.reduce((acc, vote) => {
+        const uniqueVotes = votes.reduce((acc, vote) => {
           if (!acc.has(vote.userId)) {
             acc.set(vote.userId, vote);
           } else {
@@ -338,12 +406,12 @@ export const proposalRouter = createTRPCRouter({
           return acc;
         }, new Map<string, ProposalVote>());
 
-        const voteArray = Array.from(uniqeVotes.values());
+        const voteArray = Array.from(uniqueVotes.values());
         //TODO: Calculate accept results in %
         //TODO: Calculate myPick results
         const myPickResults = voteArray.reduce((acc, vote) => {
           if (vote.myPickId) {
-            const pickVote = uniqeVotes.get(vote.myPickId);
+            const pickVote = uniqueVotes.get(vote.myPickId);
             if(!pickVote) {
               acc.numberOfMissedVotes = acc.numberOfMissedVotes++;
               return acc;
@@ -373,11 +441,11 @@ export const proposalRouter = createTRPCRouter({
 
         const votingResult = {
           numberOfParticipants: proposal.participants.length,
-          numberOfVotes: uniqeVotes.size,
+          numberOfVotes: uniqueVotes.size,
           numberOfAccepts: voteArray.filter((v) => v.accept).length,
           numberOfRejects: voteArray.filter((v) => !v.accept).length,
           numberOfAbstains: voteArray.filter((v) => v.accept === undefined).length,
-          numberOfMissedVotes: (proposal.participants.length - uniqeVotes.size),
+          numberOfMissedVotes: (proposal.participants.length - uniqueVotes.size),
         };
 
         return {

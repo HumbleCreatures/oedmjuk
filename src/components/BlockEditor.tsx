@@ -14,10 +14,12 @@ export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
   //add a reference to editor
   const ref = useRef<EditorJS>();
 
+  const [currentData, setCurrentData] = React.useState<OutputData | undefined>(undefined);
 
   //initialize editorjs
   useEffect(() => {
     //initialize editor if we don't have a reference
+    setCurrentData(data);
     if (!ref.current) {
       const editor = new EditorJS({
         holder: holder,
@@ -43,10 +45,13 @@ export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
 
   useEffect(() => { 
     if (ref.current && ref.current.render && data) {
-      console.log('rendering data', typeof data);
-      void ref.current.render(data);
+      if(!currentData) {
+        setCurrentData(data);
+        void ref.current.render(data);
+      }
+      
     }
-  }, [data]);
+  }, [data, currentData]);
 
 
   return <div id={holder} />;

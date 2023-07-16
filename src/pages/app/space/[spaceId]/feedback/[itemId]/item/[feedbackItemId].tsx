@@ -8,6 +8,7 @@ import { UserLinkWithData } from "../../../../../../../components/UserButton";
 import { DateTime } from "luxon";
 import { IconArrowMoveRight } from "@tabler/icons";
 import { FeedbackRoundStates } from "../../../../../../../utils/enums";
+import EditorJsRenderer from "../../../../../../../components/EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   areaTitle: {
@@ -82,8 +83,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
             )}
             </Text>
 
-            
-            <div dangerouslySetInnerHTML={{ __html: body }} />
+            {body && <EditorJsRenderer data={body} /> }
           </SimpleGrid>
         
       </Container>
@@ -99,7 +99,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
 <Card key={note.id} shadow="sm" padding="lg" radius="md" withBorder mb="md">
 <Card.Section p="sm">
 
-  <div dangerouslySetInnerHTML={{ __html: note.body }} />
+{note.body && <EditorJsRenderer data={note.body} /> }
 
 </Card.Section>
 
@@ -127,7 +127,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
           ))}
           </SimpleGrid>
       </Container>
-      {feedbackRound.state === FeedbackRoundStates.Created && <Container size="sm" className={classes.noteEditorArea}>
+      {feedbackRound.state === FeedbackRoundStates.Started && <Container size="sm" className={classes.noteEditorArea}>
       <Title order={2} className={classes.areaTitle}>
               Create feedback note
             </Title>
