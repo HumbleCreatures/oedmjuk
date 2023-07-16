@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 // @ts-ignore
 import Table from '@editorjs/table';
 // @ts-ignore

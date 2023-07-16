@@ -1,6 +1,5 @@
-//components/EditorJsRenderer.tsx
-
-import { OutputData } from "@editorjs/editorjs";
+/* eslint-disable */
+import type { OutputData } from "@editorjs/editorjs";
 import React from "react";
 
 //use require since editorjs-html doesn't have types
