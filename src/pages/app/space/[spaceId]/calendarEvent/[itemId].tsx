@@ -20,6 +20,7 @@ import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
 import { useState } from "react";
 import { IconUserQuestion } from "@tabler/icons-react";
+import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -136,9 +137,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             </Link>
           </div>
         </Container>
-        <Container size="sm" className={classes.bodyArea}>
-          <div dangerouslySetInnerHTML={{ __html: body }} />
-        </Container>
+        <Container size="sm" className={classes.bodyArea}>{body && <EditorJsRenderer data={body} />}</Container>
         <Container size="sm" className={classes.area}>
           <Title order={2} className={classes.areaTitle}>
             Agenda

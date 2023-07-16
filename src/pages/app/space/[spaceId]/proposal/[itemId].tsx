@@ -20,10 +20,15 @@ import { ProposalStates } from "../../../../../utils/enums";
 import { useState } from "react";
 import { VoteValue } from "../../../../../utils/enums";
 import { IconNotebook } from "@tabler/icons";
-import type { Proposal } from "@prisma/client";
+import type {
+  Proposal,
+  ProposalObjection,
+  ProposalParticipant,
+} from "@prisma/client";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
+import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -64,19 +69,10 @@ function ProposalView({
 }) {
   const { classes } = useStyles();
   const spaceReslt = api.space.getSpace.useQuery({ spaceId });
-  const proposalResult = api.proposal.getProposal.useQuery({ itemId: proposalId });
+  const proposalResult = api.proposal.getProposal.useQuery({
+    itemId: proposalId,
+  });
   const voteResult = api.proposal.getUserVote.useQuery({ proposalId });
-  const closeObjectionRound = api.proposal.closeObjectionRound.useMutation({
-    onSuccess: () => {
-      void proposalResult.refetch();
-    },
-  });
-
-  const endVoting = api.proposal.endVoting.useMutation({
-    onSuccess: () => {
-      void proposalResult.refetch();
-    },
-  });
 
   const castVote = api.proposal.castVote.useMutation({
     onSuccess: () => {
@@ -193,8 +189,6 @@ function ProposalView({
               </Text>{" "}
               experts did not vote
             </Text>
-            
-
           </Container>
         </Container>
       </AppLayout>
@@ -207,32 +201,19 @@ function ProposalView({
         <SpaceNavBar space={space} isMember={isMember} />
         <ProposalInfo proposal={proposal} />
 
-        {proposalState === ProposalStates.ProposalCreated && (
+        {proposalState === ProposalStates.ProposalOpen && (
           <Container size="sm" className={classes.bodyArea}>
             <ObjectionEditor proposalId={proposalId} />
           </Container>
         )}
 
-        <Container size="sm" className={classes.area}>
+        {proposalState !== ProposalStates.ProposalCreated && 
+        (<Container size="sm" className={classes.area}>
           <Title order={3} className={classes.areaTitle}>
             Objections
           </Title>
           <ListOfObjections objections={objections || []} />
-        </Container>
-
-        {proposalState === ProposalStates.ProposalCreated && (
-          <Container size="sm" className={classes.area}>
-            {objections.filter((o) => !o.resolvedAt).length === 0 ? (
-              <Button
-                onClick={() => closeObjectionRound.mutate({ proposalId })}
-              >
-                Start voting round
-              </Button>
-            ) : (
-              <Button disabled={true}>Start voting round</Button>
-            )}
-          </Container>
-        )}
+        </Container>)}
 
         {proposalState === ProposalStates.ObjectionsResolved && (
           <>
@@ -341,11 +322,6 @@ function ProposalView({
                 )}
               </SimpleGrid>
             </Container>
-            <Container size="sm" className={classes.area}>
-              <Button onClick={() => endVoting.mutate({ proposalId })}>
-                End vote and show results
-              </Button>
-            </Container>
           </>
         )}
       </Container>
@@ -371,10 +347,46 @@ function UserRadioButton({ userId }: { userId: string }) {
 
 export default ProposalPage;
 
-function ProposalInfo({ proposal }: { proposal: Proposal }) {
+function ProposalInfo({
+  proposal,
+}: {
+  proposal: Proposal & {
+    participants: ProposalParticipant[];
+    objections: ProposalObjection[];
+  };
+}) {
+  const utils = api.useContext();
+
+  const closeObjectionRound = api.proposal.closeObjectionRound.useMutation({
+    onSuccess: () => {
+      void utils.proposal.getProposal.refetch();
+    },
+  });
+
+  const publishProposal = api.proposal.openObjectionRound.useMutation({
+    onSuccess: () => {
+      void utils.proposal.getProposal.refetch();
+    },
+  });
+
+  const endVoting = api.proposal.endVoting.useMutation({
+    onSuccess: () => {
+      void utils.proposal.getProposal.refetch();
+    },
+  });
+
   const { classes } = useStyles();
-  const { title, body, createdAt, creatorId, updatedAt, proposalState } =
-    proposal;
+  const {
+    title,
+    body,
+    createdAt,
+    creatorId,
+    updatedAt,
+    proposalState,
+    objections,
+  } = proposal;
+
+  const hasObjections = objections.filter((o) => !o.resolvedAt).length > 0;
   return (
     <>
       <Container size="sm">
@@ -423,12 +435,42 @@ function ProposalInfo({ proposal }: { proposal: Proposal }) {
           </Text>
         </div>
 
-        <Link href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}/edit`} passHref>
-              <Button component="a">Edit</Button>
-            </Link>
+        <Link
+          href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}/edit`}
+          passHref
+        >
+          <Button component="a">Edit</Button>
+        </Link>
+
+        {proposalState === ProposalStates.ProposalOpen && hasObjections && (
+          <Button disabled={true}>Start voting round</Button>
+        )}
+
+        {proposalState === ProposalStates.ProposalOpen && !hasObjections && (
+          <Button
+            onClick={() =>
+              closeObjectionRound.mutate({ proposalId: proposal.id })
+            }
+          >
+            Start voting round
+          </Button>
+        )}
+
+        {proposalState === ProposalStates.ProposalCreated && (
+          <Button
+            onClick={() => publishProposal.mutate({ proposalId: proposal.id })}
+          >
+            Publish proposal
+          </Button>
+        )}
+
+        {proposalState === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId:proposal.id })}>
+                End vote and show results
+              </Button>)}
+
       </Container>
       <Container size="sm" className={classes.bodyArea}>
-        <div dangerouslySetInnerHTML={{ __html: body }} />
+        {body && <EditorJsRenderer data={body} />}
       </Container>
     </>
   );

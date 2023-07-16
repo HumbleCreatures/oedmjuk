@@ -20,6 +20,7 @@ import { IconColorSwatch } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
+import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -151,7 +152,7 @@ function SelectionView({
         </Container>
 
         <Container size="sm" className={classes.bodyArea}>
-          <div dangerouslySetInnerHTML={{ __html: body }} />
+          {body && <EditorJsRenderer data={body} />}
         </Container>
 
         {selection.state === SelectionStates.Created && (

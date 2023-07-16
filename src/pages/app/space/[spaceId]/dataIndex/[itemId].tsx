@@ -10,6 +10,7 @@ import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import { IconChartBar } from '@tabler/icons';
 import Link from 'next/link';
+import EditorJsRenderer from '../../../../../components/EditorJsRenderer';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -112,7 +113,7 @@ function DatIndexView({spaceId, itemId}: {spaceId: string, itemId: string}) {
         </Container>
 
         {description && <Container size="sm" className={classes.bodyArea}>
-          <div dangerouslySetInnerHTML={{ __html: description }} />
+      <EditorJsRenderer data={description} />
         </Container> }            
         
       

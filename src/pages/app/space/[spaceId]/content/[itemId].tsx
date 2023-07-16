@@ -8,10 +8,19 @@ import { DateTime } from "luxon";
 import { IconAlignBoxLeftMiddle } from "@tabler/icons";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
+import { OutputData } from "@editorjs/editorjs";
+import { useState } from "react";
+import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   area: {
     backgroundColor: theme.colors.gray[4],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  textArea: {
+    backgroundColor: theme.white,
     borderRadius: theme.radius.md,
     marginTop: theme.spacing.md,
     padding: theme.spacing.md,
@@ -39,10 +48,14 @@ const useStyles = createStyles((theme) => ({
   }
 }));
 
+
 function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const { classes } = useStyles();
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const contentResult = api.content.getContent.useQuery({ itemId });
+
+  const [data, setData] = useState<OutputData>();
+
   if (spaceResult.isLoading) return <div>loading...</div>;
   if (contentResult.isLoading) return <div>loading...</div>;
 
@@ -50,7 +63,7 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
     return <div>Could not find content</div>;
 
   const { space, isMember } = spaceResult.data;
-  const {title, createdAt, creatorId, updatedAt} = contentResult.data;
+  const {title, createdAt, creatorId, updatedAt, body} = contentResult.data;
 
   return (
     <AppLayout>
@@ -67,9 +80,6 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
           <ThemeIcon size="xl">
                   <IconAlignBoxLeftMiddle />
                 </ThemeIcon>
-                
-
-                
               </Group>
               <div>
                   
@@ -91,13 +101,10 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <Button component="a">Edit</Button>
             </Link>
         </Container>
-        <Container size="sm" className={classes.bodyArea}> 
-            <div
-              dangerouslySetInnerHTML={{ __html: contentResult.data.body }}
-            />
-            </Container>
-
+        <Container size="sm" className={classes.textArea}>{body && <EditorJsRenderer data={body} />}</Container>
       </Container>
+
+      
     </AppLayout>
   );
 }

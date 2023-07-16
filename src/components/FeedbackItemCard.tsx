@@ -4,6 +4,7 @@ import { api } from "../utils/api";
 import Link from "next/link";
 import { Router, useRouter } from "next/router";
 import { FeedbackRoundStates } from "../utils/enums";
+import EditorJsRenderer from "./EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   areaTitle: {
@@ -53,7 +54,7 @@ export function FeedbackItemCard({
       </Card.Section>
 
       <Card.Section inheritPadding>
-        <div dangerouslySetInnerHTML={{ __html: feedbackItem.body }} />
+        {feedbackItem.body && <EditorJsRenderer data={feedbackItem.body} /> }
       </Card.Section>
 
       <Card.Section withBorder p="sm">

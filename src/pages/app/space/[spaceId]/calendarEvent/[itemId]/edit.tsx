@@ -16,16 +16,14 @@ import { api } from "../../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../../components/SpaceNavBar";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
-import { useEditor } from "@tiptap/react";
-import { StarterKit } from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import { RichTextEditor } from "@mantine/tiptap";
 import { DateTimePicker } from "@mantine/dates";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ProposalToCalendarEventEditor } from "../../../../../../components/ProposalToCalendarEventEditor";
 import { SelectionToCalendarEventEditor } from "../../../../../../components/SelectionToCalendarEventEditor";
 import { DataIndexToCalendarEventEditor } from "../../../../../../components/DataIndexToCalendarEventEditor";
 import { FeedbackRoundToCalendarEventEditor } from "../../../../../../components/FeedbackRoundToCalendarEventEditor";
+import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
+import { OutputData } from "@editorjs/editorjs";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -81,25 +79,11 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
 
 
   const router = useRouter();
-
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder: "This is placeholder" }),
-    ],
-    content: "",
-    onUpdate({ editor }) {
-      form.setFieldValue("body", editor.getHTML());
-    },
-  });
   useEffect(() => {
     if (calendarEventQuery.data) {
       form.setValues(calendarEventQuery.data.calendarEvent);
-      if(editor) {
-        editor.commands.setContent(calendarEventQuery.data.calendarEvent.body);
-      }
     }
-   }, [editor, calendarEventQuery.data])
+   }, [calendarEventQuery.data])
   if (spaceQuery.isPlaceholderData) return <div>Loading ...</div>;
   if (!spaceQuery.data) return <div>Did not find space.</div>;
   if (calendarEventQuery.isLoading) return <div>Loading ...</div>;
@@ -157,33 +141,13 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <Text fz="sm" fw={500}>
                 Body
               </Text>
-              <RichTextEditor editor={editor}>
-                <RichTextEditor.Toolbar sticky stickyOffset={60}>
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Bold />
-                    <RichTextEditor.Italic />
-                    <RichTextEditor.Strikethrough />
-                    <RichTextEditor.ClearFormatting />
-                    <RichTextEditor.Highlight />
-                    <RichTextEditor.Code />
-                  </RichTextEditor.ControlsGroup>
-
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.H1 />
-                    <RichTextEditor.H2 />
-                    <RichTextEditor.H3 />
-                    <RichTextEditor.H4 />
-                  </RichTextEditor.ControlsGroup>
-
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Blockquote />
-                    <RichTextEditor.Hr />
-                    <RichTextEditor.BulletList />
-                    <RichTextEditor.OrderedList />
-                  </RichTextEditor.ControlsGroup>
-                </RichTextEditor.Toolbar>
-                <RichTextEditor.Content />
-              </RichTextEditor>
+              <div className={classes.editorWrapper}>
+              <Text fz="sm" fw={500}>
+                Body
+              </Text>
+              <DynamicBlockEditor data={form.getInputProps('body').value ? JSON.parse(form.getInputProps('body').value as string) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
+            </div>
             </div>
 
             <Button type="submit" mt="sm">

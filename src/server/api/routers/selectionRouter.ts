@@ -99,7 +99,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.userFeedItem.create({
         data: {
           userId: selection.creatorId,
-          proposalId: input.selectionId,
+          selectionId: input.selectionId,
           eventType: UserFeedEventTypes.SelectionAlternativeAdded,
           spaceId: selection.spaceId,
         }

@@ -8,15 +8,18 @@ import {
   SimpleGrid,
   createStyles,
   Title,
+  Textarea
 } from "@mantine/core";
 import { ProposalObjection } from "@prisma/client";
-import { ARichTextEditor } from "./RichTextEditor";
-import { UserButtonWithData, UserLinkWithData } from "./UserButton";
+
+import { UserLinkWithData } from "./UserButton";
 import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
 import { IconAlertCircle } from "@tabler/icons";
 import { DateTime } from "luxon";
+import { OutputData } from "@editorjs/editorjs";
+import EditorJsRenderer from "./EditorJsRenderer";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -108,7 +111,7 @@ export function Objection({ objection }: { objection: ProposalObjection }) {
       </Card.Section>
 
       <Card.Section mt="md" inheritPadding py="xs">
-        <div dangerouslySetInnerHTML={{ __html: objection.body }} />
+      {objection.body && <EditorJsRenderer data={objection.body} />}
       </Card.Section>
 
       {objection.resolvedAt ? (
@@ -152,9 +155,12 @@ export function Objection({ objection }: { objection: ProposalObjection }) {
                 <Title order={4} className={classes.areaTitle}>
                   Resolve objection
                 </Title>
-
-                <ARichTextEditor
-                  onUpdate={(html) => form.setFieldValue("comment", html)}
+                <Textarea
+                  placeholder="Why do you think this objection should be resolved?"
+                  label="Why do you think this objection should be resolved?"
+                  autosize
+                  minRows={2}
+                  {...form.getInputProps("comment")}
                 />
                 <Group position="apart">
                   <Button type="submit" mt="sm">

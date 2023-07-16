@@ -1,12 +1,14 @@
 import { type NextPage } from "next";
 import AppLayout from "../../../components/AppLayout";
 import { useForm } from "@mantine/form";
-import { TextInput, Button, Container, Title, Alert, Text, createStyles, Accordion } from "@mantine/core";
+import { TextInput, Button, Container, Title, Alert, Text, createStyles, SimpleGrid } from "@mantine/core";
 import { api } from "../../../utils/api";
 import { IconAlertCircle } from '@tabler/icons';
 import { SettingsNavBar } from "../../../components/SettingsNavBar";
+import { SettingsLoader } from "../../../components/Loaders/SettingsLoader";
 import { DynamicBlockEditor } from "../../../components/DynamicBlockEditor";
-import type { OutputData } from '@editorjs/editorjs';
+import { OutputData } from "@editorjs/editorjs";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -16,10 +18,16 @@ const useStyles = createStyles((theme) => ({
     marginTop: theme.spacing.md,
     padding: theme.spacing.md,
   },
+  clearArea: {
+    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    color: theme.white,
+    padding: 0
+  },
   editArea: {
     backgroundColor: theme.colors.gray[0],
     borderRadius: theme.radius.md,
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xl,
     padding: theme.spacing.md,
   },
   areaTitle: {
@@ -32,37 +40,41 @@ const useStyles = createStyles((theme) => ({
   fullWidth: {
     width: "100%",
   },
+  listLinkItem: {
+    borderRadius: theme.radius.md,
+    boxShadow: theme.shadows.sm,
+    backgroundColor: theme.white,
+    padding: theme.spacing.md,
+    color: theme.black,
+    '&:hover': { 
+      borderLeft: `0.5rem solid ${theme.colors.earth[2]}`,
+      paddingLeft: '0.5rem', 
+    }
+  }
 }));
 
 const DataIndexTypesPage: NextPage = () => {
   const { classes } = useStyles();
-  const form = useForm({
+  const form = useForm<{name: string, body: OutputData | undefined}>({
     initialValues: {
       name: "",
-      unitName: "",
-      description: "",
+      body: undefined,
     },
     validate: {
         name: (value) =>
-        value.length < 2 ? "Name must have at least 2 letters" : null,
-        unitName: (value) => {
-          if(value.length < 1) return "Name must have at least 1 letters";
-          if(value.length > 10) return "Name must have at most 10 letters";
-        }
-        
+        value.length < 2 ? "Name must have at least 2 letters" : null        
     },
   });
 
   const utils = api.useContext();
-  const query = api.dataIndex.getAllIndexTypes.useQuery();
-  const mutation = api.dataIndex.createDataIndexType.useMutation({
+  const query = api.bodyTemplate.getAllTemplates.useQuery();
+  const mutation = api.bodyTemplate.createTemplate.useMutation({
     onSuccess() {
-      void utils.dataIndex.getAllIndexTypes.invalidate();
+      void utils.bodyTemplate.getAllTemplates.invalidate();
     },
   });
 
-
-  if(query.isLoading) return (<div>loading...</div>);
+  if(query.isLoading) return (<SettingsLoader />);
   if(!query.data) return (<div>could not load types...</div>);
 
 
@@ -71,24 +83,27 @@ const DataIndexTypesPage: NextPage = () => {
     <AppLayout>
       <Container size="sm">
       <SettingsNavBar />
-      <Container size="sm" className={classes.area}>
-      <Title className={classes.areaTitle} order={2}>Data index types</Title>
-      <Accordion variant="filled" >
+      <Container size="sm" className={classes.clearArea}>
+      <Title className={classes.areaTitle} order={2}>Content Templates</Title>
+      
+      <SimpleGrid cols={1} spacing="xs">
+
+    
       
 
-      {query.data.map((indexType) =>{
-        return (
+      {query.data.map((template) =>{
+        const currentVersion = template.bodyTemplateVersions[0];
 
-          <Accordion.Item key={indexType.id} value={indexType.id}>
-          <Accordion.Control><Text>{indexType.name}</Text> <Text size="sm" color="dimmed" weight={400}>{indexType.unitName}</Text></Accordion.Control>
-          <Accordion.Panel><div dangerouslySetInnerHTML={{__html: indexType.description ? indexType.description : ''}}></div></Accordion.Panel>
-        </Accordion.Item>
+        return (
+          <Link className={classes.listLinkItem} key={template.id} href={`/app/settings/templates/${template.id}`}>
+          {currentVersion && <Text>{currentVersion.name}</Text>}
+          </Link>
         )
       })}
-      </Accordion>
+      </SimpleGrid>
       </Container>
       <Container size="sm" className={classes.editArea}>
-        <Title order={1}>Create a new data index type</Title>
+        <Title order={2} className={classes.areaTitle}>Create a new template</Title>
 
         <form
           onSubmit={form.onSubmit((values) => {
@@ -100,14 +115,10 @@ const DataIndexTypesPage: NextPage = () => {
             placeholder="Name"
             {...form.getInputProps("name")}
           />
-          <TextInput
-            label="Unit Name"
-            placeholder="Unit Name"
-            {...form.getInputProps("unitName")}
-          />
-          <div>Body</div>
-          <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
-            form.setFieldValue('description', JSON.stringify(data))}}  />
+         <div className={classes.editorWrapper}>
+          <Text fz="sm" fw={500}>Template Body</Text>
+              <DynamicBlockEditor holder="blockeditor-container" onChange={(data) => form.setFieldValue('body', data)}  />
+              </div>
           <Button type="submit" mt="sm">
             Submit
           </Button>
