@@ -34,5 +34,4 @@ export function SettingsLoader() {
       </Container>
     </AppLayout>
   );
-};
-
+}
