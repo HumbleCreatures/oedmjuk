@@ -464,7 +464,7 @@ function ProposalInfo({
           </Button>
         )}
 
-        {proposalState === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId })}>
+        {proposalState === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId:proposal.id })}>
                 End vote and show results
               </Button>)}
 
