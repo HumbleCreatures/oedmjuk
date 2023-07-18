@@ -58,7 +58,8 @@ export const contentRouter = createTRPCRouter({
     .input(z.object({ spaceId: z.string() }))
     .query(async ({ ctx, input }) => {
       const content = await ctx.prisma.content.findMany({
-        where: { spaceId: input.spaceId }
+        where: { spaceId: input.spaceId },
+        orderBy: { createdAt: 'desc' },
       });
       
       return content;

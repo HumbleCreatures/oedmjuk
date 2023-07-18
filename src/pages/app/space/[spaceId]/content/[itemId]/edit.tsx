@@ -17,6 +17,7 @@ import { IconAlertCircle } from "@tabler/icons";
 import { useEffect } from "react";
 import { OutputData } from "@editorjs/editorjs";
 import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
+import { SpaceLoader } from "../../../../../../components/Loaders/SpaceLoader";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -40,7 +41,7 @@ const useStyles = createStyles((theme) => ({
 function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const { classes } = useStyles();
   
-  const spaceQuery = api.space.getSpace.useQuery({ spaceId });
+  const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const contentQuery = api.content.getContent.useQuery({
     itemId,
   });
@@ -73,16 +74,13 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
       form.setValues(contentQuery.data);
     }
    }, [contentQuery.data])
-  if (spaceQuery.isPlaceholderData) return <div>Loading ...</div>;
-  if (!spaceQuery.data) return <div>Did not find space.</div>;
-  if (contentQuery.isLoading) return <div>Loading ...</div>;
+
+  if (spaceResult.isLoading) return <SpaceLoader />;
+  if (!spaceResult.data) return <div>Did not find space.</div>;
+  if (contentQuery.isLoading) return <SpaceLoader space={spaceResult.data?.space} isMember={spaceResult.data?.isMember}/>;
   if (!contentQuery.data) return <div>Did not find calendar event.</div>;
-
-
-  const { space, isMember } = spaceQuery.data;
+  const { space, isMember } = spaceResult.data;
   
-
-
   return (
     <AppLayout>
       <Container size="sm">

@@ -8,6 +8,7 @@ import { useForm } from '@mantine/form';
 import { IconAlertCircle } from '@tabler/icons';
 import { DynamicTemplatedBlockEditor } from '../../../../../components/DynamicTemplatedBlockEditor';
 import type { OutputData } from '@editorjs/editorjs';
+import { SpaceLoader } from '../../../../../components/Loaders/SpaceLoader';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -28,7 +29,7 @@ const useStyles = createStyles((theme) => ({
 
 function SpaceView({spaceId}: {spaceId: string}) {
   const { classes } = useStyles();
-  const data = api.space.getSpace.useQuery({spaceId}).data;
+  const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const form = useForm({
     initialValues: {
       title: "",
@@ -43,16 +44,19 @@ function SpaceView({spaceId}: {spaceId: string}) {
   const mutation = api.content.createContent.useMutation({
     onSuccess(data) {
       void utils.space.getSpace.invalidate();
-      void router.push(`/app/space/${space.id}/content/${data.id}`);
+      void router.push(`/app/space/${spaceId}/content/${data.id}`);
     },
   });
 
   const router = useRouter();
 
-  if(!data || !data.space) return (<div>loading...</div>)
-  const {space, isMember} = data;
+  if (spaceResult.isLoading) return <SpaceLoader />;
+  
+  if (!spaceResult.data)
+    return <div>Could not find space</div>;
 
- 
+  const { space, isMember } = spaceResult.data;
+
   
   return (
     <AppLayout>

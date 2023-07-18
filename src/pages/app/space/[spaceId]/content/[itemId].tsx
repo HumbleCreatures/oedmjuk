@@ -8,37 +8,33 @@ import { DateTime } from "luxon";
 import { IconAlignBoxLeftMiddle } from "@tabler/icons";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
-import { OutputData } from "@editorjs/editorjs";
-import { useState } from "react";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
+import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 
 const useStyles = createStyles((theme) => ({
   area: {
-    backgroundColor: theme.colors.gray[4],
-    borderRadius: theme.radius.md,
-    marginTop: theme.spacing.md,
-    padding: theme.spacing.md,
-  },
-  textArea: {
     backgroundColor: theme.white,
     borderRadius: theme.radius.md,
     marginTop: theme.spacing.md,
+    padding: 0,
+  },
+  metaArea: {
+    backgroundColor: theme.colors.gray[4],
+    borderTopLeftRadius: theme.radius.md,
+    borderTopRightRadius: theme.radius.md,
     padding: theme.spacing.md,
   },
   bodyArea: {
-    backgroundColor: theme.white,
-    borderRadius: theme.radius.md,
-    marginTop: theme.spacing.md,
     padding: theme.spacing.md,
+    marginTop: theme.spacing.xs,
   },
   areaTitle: {
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.xs,
   },
   mainTitle: {
-    color: theme.white,
+    color: theme.black,
     fontSize: theme.fontSizes.xxl,
-    marginTop: theme.spacing.xl,
   },
   editorWrapper: {
     marginTop: theme.spacing.md,
@@ -54,10 +50,8 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const contentResult = api.content.getContent.useQuery({ itemId });
 
-  const [data, setData] = useState<OutputData>();
-
-  if (spaceResult.isLoading) return <div>loading...</div>;
-  if (contentResult.isLoading) return <div>loading...</div>;
+  if (spaceResult.isLoading) return <SpaceLoader />;
+  if (contentResult.isLoading) return <SpaceLoader space={spaceResult.data?.space} isMember={spaceResult.data?.isMember}/>;
 
   if (!spaceResult.data || !contentResult.data)
     return <div>Could not find content</div>;
@@ -69,39 +63,45 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
     <AppLayout>
       <Container size="sm">
         <SpaceNavBar space={space} isMember={isMember} />
-        <Container size="sm">
-            <Title order={2} className={classes.mainTitle}>{title}</Title>
-        </Container>
 
         <Container size="sm" className={classes.area}>
-          
+          <div className={classes.metaArea}>
           <Group position="apart">
-          <Title order={2} className={classes.areaTitle}>Content</Title>
-          <ThemeIcon size="xl">
+            <Group>
+          <ThemeIcon size="xl" color="gray">
                   <IconAlignBoxLeftMiddle />
                 </ThemeIcon>
-              </Group>
-              <div>
-                  
-                  <Text fz="sm" fw={300}>
-                    Created  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(createdAt)
+          
+          <div >
+          <Text fz="sm" fw={500} >Content Page</Text>
+                  <Text fz="sm" fw={300} className={classes.inlineText}>
+                    {" "} created  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(createdAt)
                       .setLocale("en")
                       .toRelative()}</Text>
                   </Text>
 
-                  {updatedAt && updatedAt.getTime() !== createdAt.getTime() && <Text fz="sm" fw={300}>
-                    Last updated  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(updatedAt)
+                  {updatedAt && updatedAt.getTime() !== createdAt.getTime() && <Text fz="sm" fw={300} className={classes.inlineText}>
+                  {" "} last updated  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(updatedAt)
                       .setLocale("en")
                       .toRelative()}</Text>
                   </Text>}
 
-                  <Text fz="sm">By <Text fz="sm" fw={500} className={classes.inlineText}><UserLinkWithData userId={creatorId} /></Text></Text>
+                  <Text fz="sm" fw={300} className={classes.inlineText}>{" "} by <Text fz="sm" fw={500} className={classes.inlineText}><UserLinkWithData userId={creatorId} /></Text></Text>
                 </div>
-                <Link href={`/app/space/${spaceId}/content/${itemId}/edit`} passHref>
+          </Group>
+          <Link href={`/app/space/${spaceId}/content/${itemId}/edit`} passHref>
               <Button component="a">Edit</Button>
             </Link>
+
+              </Group>
+
+                
+            </div>
+          <div className={classes.bodyArea}>
+          <Title order={2} className={classes.mainTitle}>{title}</Title>
+          {body && <EditorJsRenderer data={body} />}
+          </div>
         </Container>
-        <Container size="sm" className={classes.textArea}>{body && <EditorJsRenderer data={body} />}</Container>
       </Container>
 
       
