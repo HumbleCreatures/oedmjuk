@@ -42,6 +42,7 @@ export const useGeneralStyles = createStyles((theme) => ({
         color: theme.white,
         padding: 0
       },
+      
       listLinkItem: {
         borderRadius: theme.radius.md,
         boxShadow: theme.shadows.sm,
