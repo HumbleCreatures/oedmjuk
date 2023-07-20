@@ -2,10 +2,11 @@ import { Alert, Button, createStyles, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
 import { api } from "../utils/api";
-import { useRef } from "react";
-import { DynamicBlockEditor } from "./DynamicBlockEditor";
+import { useState } from "react";
+import BlockEditor from "./BlockEditor";
 
 import { OutputData } from "@editorjs/editorjs";
+import { ClearTriggerValues } from "./BlockEditor";
 const useStyles = createStyles((theme) => ({
   area: {
     backgroundColor: theme.colors.gray[4],
@@ -38,7 +39,7 @@ const useStyles = createStyles((theme) => ({
 
 export function ObjectionEditor({ proposalId }: { proposalId: string }) {
   const { classes } = useStyles();
-
+  const [clearTrigger, setClearTrigger] = useState<ClearTriggerValues>();
   const form = useForm({
     initialValues: {
       body: "",
@@ -62,12 +63,13 @@ export function ObjectionEditor({ proposalId }: { proposalId: string }) {
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, proposalId });
           form.reset();
+          setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear);
         })}
       >
         <Title order={2} className={classes.areaTitle}>
           Create objection
         </Title>
-        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+        <BlockEditor clearTrigger={clearTrigger} holder="blockeditor-container" onChange={(data:OutputData) => {
             form.setFieldValue('body', JSON.stringify(data))}}  />
 
         <Button type="submit" mt="sm">
@@ -87,3 +89,5 @@ export function ObjectionEditor({ proposalId }: { proposalId: string }) {
     </div>
   );
 }
+
+export default ObjectionEditor;

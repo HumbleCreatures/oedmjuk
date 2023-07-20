@@ -4,23 +4,34 @@ import EditorJS, { OutputData } from "@editorjs/editorjs";
 import { EDITOR_TOOLS } from "./EditorTools";
 
 //props
+export enum ClearTriggerValues {
+  clear = 'clear',
+  clearAgain = 'clearAgain'
+}
+
 export type BlockEditorInput = {
   data?: OutputData;
   onChange(val: OutputData): void;
   holder: string;
+  clearTrigger?: ClearTriggerValues;
 };
 
-export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
+export const BlockEditor = ({ data, onChange, holder, clearTrigger }: BlockEditorInput) => {
   //add a reference to editor
-  const ref = useRef<EditorJS>();
+  const editorRef = useRef<EditorJS>();
 
   const [currentData, setCurrentData] = React.useState<OutputData | undefined>(undefined);
-
+  useEffect(() => {
+    console.log("TRIGGER SHOULD BE CALLED", clearTrigger);
+    if (clearTrigger && editorRef.current) {     
+      editorRef.current?.clear();
+    }
+  }, [clearTrigger]);
   //initialize editorjs
   useEffect(() => {
     //initialize editor if we don't have a reference
     setCurrentData(data);
-    if (!ref.current) {
+    if (!editorRef.current) {
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
@@ -32,22 +43,22 @@ export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
         },
       });
       
-      ref.current = editor;
+      editorRef.current = editor;
     }
 
     //add a return function handle cleanup
     return () => {
-      if (ref.current && ref.current.destroy) {
-        ref.current.destroy();
+      if (editorRef.current && editorRef.current.destroy) {
+        editorRef.current.destroy();
       }
     };
   }, []);
 
   useEffect(() => { 
-    if (ref.current && ref.current.render && data) {
+    if (editorRef.current && editorRef.current.render && data) {
       if(!currentData) {
         setCurrentData(data);
-        void ref.current.render(data);
+        void editorRef.current.render(data);
       }
       
     }
@@ -57,9 +68,9 @@ export const BlockEditor = ({ data, onChange, holder }: BlockEditorInput) => {
   return <div id={holder} />;
 };
 
-function AnotherBlockEditor({ data, onChange, holder }: BlockEditorInput) {
+function AnotherBlockEditor(props: BlockEditorInput) {
 return <div style={{borderColor: '#ced4da', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.25rem', paddingLeft: 10, paddingRight: 10 }}>
-  <BlockEditor data={data} onChange={onChange} holder={holder} />
+  <BlockEditor {...props} />
 </div>
 }
 export default AnotherBlockEditor;

@@ -36,7 +36,7 @@ const useStyles = createStyles((theme) => ({
     color: theme.black,
     fontSize: theme.fontSizes.xxl,
   },
-  editorWrapper: {
+  editorWrapper: { 
     marginTop: theme.spacing.md,
   },
   inlineText: {

@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
-import { ObjectionEditor } from "../../../../../components/ObjectionEditor";
+
 import { ListOfObjections } from "../../../../../components/ObjectionList";
 import { ProposalStates } from "../../../../../utils/enums";
 import { useState } from "react";
@@ -29,6 +29,13 @@ import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import Link from "next/link";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
+import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
+import { useGeneralStyles } from "../../../../../styles/generalStyles";
+import { ProposalStatusBadge } from "../../../../../components/ProposalBadge";
+import dynamic from "next/dynamic";
+const DynamicObjectionEditor = dynamic(() => import('../../../../../components/ObjectionEditor'), {
+  ssr: false,
+})
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -68,7 +75,8 @@ function ProposalView({
   proposalId: string;
 }) {
   const { classes } = useStyles();
-  const spaceReslt = api.space.getSpace.useQuery({ spaceId });
+  const { classes: generalClasses } = useGeneralStyles();
+  const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const proposalResult = api.proposal.getProposal.useQuery({
     itemId: proposalId,
   });
@@ -88,16 +96,16 @@ function ProposalView({
     voteAgain?: boolean;
   }>({ myPickChosen: false });
 
-  if (proposalResult.isLoading || spaceReslt.isLoading)
-    return <div>loading...</div>;
-
-  if (!spaceReslt.data) return <div>Could not load space</div>;
-  const { space, isMember } = spaceReslt.data;
-
+  if (spaceResult.isLoading) return <SpaceLoader />;
+  if (!spaceResult.data) return <div>Could not load space</div>;
+  const { space, isMember } = spaceResult.data;
+  
+  if (proposalResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
   if (!proposalResult.data) return <div>Could not load proposal</div>;
+  
   const { proposal, votingResult, myPickResults } = proposalResult.data;
   if (!proposal) return <div>Could not load proposal</div>;
-  const { objections, proposalState, title, body, participants } = proposal;
+  const { objections, proposalState, participants } = proposal;
 
   if (proposal.proposalState === ProposalStates.VoteClosed) {
     if (!votingResult) return <div>Could not load voting result</div>;
@@ -109,18 +117,14 @@ function ProposalView({
       numberOfRejects,
       numberOfMissedVotes,
     } = votingResult;
+    
     return (
       <AppLayout>
         <Container size="sm">
           <SpaceNavBar space={space} isMember={isMember} />
           <ProposalInfo proposal={proposal} />
 
-          <Container size="sm" className={classes.area}>
-            <Title order={3} className={classes.areaTitle}>
-              Objections
-            </Title>
-            <ListOfObjections objections={objections || []} />
-          </Container>
+            
           <Container size="sm" className={classes.area}>
             <Title order={3} className={classes.areaTitle}>
               Vote results
@@ -190,6 +194,8 @@ function ProposalView({
               experts did not vote
             </Text>
           </Container>
+
+          <ListOfObjections objections={objections || []} defaultTab="resolved" />
         </Container>
       </AppLayout>
     );
@@ -203,17 +209,11 @@ function ProposalView({
 
         {proposalState === ProposalStates.ProposalOpen && (
           <Container size="sm" className={classes.bodyArea}>
-            <ObjectionEditor proposalId={proposalId} />
+            <DynamicObjectionEditor proposalId={proposalId} />
           </Container>
         )}
 
-        {proposalState !== ProposalStates.ProposalCreated && 
-        (<Container size="sm" className={classes.area}>
-          <Title order={3} className={classes.areaTitle}>
-            Objections
-          </Title>
-          <ListOfObjections objections={objections || []} />
-        </Container>)}
+
 
         {proposalState === ProposalStates.ObjectionsResolved && (
           <>
@@ -324,6 +324,11 @@ function ProposalView({
             </Container>
           </>
         )}
+
+      {proposalState !== ProposalStates.ProposalCreated && 
+        (
+          <ListOfObjections objections={objections || []} defaultTab={proposalState === ProposalStates.ObjectionsResolved ? "resolved" :"open"} />
+        )}
       </Container>
     </AppLayout>
   );
@@ -376,6 +381,7 @@ function ProposalInfo({
   });
 
   const { classes } = useStyles();
+  const { classes: generalClasses } = useGeneralStyles();
   const {
     title,
     body,
@@ -389,53 +395,44 @@ function ProposalInfo({
   const hasObjections = objections.filter((o) => !o.resolvedAt).length > 0;
   return (
     <>
-      <Container size="sm">
-        <Title order={2} className={classes.mainTitle}>
-          {title}
-        </Title>
-      </Container>
-
-      <Container size="sm" className={classes.area}>
+      <Container size="sm" className={generalClasses.area}>
+          <div className={generalClasses.metaArea}>
         <Group position="apart">
-          <Title order={2} className={classes.areaTitle}>
-            Proposal
-          </Title>
-          <ThemeIcon size="xl">
+        <Group>
+        <ThemeIcon size="xl">
             <IconNotebook />
           </ThemeIcon>
-        </Group>
-        <div>
-          <Text fz="sm" fw={300}>
-            State:{" "}
-            <Text fz="sm" fw={500} className={classes.inlineText}>
-              {proposalState}
-            </Text>
-          </Text>
-          <Text fz="sm" fw={300}>
-            Created{" "}
+          <div>
+          <Text fz="sm" fw={500} >Proposal</Text>
+        
+          <Text fz="sm" fw={300} className={generalClasses.inlineText}>
+            created{" "}
             <Text fz="sm" fw={500} className={classes.inlineText}>
               {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
             </Text>
           </Text>
 
+          <Text fz="sm" className={generalClasses.inlineText}>
+            {" "}by{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              <UserLinkWithData userId={creatorId} />
+            </Text>
+          </Text>
+
           {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
-            <Text fz="sm" fw={300}>
-              Last updated{" "}
+            <Text fz="sm" fw={300} className={generalClasses.inlineText}>
+              ,{" "}last updated{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
                 {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
               </Text>
             </Text>
           )}
 
-          <Text fz="sm">
-            By{" "}
-            <Text fz="sm" fw={500} className={classes.inlineText}>
-              <UserLinkWithData userId={creatorId} />
-            </Text>
-          </Text>
+          
         </div>
-
-        <Link
+          </Group>
+          <Group>
+          <Link
           href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}/edit`}
           passHref
         >
@@ -443,7 +440,7 @@ function ProposalInfo({
         </Link>
 
         {proposalState === ProposalStates.ProposalOpen && hasObjections && (
-          <Button disabled={true}>Start voting round</Button>
+          <Button disabled={true}>Start voting</Button>
         )}
 
         {proposalState === ProposalStates.ProposalOpen && !hasObjections && (
@@ -452,7 +449,7 @@ function ProposalInfo({
               closeObjectionRound.mutate({ proposalId: proposal.id })
             }
           >
-            Start voting round
+            Start voting
           </Button>
         )}
 
@@ -465,12 +462,21 @@ function ProposalInfo({
         )}
 
         {proposalState === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId:proposal.id })}>
-                End vote and show results
+                End vote
               </Button>)}
+          </Group>
+          
+        </Group>
+        </div>
 
-      </Container>
-      <Container size="sm" className={classes.bodyArea}>
+        <div className={classes.bodyArea}>
+          <Group position="apart">
+        
+      <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
+      <ProposalStatusBadge state={proposalState} />
+        </Group>
         {body && <EditorJsRenderer data={body} />}
+        </div>
       </Container>
     </>
   );

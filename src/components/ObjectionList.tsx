@@ -8,7 +8,9 @@ import {
   SimpleGrid,
   createStyles,
   Title,
-  Textarea
+  Textarea,
+  Container,
+  Tabs
 } from "@mantine/core";
 import { ProposalObjection } from "@prisma/client";
 
@@ -18,8 +20,8 @@ import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
 import { IconAlertCircle } from "@tabler/icons";
 import { DateTime } from "luxon";
-import { OutputData } from "@editorjs/editorjs";
 import EditorJsRenderer from "./EditorJsRenderer";
+import { useGeneralStyles } from "../styles/generalStyles";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -49,15 +51,101 @@ const useStyles = createStyles((theme) => ({
   inlineText: {
     display: "inline",
   },
+  tabNav: {
+    marginBottom: theme.spacing.md,
+  }
 }));
 
-export function ListOfObjections({ objections }: { objections: ProposalObjection[] }) {
+export function ListOfObjections({ objections, defaultTab }: { objections: ProposalObjection[], defaultTab: 'open' | 'resolved' }) {
+  const { classes: generalClasses } = useGeneralStyles();
+
+  const openObjections = objections.filter((objection) => !objection.resolvedAt);
+  const resolvedObjections = objections.filter((objection) => !!objection.resolvedAt);
+
   return (
-    <SimpleGrid cols={1}>
-      {objections.map((objection) => (
+    <Container size="sm" className={generalClasses.clearArea}>
+          <Title order={3} className={generalClasses.sectionTitle}>
+            Objections
+          </Title>
+          <Tabs defaultValue={defaultTab} 
+          styles={(theme) => ({
+            tabsList: {
+              border: 'none',
+            },
+            tab: { 
+              color: theme.white,
+              marginBottom: theme.spacing.xs,
+              borderColor: theme.colors.earth[2],
+              borderRadius: 0,
+              '&[right-section]': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+               },
+              '&:hover': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.05),
+                borderColor: theme.colors.earth[2],
+              },
+              '&[data-active]': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+                borderColor: theme.white,
+                color: theme.white,
+              },
+              '&[data-active]:hover': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+                borderColor: theme.white,
+                color: theme.white,
+              },
+            }
+          })}>
+      <Tabs.List grow>
+        <Tabs.Tab
+          rightSection={
+            <Badge
+              w={16}
+              h={16}
+              sx={{ pointerEvents: 'none' }}
+              size="xs"
+              p={0}
+              
+            >
+              {openObjections.length}
+            </Badge>
+          }
+          value="open"
+        >
+          Open
+        </Tabs.Tab>
+        <Tabs.Tab value="resolved"
+        rightSection={
+          <Badge
+            w={16}
+            h={16}
+            sx={{ pointerEvents: 'none' }}
+            size="xs"
+            p={0}
+            
+          >
+            {resolvedObjections.length}
+          </Badge>
+        }>Resolved</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="open">
+      <SimpleGrid cols={1}>
+      {openObjections.map((objection) => (
         <Objection key={objection.id} objection={objection} />
       ))}
     </SimpleGrid>
+      </Tabs.Panel>
+      <Tabs.Panel value="resolved">
+      <SimpleGrid cols={1}>
+      {resolvedObjections.map((objection) => (
+        <Objection key={objection.id} objection={objection} />
+      ))}
+    </SimpleGrid>
+      </Tabs.Panel>
+    </Tabs>
+
+    
+    </Container>
   );
 }
 
@@ -88,7 +176,7 @@ export function Objection({ objection }: { objection: ProposalObjection }) {
       <Card.Section withBorder inheritPadding py="xs">
         <Group position="apart">
           <Text fz="sm" fw={300}>
-            Created{" "}
+            Objection created{" "}
             <Text fz="sm" fw={500} className={classes.inlineText}>
               {DateTime.fromJSDate(objection.createdAt)
                 .setLocale("en")
