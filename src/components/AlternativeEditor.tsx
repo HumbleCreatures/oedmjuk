@@ -105,3 +105,5 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
       </form>
   );
 }
+
+export default AlternativeEditor;

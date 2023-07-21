@@ -14,7 +14,6 @@ import {
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
-import { AlternativeEditor } from "../../../../../components/AlternativeEditor";
 import { AlternativeListItem } from "../../../../../components/AlternativeListItem";
 import { SelectionStates } from "../../../../../utils/enums";
 import { IconAlertCircle, IconColorSwatch } from "@tabler/icons";
@@ -25,6 +24,10 @@ import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 import { SelectionStatusBadge } from "../../../../../components/SelectionStatusBadge";
 import { useGeneralStyles } from "../../../../../styles/generalStyles";
 import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
+import dynamic from "next/dynamic";
+const DynamicAlternativeEditor = dynamic(() => import('../../../../../components/AlternativeEditor'), {
+  ssr: false,
+})
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -183,7 +186,7 @@ function SelectionView({
 
         {selection.state === SelectionStates.Created && (
           <Container size="sm" className={classes.bodyArea}>
-            <AlternativeEditor selectionId={selectionId} />
+            <DynamicAlternativeEditor selectionId={selectionId} />
           </Container>
         )}
 
