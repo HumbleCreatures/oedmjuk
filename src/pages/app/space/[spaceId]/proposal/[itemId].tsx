@@ -469,7 +469,7 @@ function ProposalInfo({
         </Group>
         </div>
 
-        <div className={classes.bodyArea}>
+        <div className={generalClasses.bodyArea}>
           <Group position="apart">
         
       <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
@@ -477,7 +477,7 @@ function ProposalInfo({
         </Group>
         {body && <EditorJsRenderer data={body} />}
         </div>
-      </Container>
+      </Container> 
     </>
   );
 }

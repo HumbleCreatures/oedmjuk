@@ -19,7 +19,6 @@ export const useGeneralStyles = createStyles((theme) => ({
     },
     areaTitle: {
       fontSize: theme.fontSizes.md,
-      marginBottom: theme.spacing.xs,
     },
     sectionTitle: {
         fontSize: theme.fontSizes.md,
@@ -41,6 +40,12 @@ export const useGeneralStyles = createStyles((theme) => ({
         marginTop: theme.spacing.md,
         color: theme.white,
         padding: 0
+      },
+      listHeader: {
+        borderBottom: `2px solid ${theme.colors.earth[2]}`,
+        marginTop: theme.spacing.xl,
+        paddingBottom: theme.spacing.md,
+        marginBottom: theme.spacing.xl,
       },
       
       listLinkItem: {

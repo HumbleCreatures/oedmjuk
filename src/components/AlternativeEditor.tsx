@@ -5,6 +5,8 @@ import { api } from "../utils/api";
 
 import { OutputData } from "@editorjs/editorjs";
 import { DynamicBlockEditor } from "./DynamicBlockEditor";
+import { ClearTriggerValues } from "./BlockEditor";
+import { useState } from "react";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -39,6 +41,7 @@ const useStyles = createStyles((theme) => ({
 
 export function AlternativeEditor({ selectionId }: { selectionId: string }) {
   const { classes } = useStyles();
+  const [clearTrigger, setClearTrigger] = useState<ClearTriggerValues>();
 
   const form = useForm({
     initialValues: {
@@ -65,12 +68,13 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
         onSubmit={form.onSubmit((values) => {
           mutation.mutate({ ...values, selectionId });
           form.reset();
+          setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear);
         })}
       >
         <Title order={2} className={classes.areaTitle}>
           Create alternative
         </Title>
-        <TextInput
+        <TextInput 
             label="Title"
             placeholder="Title"
             {...form.getInputProps("title")}
@@ -81,7 +85,7 @@ export function AlternativeEditor({ selectionId }: { selectionId: string }) {
                 Body
               </Text>
         
-        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+        <DynamicBlockEditor clearTrigger={clearTrigger} holder="blockeditor-container" onChange={(data:OutputData) => {
             form.setFieldValue('body', JSON.stringify(data))}}  />
         </div>
 
