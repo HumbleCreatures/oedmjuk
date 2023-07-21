@@ -5,6 +5,7 @@ import { forwardRef } from "react";
 import { api } from "../utils/api";
 import { DateTime } from "luxon";
 import EditorJsRenderer from "./EditorJsRenderer";
+import { SelectionStates } from "../utils/enums";
 
 
 const useStyles = createStyles((theme) => ({
@@ -45,6 +46,7 @@ type AlternativeListItemProps = {
   canVote: boolean;
   currentVotingBalance?: number;
   showResults: boolean;
+  selectionState: string;
 };
 
 export function AlternativeListItem({
@@ -53,6 +55,7 @@ export function AlternativeListItem({
   currentVotingBalance,
   vote,
   showResults,
+  selectionState,
 }: AlternativeListItemProps) {
   const { classes } = useStyles();
     const utils = api.useContext();
@@ -108,6 +111,7 @@ export function AlternativeListItem({
           {alternative.body && <EditorJsRenderer data={alternative.body} />}
           
           </Card.Section>
+          {selectionState !== SelectionStates.Created && (
           <Card.Section withBorder mt="md" inheritPadding py="xs">
         <Group position="apart">
             {showResults && <Text fz="lg" fw={500}>
@@ -138,7 +142,7 @@ export function AlternativeListItem({
             }}        
           />}
         </Group>
-      </Card.Section>
+      </Card.Section>)}
     </Card>
   );
 }

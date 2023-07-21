@@ -67,7 +67,7 @@ function SpaceView({ spaceId }: { spaceId: string }) {
 
   return (
     <AppLayout>
-      <Container size="sm">
+      <Container size="sm"> 
         <SpaceNavBar space={space} isMember={isMember} />
         <Container size="sm" className={generalClasses.clearArea}>
           <Group className={classes.titleWrapper}>

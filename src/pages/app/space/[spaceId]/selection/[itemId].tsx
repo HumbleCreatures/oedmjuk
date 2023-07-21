@@ -217,6 +217,7 @@ function SelectionView({
             {voteResult.data && voteResult.data.data
               ? selection.alternatives.map((alternative) => (
                   <AlternativeListItem
+                    selectionState={state}
                     key={alternative.id}
                     showResults={
                       selection.state === SelectionStates.VoteClosed
@@ -231,6 +232,7 @@ function SelectionView({
                 ))
               : selection.alternatives.map((alternative) => (
                   <AlternativeListItem
+                    selectionState={state}
                     showResults={
                       selection.state === SelectionStates.VoteClosed
                     }
@@ -242,9 +244,6 @@ function SelectionView({
           </SimpleGrid>
         </Container>
 
-        
-
-        
       </Container>
     </AppLayout>
   );
