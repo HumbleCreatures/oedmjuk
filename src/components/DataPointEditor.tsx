@@ -1,5 +1,5 @@
 import { DatePickerInput } from "@mantine/dates";
-import { NumberInput, Alert, Button, SimpleGrid } from "@mantine/core";
+import { NumberInput, Alert, Button, Group, createStyles } from "@mantine/core";
 
 import { IconCalendar } from "@tabler/icons-react";
 
@@ -12,8 +12,15 @@ interface InputValues {
   value: number | undefined;
 }
 
+const useStyles = createStyles((theme) => ({
+  bottomGroup: {
+    alignItems: "flex-end",
+  },
+}));
+
 export function DataPointEditor({ dataIndexId }: { dataIndexId: string }) {
-    const utils = api.useContext();
+  const { classes } = useStyles();  
+  const utils = api.useContext();
     const mutation = api.dataIndex.upsertDataIndexPoint.useMutation({
         onSuccess() {
           void utils.dataIndex.getDataIndex.invalidate({itemId: dataIndexId});
@@ -44,7 +51,7 @@ export function DataPointEditor({ dataIndexId }: { dataIndexId: string }) {
       mutation.mutate({datestamp: values.datestamp, value: values.value, dataIndexId: dataIndexId});
     })}
   >
-    <SimpleGrid cols={1}>
+    <Group position="apart" grow className={classes.bottomGroup}>
       <DatePickerInput
         icon={<IconCalendar size="1.1rem" stroke={1.5} />}
         label="Pick date"
@@ -53,20 +60,18 @@ export function DataPointEditor({ dataIndexId }: { dataIndexId: string }) {
       />
 
       <NumberInput
-        mt="xl"
-        label="Number value for the chosen date"
-        placeholder="NumberInput with custom layout"
-        description="If there is a value for the chosen date, it will be overwritten."
+        label="Value for the chosen date"
+        placeholder="0"
         {...form.getInputProps("value")}
       />
-      <div><Button type="submit" mt="sm">
+      <Button type="submit" mt="sm">
             Add point
           </Button>
-          </div>
+         
 
      {mutation.error && 
            <Alert icon={<IconAlertCircle size={16} />} title="Bummer!" color="red">Something went wrong! {mutation.error.message}</Alert>}
-        </SimpleGrid>
+        </Group>
         </form>
   );
 }

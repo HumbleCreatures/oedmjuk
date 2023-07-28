@@ -1,13 +1,16 @@
 import { useRouter } from 'next/router'
 import { type NextPage } from "next";
 import AppLayout from "../../../../components/AppLayout";
-import { Container, Title, SimpleGrid, createStyles, Card, Text } from "@mantine/core";
+import { Container, Title, SimpleGrid, createStyles, Card, Text, Group } from "@mantine/core";
 import { api } from "../../../../utils/api";
 import { SpaceNavBar } from '../../../../components/SpaceNavBar';
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { DateTime } from "luxon";
 import Link from 'next/link';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { SpaceLoader } from '../../../../components/Loaders/SpaceLoader';
+import { useGeneralStyles } from '../../../../styles/generalStyles';
+import { IconChartBar } from '@tabler/icons';
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -22,31 +25,53 @@ const useStyles = createStyles((theme) => ({
   },
   inlineText: {
     display: "inline",
+  },
+  title: {
+    fontSize: theme.fontSizes.md,
+  },
+  topGroup: {
+    alignItems: "flex-start",
   }
 }));
 
 function SpaceView({spaceId}: {spaceId: string}) {
   const { classes } = useStyles();
-  const spaceRequest = api.space.getSpace.useQuery({spaceId});
-  const dataIndexRequest = api.dataIndex.getDataIndicesForSpace.useQuery({spaceId});
-  if(spaceRequest.isLoading || dataIndexRequest.isLoading) return (<div>loading...</div>);
-  if(spaceRequest.error || dataIndexRequest.error) return (<div>error</div>);
-  if(spaceRequest.data === undefined || dataIndexRequest.data === undefined) return (<div>not found</div>);
-  const {space, isMember} = spaceRequest.data;
+  const { classes: generalClasses } = useGeneralStyles();
+
+  const spaceResult = api.space.getSpace.useQuery({spaceId});
+  const dataIndexResult = api.dataIndex.getDataIndicesForSpace.useQuery({spaceId});
+  if (spaceResult.isLoading) return <SpaceLoader />;
+  if (!spaceResult.data) return <div>Could not load space</div>;
+  const { space, isMember } = spaceResult.data;
+  
+  if (dataIndexResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
+  if (!dataIndexResult.data) return <div>Could not load data index</div>;
 
   return (
     <AppLayout>
       <Container size="sm">
       <SpaceNavBar space={space} isMember={isMember}/>
-      <div className={classes.area}>
-        <Title order={2} className={classes.areaTitle}>Data Indices</Title>
+      <Container size="sm" className={generalClasses.clearArea}>
+        <Group className={generalClasses.listHeader}>
+        
+        <IconChartBar />
+        <Title order={2} className={classes.title}>Data indices</Title>
+        </Group>
+        </Container>
+    
         <SimpleGrid cols={1}>
-            {dataIndexRequest.data.map(({dataIndex, dataIndexPoints}) => (<Link href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`} key={dataIndex.id}>
+            {dataIndexResult.data.map(({dataIndex, dataIndexPoints}) => (<Link href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`} key={dataIndex.id} className={generalClasses.listLinkItem}>
               <Card>
                 <Card.Section mt="md" inheritPadding py="xs">
+                  <Group position="apart" className={classes.topGroup}>
+            <div>
             <Text fz="lg" fw={500}>{dataIndex.title}</Text>
             <div>
-
+                  <Text fz="sm" fw={300}>
+                    Measured in  <Text fz="sm" fw={500} className={classes.inlineText}>
+                      {dataIndex.unitType.unitName}
+                      </Text>
+                  </Text>
                   <Text fz="sm" fw={300}>
                     Created  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(dataIndex.createdAt)
                       .setLocale("en")
@@ -56,13 +81,14 @@ function SpaceView({spaceId}: {spaceId: string}) {
                   {dataIndex.updatedAt && dataIndex.updatedAt.getTime() !== dataIndex.createdAt.getTime() && <Text fz="sm" fw={300}>
                     Last updated  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(dataIndex.updatedAt)
                       .setLocale("en")
-                      .toRelative()}</Text>
+                      .toRelative()}</Text> 
                   </Text>}
 
                 </div>
-                </Card.Section>
-                <Card.Section mt="md" inheritPadding py="xs" withBorder>
-                <div style={{ width: 500, height: 300}}>
+                </div>
+
+
+                <div style={{ width: 350, height: 150}}>
                 <ResponsiveContainer width="100%" height="100%">
         <BarChart
           width={500}
@@ -79,17 +105,16 @@ function SpaceView({spaceId}: {spaceId: string}) {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Legend />
           <Bar dataKey="value" name={dataIndex.unitType.unitName} fill="#5b6c41" />
         </BarChart>
       </ResponsiveContainer></div>
+      </Group>
                 </Card.Section>
 
             </Card></Link>))}
         </SimpleGrid>
 
 
-      </div>
       </Container>
     </AppLayout>
   );
