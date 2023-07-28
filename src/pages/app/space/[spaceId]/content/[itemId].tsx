@@ -80,8 +80,8 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
                       .toRelative()}</Text>
                   </Text>
 
-                  {updatedAt && updatedAt.getTime() !== createdAt.getTime() && <Text fz="sm" fw={300} className={classes.inlineText}>
-                  {" "} last updated  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(updatedAt)
+                  {updatedAt && updatedAt.getTime() !== createdAt.getTime() && <Text fz="sm" fw={300}>
+                  last updated  <Text fz="sm" fw={500} className={classes.inlineText}>{DateTime.fromJSDate(updatedAt)
                       .setLocale("en")
                       .toRelative()}</Text>
                   </Text>}

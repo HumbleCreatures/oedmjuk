@@ -20,7 +20,7 @@ const useStyles = createStyles((theme) => ({
   },
   areaTitle: {
     fontSize: theme.fontSizes.md,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.md, 
   }
 }));
 

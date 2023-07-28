@@ -8,19 +8,24 @@ import {
   createStyles,
   Group,
   ThemeIcon,
-  Badge,
   Button,
   List,
+  Badge,
+  SimpleGrid,
+  Tabs,
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import { IconCalendarEvent, IconChartBar, IconColorSwatch, IconNotebook, IconRecycle, IconUserCheck, IconUserX } from "@tabler/icons";
 import { DateTime } from "luxon";
-import { UserLinkWithData } from "../../../../../components/UserButton";
+import { UserLinkWithData, UserLinkWithDataWhite } from "../../../../../components/UserButton";
 import Link from "next/link";
 import { useState } from "react";
 import { IconUserQuestion } from "@tabler/icons-react";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
+import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
+import { useGeneralStyles } from "../../../../../styles/generalStyles";
+import { CalendarBadge } from "../../../../../components/CalendarEventStatusBadge";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -50,10 +55,22 @@ const useStyles = createStyles((theme) => ({
   inlineText: {
     display: "inline",
   },
+  dateText: {
+    display: "inline",
+    color: theme.colors.earth[5],
+  },
+  agendaTitle: {
+    borderTop: `2px solid ${theme.colors.earth[2]}`,
+    fontSize: theme.fontSizes.sm,
+    paddingTop: theme.spacing.xs,
+    paddingBottom: theme.spacing.md,
+  },
+
 }));
 
 function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   const { classes } = useStyles();
+  const { classes: generalClasses } = useGeneralStyles();
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const calendarResult = api.calendarEvents.getCalendarEvent.useQuery({
     itemId,
@@ -75,71 +92,106 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
   );
   const [changeAttendee, setChangeAttendee] = useState<boolean>(false);
 
-  if (spaceResult.isLoading) return <div>loading...</div>;
-  if (calendarResult.isLoading) return <div>loading...</div>;
-  if (!spaceResult.data || !calendarResult.data)
-    return <div>Could not find calendar event</div>;
-  if (!calendarResult.data || !calendarResult.data.calendarEvent)
-    return <div>calendar event not found</div>;
+  if (spaceResult.isLoading) return <SpaceLoader />;
+  if (!spaceResult.data) return <div>Could not load space</div>;
   const { space, isMember } = spaceResult.data;
+  
+  if (calendarResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
+  if (!calendarResult.data) return <div>Could not load calendar event</div>;
+
+
   const { createdAt, updatedAt, title, body, startAt, endAt, creatorId } =
     calendarResult.data.calendarEvent;
   const amIAttending = calendarResult.data.myAttendee?.isAttending;
+  const {notAnswered, attending, notAttending} = calendarResult.data;
 
   return (
     <AppLayout>
       <Container size="sm">
         <SpaceNavBar space={space} isMember={isMember} />
-        <Container size="sm">
-          <Title order={2} className={classes.mainTitle}>
-            {title}
-          </Title>
-        </Container>
-
-        <Container size="sm" className={classes.area}>
-          <Group position="apart">
-            <Title order={2} className={classes.areaTitle}>
-              Calendar event
-            </Title>
-            <ThemeIcon size="xl">
-              <IconCalendarEvent />
-            </ThemeIcon>
-          </Group>
+        <Container size="sm" className={generalClasses.area}>
+          <div className={generalClasses.metaArea}>
+        <Group position="apart" className={generalClasses.topGroup}>
+          <Group className={generalClasses.topGroup}>
+        <ThemeIcon size="xl">
+        <IconCalendarEvent />
+          </ThemeIcon>
           <div>
-            <Group position="apart">
-              {" "}
-              <FormattedEventDateAndTime startAt={startAt} endAt={endAt} />{" "}
-              <CalendarBadge startAt={startAt} endAt={endAt} />
-            </Group>
-            <Text fz="sm" fw={300}>
-              Created{" "}
-              <Text fz="sm" fw={500} className={classes.inlineText}>
-                {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
-              </Text>
+          <Text fz="sm" fw={500} >Calendar Event</Text>
+        
+          <Text fz="sm" fw={300} className={generalClasses.inlineText}>
+            created{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
             </Text>
-            {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
-              <Text fz="sm" fw={300}>
-                Last updated{" "}
-                <Text fz="sm" fw={500} className={classes.inlineText}>
-                  {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
-                </Text>
-              </Text>
-            )}
-            <Text fz="sm">
-              By{" "}
-              <Text fz="sm" fw={500} className={classes.inlineText}>
-                <UserLinkWithData userId={creatorId} />
-              </Text>
-            </Text>
+          </Text>
 
-            <Link href={`/app/space/${spaceId}/calendarEvent/${itemId}/edit`} passHref>
+          <Text fz="sm" className={generalClasses.inlineText}>
+            {" "}by{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              <UserLinkWithData userId={creatorId} />
+            </Text>
+          </Text>
+
+          {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
+            <Text fz="sm" fw={300}>
+             last updated{" "}
+              <Text fz="sm" fw={500} className={classes.inlineText}>
+                {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
+              </Text>
+            </Text>
+          )}
+
+          
+        </div>
+          </Group>
+          <Group position="right" spacing="xs" className={generalClasses.topGroup}>
+          <Link href={`/app/space/${spaceId}/calendarEvent/${itemId}/edit`} passHref>
               <Button component="a">Edit</Button>
             </Link>
+
+            {amIAttending === undefined || changeAttendee ? (<><Button
+              onClick={() =>
+                attendEventMutation.mutate({ calendarEventId: itemId })
+              }
+            >
+              Attend
+            </Button>
+            <Button
+              onClick={() =>
+                notAttendEventMutation.mutate({ calendarEventId: itemId })
+              }
+            >
+              Not attending
+            </Button></>
+        ) : (
+            <Button onClick={() => {setChangeAttendee(true)}}>Change status</Button>
+        )}
+          </Group>
+          
+        </Group>
+        </div>
+        
+
+        <div className={generalClasses.bodyArea}>
+          <Group position="apart" className={generalClasses.topGroup}>
+          <div>
+          <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
+          <FormattedEventDateAndTime startAt={startAt} endAt={endAt} />
           </div>
-        </Container>
-        <Container size="sm" className={classes.bodyArea}>{body && <EditorJsRenderer data={body} />}</Container>
-        <Container size="sm" className={classes.area}>
-          <Title order={2} className={classes.areaTitle}>
+          <SimpleGrid cols={1} spacing="xs">
+        <CalendarBadge startAt={startAt} endAt={endAt} />
+        {amIAttending
+              ? <Badge color="green">Attending</Badge>
+              : <Badge color="red">Not attending</Badge>}
+        </SimpleGrid>
+        </Group>
+        
+        {body && <EditorJsRenderer data={body} />}
+        </div>
+
+        <div className={generalClasses.bodyArea}>
+          <Title order={3} className={classes.agendaTitle}>
             Agenda
           </Title>
           <List
@@ -211,40 +263,90 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
                 <Link href={`/app/space/${calendarResult.data.calendarEvent.feedbackRound.spaceId}/feedback/${calendarResult.data.calendarEvent.feedbackRound.id}`}>{calendarResult.data.calendarEvent.feedbackRound.title}</Link>
               </List.Item>
           </List>}
+        </div>
+
         </Container>
 
-        {amIAttending === undefined || changeAttendee ? (
-          <Container size="sm" className={classes.area}>
-            <Button
-              onClick={() =>
-                attendEventMutation.mutate({ calendarEventId: itemId })
-              }
-            >
-              Attend
-            </Button>{" "}
-            <Button
-              onClick={() =>
-                notAttendEventMutation.mutate({ calendarEventId: itemId })
-              }
-            >
-              Not attending
-            </Button>
-          </Container>
-        ) : (
-          <Container size="sm" className={classes.area}>
-            <Group position="apart">
-            <Text fz="sm" fw={500}>{amIAttending
-              ? "You are attending this event"
-              : "You are NOT tending this event"}</Text>
-            <Button onClick={() => {setChangeAttendee(true)}}>Change</Button>
-            </Group>
-          </Container>
-        )}
-        <Container size="sm" className={classes.area}>
-          <Title order={2} className={classes.areaTitle}>
-            Attending
+
+        <Container size="sm" className={generalClasses.clearArea}>
+          <Title order={3} className={generalClasses.sectionTitle}>
+            Participants
           </Title>
-          <List
+          <Tabs 
+          styles={(theme) => ({
+            tabsList: {
+              border: 'none',
+            },
+            tab: { 
+              color: theme.white,
+              marginBottom: theme.spacing.xs,
+              borderColor: theme.colors.earth[2],
+              borderRadius: 0,
+              '&[right-section]': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+               },
+              '&:hover': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.05),
+                borderColor: theme.colors.earth[2],
+              },
+              '&[data-active]': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+                borderColor: theme.white,
+                color: theme.white,
+              },
+              '&[data-active]:hover': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+                borderColor: theme.white,
+                color: theme.white,
+              },
+            }
+          })}>
+      <Tabs.List grow>
+        <Tabs.Tab
+          rightSection={
+            <Badge
+              w={16}
+              h={16}
+              sx={{ pointerEvents: 'none' }}
+              size="xs"
+              p={0}
+              
+            >
+              {attending.length}
+            </Badge>
+          }
+          value="Attending"
+        >
+          Attending
+        </Tabs.Tab>
+        <Tabs.Tab value="absent"
+        rightSection={
+          <Badge
+            w={16}
+            h={16}
+            sx={{ pointerEvents: 'none' }}
+            size="xs"
+            p={0}
+            
+          >
+            {notAttending.length}
+          </Badge>
+        }>Absent</Tabs.Tab>
+        <Tabs.Tab value="participants"
+        rightSection={
+          <Badge
+            w={16}
+            h={16}
+            sx={{ pointerEvents: 'none' }}
+            size="xs"
+            p={0}
+          >
+            {notAnswered.length}
+          </Badge>
+        }>Not answered</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="attending">
+      <List
             spacing="xs"
             size="sm"
             center
@@ -255,18 +357,14 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             }
           >
             {calendarResult.data.attending.map((attendee) => (
-              <List.Item key={attendee.id}>
-                <UserLinkWithData userId={attendee.userId} />
+              <List.Item key={attendee.id}  >
+                <UserLinkWithDataWhite userId={attendee.userId} />
               </List.Item>
             ))}
           </List>
-        </Container>
-
-        <Container size="sm" className={classes.area}>
-          <Title order={2} className={classes.areaTitle}>
-            Not attending
-          </Title>
-          <List
+      </Tabs.Panel>
+      <Tabs.Panel value="absent">
+      <List
             spacing="xs"
             size="sm"
             center
@@ -278,17 +376,13 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
           >
             {calendarResult.data.notAttending.map((attendee) => (
               <List.Item key={attendee.id}>
-                <UserLinkWithData userId={attendee.userId} />
+                <UserLinkWithDataWhite userId={attendee.userId} />
               </List.Item>
             ))}
           </List>
-        </Container>
-
-        <Container size="sm" className={classes.area}>
-          <Title order={2} className={classes.areaTitle}>
-            Not answered
-          </Title>
-          <List
+      </Tabs.Panel>
+      <Tabs.Panel value="participants">
+      <List
             spacing="xs"
             size="sm"
             center
@@ -300,11 +394,15 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
           >
             {calendarResult.data.notAnswered.map((member) => (
               <List.Item key={member.id}>
-                <UserLinkWithData userId={member.userId} />
+                <UserLinkWithDataWhite userId={member.userId} />
               </List.Item>
             ))}
           </List>
-        </Container>
+      </Tabs.Panel>
+    </Tabs>
+
+    
+    </Container>
       </Container>
     </AppLayout>
   );
@@ -333,7 +431,7 @@ function FormattedEventDateAndTime({
     if (currentTime.getDate() === startAt.getDate()) {
       if (startAt.getDate() === endAt.getDate()) {
         return (
-          <Text fz="sm" fw={500}>
+          <Text fz="sm" fw={500} className={classes.dateText}>
             Today
             <Text fz="sm" fw={500} className={classes.inlineText}>
               {" "}
@@ -348,7 +446,7 @@ function FormattedEventDateAndTime({
       } else {
         return (
           <div>
-            <Text fz="sm" fw={300}>
+            <Text fz="sm" fw={300} className={classes.dateText}>
               Today
               <Text fz="sm" fw={500} className={classes.inlineText}>
                 {" "}
@@ -370,7 +468,7 @@ function FormattedEventDateAndTime({
 
   if (startAt.getDate() === endAt.getDate()) {
     return (
-      <Text fz="sm" fw={500}>
+      <Text fz="sm" fw={500} className={classes.dateText}>
         {DateTime.fromJSDate(endAt).toFormat("DDDD")}{" "}
         {DateTime.fromJSDate(startAt).toFormat("HH:mm")} -{" "}
         {DateTime.fromJSDate(startAt).toFormat("HH:mm")}
@@ -380,27 +478,15 @@ function FormattedEventDateAndTime({
 
   return (
     <div>
-      <Text fz="sm" fw={500}>
+      <Text fz="sm" fw={500} className={classes.dateText}>
         {DateTime.fromJSDate(startAt).toFormat("DDDD HH:mm")}
       </Text>
 
-      <Text fz="sm" fw={500}>
+      <Text fz="sm" fw={500} className={classes.dateText}>
         {DateTime.fromJSDate(endAt).toFormat("DDDD HH:mm")}
       </Text>
     </div>
   );
 }
 
-function CalendarBadge({ startAt, endAt }: { startAt: Date; endAt: Date }) {
-  const currentTime = new Date();
-  if (currentTime.getTime() < startAt.getTime()) {
-    if (currentTime.getDate() === startAt.getDate()) {
-      return <Badge>Today</Badge>;
-    }
-    return <></>;
-  }
-  if (currentTime.getTime() > endAt.getTime()) return <Badge>Passed</Badge>;
-  if (currentTime.getTime() < endAt.getTime()) return <Badge>Ongoing</Badge>;
 
-  return <></>;
-}

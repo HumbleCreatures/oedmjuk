@@ -420,8 +420,8 @@ function ProposalInfo({
           </Text>
 
           {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
-            <Text fz="sm" fw={300} className={generalClasses.inlineText}>
-              ,{" "}last updated{" "}
+            <Text fz="sm" fw={300} >
+              last updated{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
                 {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
               </Text>

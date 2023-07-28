@@ -58,5 +58,8 @@ export const useGeneralStyles = createStyles((theme) => ({
           borderLeft: `0.5rem solid ${theme.colors.earth[2]}`,
           paddingLeft: '0.5rem', 
         }
+      },
+      topGroup: {
+        alignItems: "flex-start",
       }
   }));

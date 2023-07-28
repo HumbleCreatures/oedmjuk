@@ -92,7 +92,7 @@ function SelectionView({
   const { space, isMember } = spaceResult.data;
   
   if (selectionResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
-  if (!selectionResult.data) return <div>Could not load proposal</div>;
+  if (!selectionResult.data) return <div>Could not load selection</div>;
 
   const selection = selectionResult.data;
   if (!selection) return <div>Could not load selection</div>;
@@ -136,8 +136,8 @@ function SelectionView({
           </Text>
 
           {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
-            <Text fz="sm" fw={300} className={generalClasses.inlineText}>
-              ,{" "}last updated{" "}
+            <Text fz="sm" fw={300}>
+              last updated{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
                 {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
               </Text>

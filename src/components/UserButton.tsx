@@ -22,6 +22,10 @@ import Link from 'next/link';
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
       },
     },
+    whiteText: {
+      color: theme.white,
+      fontWeight: 500,
+    }
   }));
   
   interface UserButtonProps extends UnstyledButtonProps {
@@ -39,6 +43,15 @@ import Link from 'next/link';
     if(!user) return (<div>loading...</div>);
     return <Link href={`/app/user/${userId}`}>
       {user.name as string}
+    </Link>
+  }
+
+  export function UserLinkWithDataWhite ({userId}: {userId: string}) {
+    const { classes } = useStyles();
+    const user = api.user.getUser.useQuery({userId}).data;
+    if(!user) return (<div>loading...</div>);
+    return <Link href={`/app/user/${userId}`} >
+      <span className={classes.whiteText}>{user.name as string}</span>
     </Link>
   }
   
