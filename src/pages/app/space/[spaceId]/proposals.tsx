@@ -21,7 +21,7 @@ import { IconNotebook } from "@tabler/icons";
 import { useGeneralStyles } from "../../../../styles/generalStyles";
 import { Proposal } from "@prisma/client";
 import { ProposalStates } from "../../../../utils/enums";
-import { ProposalStatusBadge } from "../../../../components/ProposalBadge";
+import { ProposalStatusBadge } from "../../../../components/ProposalStatusBadge";
 import { SpaceLoader } from "../../../../components/Loaders/SpaceLoader";
 
 const useStyles = createStyles((theme) => ({

@@ -9,14 +9,17 @@ import {
   Group,
   ThemeIcon,
   Button,
+  Center,
+  Alert,
+  Tabs,
+  Badge,
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import { FeedbackItemEditor } from "../../../../../components/FeedbackItemEditor";
 import { ExternalFeedbackItemCardList } from "../../../../../containers/ExternalFeedbackItemCardList";
 import { MyFeedbackItemCardList } from "../../../../../containers/MyFeedbackItemCardList";
-import { FeedbackColumns } from "../../../../../components/FeedbackColumns";
-import { IconRecycle } from "@tabler/icons";
+import { IconAlertCircle, IconRecycle } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
 import { useEffect, useState } from "react";
@@ -26,6 +29,9 @@ import { NamedFeedbackItemCardList } from "../../../../../containers/NamedFeedba
 import Pusher from 'pusher-js';
 import { env } from "../../../../../env/client.mjs";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
+import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
+import { useGeneralStyles } from "../../../../../styles/generalStyles";
+import { FeedbackRoundStatusBadge } from "../../../../../components/FeedbackRoundStatusBadge";
 
 Pusher.logToConsole = true;
 
@@ -49,6 +55,11 @@ const useStyles = createStyles((theme) => ({
   areaTitle: {
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.xs,
+  },
+  focusTitle: {
+    fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.xs,
+    color: theme.white
   },
   mainTitle: {
     color: theme.white,
@@ -79,6 +90,16 @@ const useStyles = createStyles((theme) => ({
   },
   alignItemsStart: {
     alignItems: "start"
+  },
+  focusArea: {
+    backgroundColor: theme.colors.earth[9],
+    borderRadius: theme.radius.md,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  alertCreated: {
+    marginTop: theme.spacing.md,
   }
 }));
 
@@ -90,6 +111,7 @@ function FeedbackView({
   feedbackRoundId: string;
 }) {
   const { classes } = useStyles();
+  const { classes: generalClasses } = useGeneralStyles();
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const feedbackResult = api.feedback.getFeedbackRound.useQuery({
     itemId: feedbackRoundId,
@@ -110,18 +132,19 @@ function FeedbackView({
   useEffect(() => {
     const channel = pusher.subscribe(EventChannels.FeedbackRound + feedbackRoundId);
     channel.bind(ChannelEventTypes.FeedbackItemMoved, function(data:any) {
-      console.log(JSON.stringify(data));
       void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
     });
   }, [pusher]);
 
-  if (feedbackResult.isLoading || spaceResult.isLoading)
-    return <div>loading...</div>;
 
+  if (spaceResult.isLoading) return <SpaceLoader />;
   if (!spaceResult.data) return <div>Could not load space</div>;
   const { space, isMember } = spaceResult.data;
+  
+  if (feedbackResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
+  if (!feedbackResult.data) return <div>Could not load feedback result</div>;
 
-  if (!feedbackResult.data) return <div>Could not load feedback round</div>;
+
   const feedbackRound = feedbackResult.data;
   const { title, body, createdAt, creatorId, updatedAt, state } = feedbackRound;
 
@@ -129,122 +152,190 @@ function FeedbackView({
     <AppLayout>
       <Container size="sm">
         <SpaceNavBar space={space} isMember={isMember} />
-        <Container size="sm">
-          <Title order={2} className={classes.mainTitle}>
-            {title}
-          </Title>
-        </Container>
 
-        <Container size="sm" className={classes.area}>
-          <Group position="apart">
-            <Title order={2} className={classes.areaTitle}>
-              Feedback round
-            </Title>
-            <ThemeIcon size="xl">
-              <IconRecycle />
-            </ThemeIcon>
-          </Group>
+        <Container size="sm" className={generalClasses.area}>
+          <div className={generalClasses.metaArea}>
+        <Group position="apart" className={generalClasses.topGroup}>
+          <Group className={generalClasses.topGroup}>
+        <ThemeIcon size="xl">
+        <IconRecycle />
+          </ThemeIcon>
           <div>
-            <Text fz="sm" fw={300}>
-              State:{" "}
-              <Text fz="sm" fw={500} className={classes.inlineText}>
-                {state}
-              </Text>
+          <Text fz="sm" fw={500} >Feedback round</Text>
+        
+          <Text fz="sm" fw={300} className={generalClasses.inlineText}>
+            created{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
             </Text>
-            <Text fz="sm" fw={300}>
-              Created{" "}
-              <Text fz="sm" fw={500} className={classes.inlineText}>
-                {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
-              </Text>
-            </Text>
+          </Text>
 
-            {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
-              <Text fz="sm" fw={300}>
-                Last updated{" "}
-                <Text fz="sm" fw={500} className={classes.inlineText}>
-                  {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
-                </Text>
-              </Text>
-            )}
+          <Text fz="sm" className={generalClasses.inlineText}>
+            {" "}by{" "}
+            <Text fz="sm" fw={500} className={classes.inlineText}>
+              <UserLinkWithData userId={creatorId} />
+            </Text>
+          </Text>
 
-            <Text fz="sm">
-              By{" "}
+          {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
+            <Text fz="sm" fw={300}>
+             last updated{" "}
               <Text fz="sm" fw={500} className={classes.inlineText}>
-                <UserLinkWithData userId={creatorId} />
+                {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
               </Text>
             </Text>
-          </div>
-          <Group>
+          )}
+
+          
+        </div>
+          </Group>
+          <Group position="right" spacing="xs" className={generalClasses.topGroup}>
           <Link href={`/app/space/${spaceId}/feedback/${feedbackRoundId}/edit`} passHref>
               <Button component="a">Edit</Button>
             </Link>
+
             {feedbackRound.state === FeedbackRoundStates.Created && <Button onClick={() => startMutation.mutate({itemId: feedbackRoundId})}>Start feedback round</Button>}
             {feedbackRound.state === FeedbackRoundStates.Started &&<Button onClick={() => closeMutation.mutate({itemId: feedbackRoundId})}>Close feedback round</Button>}
-            
-            </Group>
-        </Container>
 
-        <Container size="sm" className={classes.bodyArea}>
-          {body && <EditorJsRenderer data={body} />}
+
+          </Group>
+          
+        </Group>
+        </div>
+        
+        <div className={generalClasses.bodyArea}>
+          <Group position="apart" className={generalClasses.topGroup}>
+          <div>
+          <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
+          
+          </div>
+
+          <FeedbackRoundStatusBadge state={state} />
+
+        </Group>
+        
+        {body && <EditorJsRenderer data={body} />}
+        </div>
         </Container>
-      </Container>
-      <Container size="sm" className={classes.bodyArea}>
-              <Title order={3} className={classes.areaTitle}>
+          {state === FeedbackRoundStates.Created &&  (<Alert className={classes.alertCreated}  icon={<IconAlertCircle size="1rem" />} title="Feedback round is not started yet!" color="gray" variant="filled">
+          You can create feedback items, but they will not be visible to other users until you move den to ongoing or done.
+          External feedback items are always visible.
+          </Alert>)}
+
+          {state === FeedbackRoundStates.Started && <Container size="sm" className={classes.focusArea}>
+              <Center><Title order={3} className={classes.focusTitle}>
                 Current item being discussed
-              </Title>
+              </Title></Center>
 
-              <NamedFeedbackItemCardList
+              <Center>
+                <NamedFeedbackItemCardList
                 feedbackRoundId={feedbackRoundId}
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
                 columnName="Ongoing"
               />
-      </Container>
-      
-      <Container size="sm" className={classes.itemColumnContainer}>
-        <Group position="center" className={classes.alignItemsStart} >
+               
+              </Center>
+      </Container> }
 
-        {feedbackRound.state !== FeedbackRoundStates.Closed && <div className={classes.editColumnSection}>
+      <Tabs 
+          styles={(theme) => ({
+            tabsList: {
+              border: 'none',
+            },
+            tab: { 
+              color: theme.white,
+              marginBottom: theme.spacing.xs,
+              borderColor: theme.colors.earth[2],
+              borderRadius: 0,
+              '&[right-section]': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+               },
+              '&:hover': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.05),
+                borderColor: theme.colors.earth[2],
+              },
+              '&[data-active]': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+                borderColor: theme.white,
+                color: theme.white,
+              },
+              '&[data-active]:hover': {
+                backgroundColor: theme.fn.rgba(theme.white, 0.1),
+                borderColor: theme.white,
+                color: theme.white,
+              },
+            }
+          })}
+          defaultValue="myItems">
+      <Tabs.List grow>
+        <Tabs.Tab
+          rightSection={
+            <Badge
+              w={16}
+              h={16}
+              sx={{ pointerEvents: 'none' }}
+              size="xs"
+              p={0}
+              
+            >
+              0
+            </Badge>
+          }
+          value="myItems"
+        >
+          My items
+        </Tabs.Tab>
+        <Tabs.Tab value="external"
+        rightSection={
+          <Badge
+            w={16}
+            h={16}
+            sx={{ pointerEvents: 'none' }}
+            size="xs"
+            p={0}
+            
+          >
+            0
+          </Badge>
+        }>External feedback</Tabs.Tab>
+        <Tabs.Tab value="archive"
+        rightSection={
+          <Badge
+            w={16}
+            h={16}
+            sx={{ pointerEvents: 'none' }}
+            size="xs"
+            p={0}
+          >
+            0
+          </Badge>
+        }>Archived (Done)</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="myItems">
+      <Group position="center" className={classes.alignItemsStart} >
+
+        {feedbackRound.state !== FeedbackRoundStates.Closed &&
                 <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
-            </div>}
-            <div className={classes.itemColumn}>
-              <Title order={3} className={classes.areaTitle}>
-                My feedback items
-              </Title>
+           }
               <MyFeedbackItemCardList
                 feedbackRoundId={feedbackRoundId}
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
               />
-            </div>
-            
-            
         </Group>
-
-        
-      </Container>
-
-
-      <Container size="sm" className={classes.area}>
-
-              <Title order={3} className={classes.areaTitle}>
-                External feedback items
-              </Title>
-              <Group position="center" className={classes.alignItemsStart}>
+      </Tabs.Panel>
+      <Tabs.Panel value="external">
+      <Group position="center" className={classes.alignItemsStart}>
               <ExternalFeedbackItemCardList
                 feedbackRoundId={feedbackRoundId}
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
               />
               </Group>
-      </Container>
-
-      <Container size="sm" className={classes.area}>
-
-              <Title order={3} className={classes.areaTitle}>
-                Archived items
-              </Title>
-              <Group position="center" className={classes.alignItemsStart}>
+      </Tabs.Panel>
+      <Tabs.Panel value="archive">
+      <Group position="center" className={classes.alignItemsStart}>
               <NamedFeedbackItemCardList
                 feedbackRoundId={feedbackRoundId}
                 feedbackColumns={feedbackRound.feedbackColumns}
@@ -252,7 +343,14 @@ function FeedbackView({
                 columnName="Done"
               />
               </Group>
+      </Tabs.Panel>
+    </Tabs>
+
       </Container>
+
+      
+
+
     </AppLayout>
   );
 }

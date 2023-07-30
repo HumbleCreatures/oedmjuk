@@ -1,4 +1,4 @@
-import { Button, Container, TextInput, createStyles, Title } from "@mantine/core";
+import { Button, Container, TextInput, createStyles, Title, Card } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
 import { DynamicBlockEditor } from "./DynamicBlockEditor";
@@ -10,7 +10,7 @@ const useStyles = createStyles((theme) => ({
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.xs,
   },
-  editorContainer: {
+  cardWrapper: {
     width: 300,
   }
  
@@ -39,7 +39,8 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
   });
 
   return (
-    <Container className={classes.editorContainer}>
+    <Card shadow="sm" padding="lg" radius="md" withBorder mb="md" className={classes.cardWrapper}>
+      <Card.Section p="sm">
         <Title order={3} className={classes.areaTitle}>
               Create feedback item
             </Title>
@@ -60,6 +61,7 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
           Create feedback item
         </Button>
       </form>
-    </Container>
+      </Card.Section>
+    </Card>
   );
 }

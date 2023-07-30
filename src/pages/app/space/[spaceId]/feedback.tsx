@@ -42,7 +42,7 @@ function SpaceView({spaceId}: {spaceId: string}) {
       <Container size="sm">
       <SpaceNavBar space={space} isMember={isMember}/>
       <div className={classes.area}>
-        <Title order={2} className={classes.areaTitle}>Selections</Title>
+        <Title order={2} className={classes.areaTitle}>Feedback</Title>
         <SimpleGrid cols={1}>
             {feedbackRequest.data.map((feedbackRound) => (<Link href={`/app/space/${feedbackRound.spaceId}/feedback/${feedbackRound.id}`} key={feedbackRound.id}><Card>
             <Text fz="lg" fw={500}>{feedbackRound.title}</Text>

@@ -31,7 +31,7 @@ import Link from "next/link";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 import { useGeneralStyles } from "../../../../../styles/generalStyles";
-import { ProposalStatusBadge } from "../../../../../components/ProposalBadge";
+import { ProposalStatusBadge } from "../../../../../components/ProposalStatusBadge";
 import dynamic from "next/dynamic";
 const DynamicObjectionEditor = dynamic(() => import('../../../../../components/ObjectionEditor'), {
   ssr: false,

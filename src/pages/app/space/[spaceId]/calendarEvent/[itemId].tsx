@@ -172,7 +172,6 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
         </Group>
         </div>
         
-
         <div className={generalClasses.bodyArea}>
           <Group position="apart" className={generalClasses.topGroup}>
           <div>
