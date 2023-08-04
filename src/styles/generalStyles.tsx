@@ -61,5 +61,15 @@ export const useGeneralStyles = createStyles((theme) => ({
       },
       topGroup: {
         alignItems: "flex-start",
+      },
+      cardInfoArea: {
+        backgroundColor: theme.colors.gray[4],
+        padding: theme.spacing.sm,
+        marginLeft: '-1rem',
+        borderTopLeftRadius: theme.radius.md,
+        borderTopRightRadius: theme.radius.md,
+      },
+      cardContentArea: {
+        padding: theme.spacing.sm
       }
   }));

@@ -5,12 +5,15 @@ import {
   IconAlignBoxLeftMiddle,
   IconCalendarEvent,
   IconChartBar,
+  IconClipboardList,
   IconColorSwatch,
   IconNotebook,
   IconRecycle,
 } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { formatDateLengthBetween } from "../utils/dateFormaters";
+import { useGeneralStyles } from "../styles/generalStyles";
+import { CleanLoader } from "./Loaders/CleanLoader";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -30,15 +33,19 @@ const useStyles = createStyles((theme) => ({
   areaTitle: {
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.md,
-  }
+  },
+  title: {
+    fontSize: theme.fontSizes.md,
+  },
 }));
 
 export function UserFeed() {
   const feedItemQuery = api.user.getUserFeed.useQuery();
   const { classes } = useStyles();
+  const { classes: generalClasses } = useGeneralStyles();
 
   if (feedItemQuery.isLoading) {
-    return <div>Loading...</div>;
+    return <CleanLoader />;
   }
 
     if (feedItemQuery.isError) {
@@ -347,8 +354,13 @@ export function UserFeed() {
     }
   });
 
-  return <Container size="sm" className={classes.area}>
-     <Title order={2} className={classes.areaTitle}>My Feed</Title>
+  return <Container size="sm" className={generalClasses.clearArea}>
+  <Group className={generalClasses.listHeader}>
+  
+  <IconClipboardList />
+  <Title order={2} className={classes.title}>My feed</Title>
+  </Group>
+
      <SimpleGrid cols={1}>
       {itemCards}
      </SimpleGrid>

@@ -12,6 +12,7 @@ import {
 } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { formatDateLengthBetween } from "../utils/dateFormaters";
+import { FeedItemContentCard } from "./FeedItemContentCard";
 
 const useStyles = createStyles((theme) => ({
   itemTitle: {
@@ -30,7 +31,8 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
 
   const itemCards = feedItems?.map((item) => {
     if (item.content) {
-      return (
+      return <FeedItemContentCard key={item.id} content={item.content} eventItem={item} />;
+      /*return (
         <Link
           href={`/app/space/${item.spaceId}/content/${item.content.id}`}
           key={item.id}
@@ -65,7 +67,7 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
             </Card.Section>
           </Card>
         </Link>
-      );
+      ); */
     }
 
     if (item.calendarEvent) {
