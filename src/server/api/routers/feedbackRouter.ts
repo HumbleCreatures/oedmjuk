@@ -199,8 +199,8 @@ export const feedbackRouter = createTRPCRouter({
         throw new Error("Feedback round not found");
       }
 
-      if (feedbackRound.state !== FeedbackRoundStates.Started) {
-        throw new Error("Feedback round not ready");
+      if (feedbackRound.state === FeedbackRoundStates.Closed) {
+        throw new Error("Feedback round closed, can't add more items.");
       }
 
       const myMembership = await ctx.prisma.spaceMember.findMany({

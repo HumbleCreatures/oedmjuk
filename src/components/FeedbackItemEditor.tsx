@@ -3,6 +3,8 @@ import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
 import { DynamicBlockEditor } from "./DynamicBlockEditor";
 import type { OutputData } from '@editorjs/editorjs';
+import { useState } from "react";
+import { ClearTriggerValues } from "./BlockEditor";
 
 const useStyles = createStyles((theme) => ({
 
@@ -18,6 +20,7 @@ const useStyles = createStyles((theme) => ({
 
 export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string}) {
   const { classes } = useStyles();
+  const [clearTrigger, setClearTrigger] = useState<ClearTriggerValues>();
   const form = useForm({
     initialValues: {
       title: "",
@@ -46,7 +49,9 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
             </Title>
         <form
         onSubmit={form.onSubmit((values) => {
-          mutation.mutate({ ...values, feedbackRoundId })
+          mutation.mutate({ ...values, feedbackRoundId });
+          form.reset();
+          setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear);
         })}
       >
         <TextInput
@@ -55,7 +60,7 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
           {...form.getInputProps("title")}
         />
         <div>Body</div>
-        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+        <DynamicBlockEditor holder="blockeditor-container" clearTrigger={clearTrigger} onChange={(data:OutputData) => {
               form.setFieldValue('body', JSON.stringify(data))}} />
         <Button type="submit" mt="sm">
           Create feedback item

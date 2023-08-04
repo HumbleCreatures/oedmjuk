@@ -13,6 +13,7 @@ import {
   Alert,
   Tabs,
   Badge,
+  SimpleGrid,
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
@@ -32,6 +33,7 @@ import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 import { useGeneralStyles } from "../../../../../styles/generalStyles";
 import { FeedbackRoundStatusBadge } from "../../../../../components/FeedbackRoundStatusBadge";
+import { FeedbackItemCardList } from "../../../../../components/FeedbackItemCardList";
 
 Pusher.logToConsole = true;
 
@@ -100,6 +102,7 @@ const useStyles = createStyles((theme) => ({
   },
   alertCreated: {
     marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   }
 }));
 
@@ -116,6 +119,10 @@ function FeedbackView({
   const feedbackResult = api.feedback.getFeedbackRound.useQuery({
     itemId: feedbackRoundId,
   });
+  const myFeedbackItemsResult = api.feedback.getMyFeedbackItems.useQuery({ itemId: feedbackRoundId });
+  const externalFeedbackItemsResult = api.feedback.getExternalFeedbackItems.useQuery({ itemId: feedbackRoundId });
+  const archiveFeedbackItemsResult = api.feedback.getNamedFeedbackItems.useQuery({ itemId: feedbackRoundId, columnName: "Done" });
+  
   const utils = api.useContext();
   const closeMutation = api.feedback.closeFeedbackRound.useMutation( {
     onSuccess: () => { 
@@ -133,6 +140,10 @@ function FeedbackView({
     const channel = pusher.subscribe(EventChannels.FeedbackRound + feedbackRoundId);
     channel.bind(ChannelEventTypes.FeedbackItemMoved, function(data:any) {
       void utils.feedback.getFeedbackRound.invalidate({ itemId: feedbackRoundId });
+      void utils.feedback.getNamedFeedbackItems.refetch({ itemId: feedbackRoundId, columnName: "Done" });
+      void utils.feedback.getExternalFeedbackItems.invalidate({ itemId: feedbackRoundId });
+      void utils.feedback.getMyFeedbackItems.invalidate({ itemId: feedbackRoundId });
+      void utils.feedback.getNamedFeedbackItems.refetch({ itemId: feedbackRoundId, columnName: "Ongoing" });
     });
   }, [pusher]);
 
@@ -143,6 +154,13 @@ function FeedbackView({
   
   if (feedbackResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
   if (!feedbackResult.data) return <div>Could not load feedback result</div>;
+
+  if (myFeedbackItemsResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
+  if (!myFeedbackItemsResult.data) return <div>Could not load my feedback items</div>;
+  if (externalFeedbackItemsResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
+  if (!externalFeedbackItemsResult.data) return <div>Could not load my feedback items</div>;
+  if (archiveFeedbackItemsResult.isLoading) return <SpaceLoader space={space} isMember={isMember} />;
+  if (!archiveFeedbackItemsResult.data) return <div>Could not load my feedback items</div>;
 
 
   const feedbackRound = feedbackResult.data;
@@ -218,7 +236,7 @@ function FeedbackView({
         </div>
         </Container>
           {state === FeedbackRoundStates.Created &&  (<Alert className={classes.alertCreated}  icon={<IconAlertCircle size="1rem" />} title="Feedback round is not started yet!" color="gray" variant="filled">
-          You can create feedback items, but they will not be visible to other users until you move den to ongoing or done.
+          You can create feedback items, but they will not be visible to other users until you move them to ongoing or done.
           External feedback items are always visible.
           </Alert>)}
 
@@ -279,7 +297,7 @@ function FeedbackView({
               p={0}
               
             >
-              0
+              {myFeedbackItemsResult.data.length}
             </Badge>
           }
           value="myItems"
@@ -296,7 +314,7 @@ function FeedbackView({
             p={0}
             
           >
-            0
+            {externalFeedbackItemsResult.data.length}
           </Badge>
         }>External feedback</Tabs.Tab>
         <Tabs.Tab value="archive"
@@ -308,39 +326,38 @@ function FeedbackView({
             size="xs"
             p={0}
           >
-            0
+            {archiveFeedbackItemsResult.data.length}
           </Badge>
         }>Archived (Done)</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="myItems">
-      <Group position="center" className={classes.alignItemsStart} >
+      <SimpleGrid cols={2} className={classes.alignItemsStart} >
 
         {feedbackRound.state !== FeedbackRoundStates.Closed &&
                 <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
            }
-              <MyFeedbackItemCardList
-                feedbackRoundId={feedbackRoundId}
+              <FeedbackItemCardList
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
+                feedbackItems={myFeedbackItemsResult.data}
               />
-        </Group>
+        </SimpleGrid>
       </Tabs.Panel>
       <Tabs.Panel value="external">
       <Group position="center" className={classes.alignItemsStart}>
-              <ExternalFeedbackItemCardList
-                feedbackRoundId={feedbackRoundId}
+            <FeedbackItemCardList
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
+                feedbackItems={externalFeedbackItemsResult.data}
               />
               </Group>
       </Tabs.Panel>
       <Tabs.Panel value="archive">
       <Group position="center" className={classes.alignItemsStart}>
-              <NamedFeedbackItemCardList
-                feedbackRoundId={feedbackRoundId}
+      <FeedbackItemCardList
                 feedbackColumns={feedbackRound.feedbackColumns}
                 feedbackRound={feedbackRound}
-                columnName="Done"
+                feedbackItems={archiveFeedbackItemsResult.data}
               />
               </Group>
       </Tabs.Panel>
