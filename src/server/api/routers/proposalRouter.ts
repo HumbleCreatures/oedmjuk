@@ -80,7 +80,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Objection not found");
 
-      if(proposal.proposalState !== ProposalStates.ProposalCreated) 
+      if(proposal.state !== ProposalStates.ProposalCreated) 
           throw new Error("Can only open created proposal");
 
       const space = await ctx.prisma.space.findUnique({where: {id: proposal.spaceId},
@@ -103,7 +103,7 @@ export const proposalRouter = createTRPCRouter({
           id: input.proposalId,
         },
         data: {
-          proposalState: ProposalStates.ProposalOpen,
+          state: ProposalStates.ProposalOpen,
           spaceFeedItem: {
             create: {
               spaceId: proposal.spaceId,
@@ -145,7 +145,7 @@ export const proposalRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const proposal = await ctx.prisma.proposal.findUnique({ where: { id: input.proposalId } });
       if(!proposal) throw new Error("Proposal not found");
-      if(proposal.proposalState !== ProposalStates.ProposalOpen) 
+      if(proposal.state !== ProposalStates.ProposalOpen) 
         throw new Error("Proposal needs to be open for objections");
 
       const objection = await ctx.prisma.proposalObjection.create({
@@ -216,7 +216,7 @@ export const proposalRouter = createTRPCRouter({
       });
 
       if (!proposal) throw new Error("Objection not found");
-      if (proposal.proposalState !== ProposalStates.ProposalOpen) 
+      if (proposal.state !== ProposalStates.ProposalOpen) 
         throw new Error("Can only close open proposals");
 
       const openObjections = proposal.objections.filter((o) => !o.resolvedAt);
@@ -234,7 +234,7 @@ export const proposalRouter = createTRPCRouter({
           id: input.proposalId,
         },
         data: {
-          proposalState: ProposalStates.ObjectionsResolved,
+          state: ProposalStates.ObjectionsResolved,
           participants: {
             create: allSpaceUsers.map((u) => ({ participantId: u.userId })),
           },
@@ -280,7 +280,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Objection not found");
 
-      if (proposal.proposalState !== ProposalStates.ObjectionsResolved)
+      if (proposal.state !== ProposalStates.ObjectionsResolved)
         throw new Error("Proposal not in votable state");
 
       const isParticipant = proposal.participants.some(p => p.participantId === ctx.session.user.id);
@@ -318,7 +318,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Proposal not found");
 
-      if (proposal.proposalState !== ProposalStates.ObjectionsResolved) 
+      if (proposal.state !== ProposalStates.ObjectionsResolved) 
         throw new Error("Can only end voting on resolved proposals");
 
       const updatedProposal = await ctx.prisma.proposal.update({
@@ -326,7 +326,7 @@ export const proposalRouter = createTRPCRouter({
           id: input.proposalId,
         },
         data: {
-          proposalState: ProposalStates.VoteClosed,
+          state: ProposalStates.VoteClosed,
         },
       });
 
@@ -373,7 +373,7 @@ export const proposalRouter = createTRPCRouter({
     .input(z.object({ spaceId: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.proposal.findMany({
-        where: { spaceId: input.spaceId, proposalState: ProposalStates.ProposalCreated },
+        where: { spaceId: input.spaceId, state: ProposalStates.ProposalCreated },
         include: {
           objections: true,
         },
@@ -389,7 +389,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Proposal not found");
 
-      if (proposal.proposalState === ProposalStates.VoteClosed) {
+      if (proposal.state === ProposalStates.VoteClosed) {
         const votes = await ctx.prisma.proposalVote.findMany({
           where: { proposalId: proposal.id },
         });

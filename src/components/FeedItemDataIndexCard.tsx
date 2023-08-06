@@ -1,17 +1,17 @@
 import { Group, Text, ThemeIcon } from "@mantine/core";
-import { Content, Space } from "@prisma/client";
+import {  DataIndex, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
-import { IconAlignBoxLeftMiddle } from "@tabler/icons";
+import { IconChartBar } from "@tabler/icons";
 import { SpaceFeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 
-export function FeedItemContentCard({content, eventItem, space} : {content: Content, eventItem: FeedEventItem, space?: Space}) {
+export function FeedItemDataIndexCard({dataIndex, eventItem, space} : {dataIndex: DataIndex, eventItem: FeedEventItem, space?: Space}) {
   const { classes: generalClasses } = useGeneralStyles();  
   return (
         <Link
-          href={`/app/space/${content.spaceId}/content/${content.id}`}
+          href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`}
           key={eventItem.id}
           className={generalClasses.listLinkItem}
         >
@@ -19,8 +19,8 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentCreated && "Content page created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentUpdated && "Content page updated"}
+                  {eventItem.eventType === SpaceFeedEventTypes.DataIndexUpdated && "Data index created"}
+                  {eventItem.eventType === SpaceFeedEventTypes.DataIndexCreated && "Data index updated"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)
@@ -34,13 +34,13 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
                 </div>
 
                 <ThemeIcon size="xl" color="gray">
-                  <IconAlignBoxLeftMiddle />
+                <IconChartBar />
                 </ThemeIcon>
               </Group>
 
               <Group position="apart" className={generalClasses.cardContentArea}>
                 <Text fz="xl" fw={500} color="earth.9">
-                  {content.title}
+                  {dataIndex.title}
                 </Text>
               </Group>
 

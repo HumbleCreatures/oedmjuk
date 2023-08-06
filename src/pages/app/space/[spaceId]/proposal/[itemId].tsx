@@ -105,9 +105,9 @@ function ProposalView({
   
   const { proposal, votingResult, myPickResults } = proposalResult.data;
   if (!proposal) return <div>Could not load proposal</div>;
-  const { objections, proposalState, participants } = proposal;
+  const { objections, state, participants } = proposal;
 
-  if (proposal.proposalState === ProposalStates.VoteClosed) {
+  if (state === ProposalStates.VoteClosed) {
     if (!votingResult) return <div>Could not load voting result</div>;
     const {
       numberOfAbstains,
@@ -207,7 +207,7 @@ function ProposalView({
         <SpaceNavBar space={space} isMember={isMember} />
         <ProposalInfo proposal={proposal} />
 
-        {proposalState === ProposalStates.ProposalOpen && (
+        {state === ProposalStates.ProposalOpen && (
           <Container size="sm" className={classes.bodyArea}>
             <DynamicObjectionEditor proposalId={proposalId} />
           </Container>
@@ -215,7 +215,7 @@ function ProposalView({
 
 
 
-        {proposalState === ProposalStates.ObjectionsResolved && (
+        {state === ProposalStates.ObjectionsResolved && (
           <>
             <Container size="sm" className={classes.area}>
               <Title order={3} className={classes.areaTitle}>
@@ -325,9 +325,9 @@ function ProposalView({
           </>
         )}
 
-      {proposalState !== ProposalStates.ProposalCreated && 
+      {state !== ProposalStates.ProposalCreated && 
         (
-          <ListOfObjections objections={objections || []} defaultTab={proposalState === ProposalStates.ObjectionsResolved ? "resolved" :"open"} />
+          <ListOfObjections objections={objections || []} defaultTab={state === ProposalStates.ObjectionsResolved ? "resolved" :"open"} />
         )}
       </Container>
     </AppLayout>
@@ -388,7 +388,7 @@ function ProposalInfo({
     createdAt,
     creatorId,
     updatedAt,
-    proposalState,
+    state,
     objections,
   } = proposal;
 
@@ -439,11 +439,11 @@ function ProposalInfo({
           <Button component="a">Edit</Button>
         </Link>
 
-        {proposalState === ProposalStates.ProposalOpen && hasObjections && (
+        {state === ProposalStates.ProposalOpen && hasObjections && (
           <Button disabled={true}>Start voting</Button>
         )}
 
-        {proposalState === ProposalStates.ProposalOpen && !hasObjections && (
+        {state === ProposalStates.ProposalOpen && !hasObjections && (
           <Button
             onClick={() =>
               closeObjectionRound.mutate({ proposalId: proposal.id })
@@ -453,7 +453,7 @@ function ProposalInfo({
           </Button>
         )}
 
-        {proposalState === ProposalStates.ProposalCreated && (
+        {state === ProposalStates.ProposalCreated && (
           <Button
             onClick={() => publishProposal.mutate({ proposalId: proposal.id })}
           >
@@ -461,7 +461,7 @@ function ProposalInfo({
           </Button>
         )}
 
-        {proposalState === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId:proposal.id })}>
+        {state === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId:proposal.id })}>
                 End vote
               </Button>)}
           </Group>
@@ -473,7 +473,7 @@ function ProposalInfo({
           <Group position="apart">
         
       <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
-      <ProposalStatusBadge state={proposalState} />
+      <ProposalStatusBadge state={state} />
         </Group>
         {body && <EditorJsRenderer data={body} />}
         </div>

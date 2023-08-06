@@ -289,7 +289,7 @@ model Proposal {
   spaceId        String
   creator        User                  @relation(fields: [creatorId], references: [id])
   creatorId      String
-  proposalState  String                @default("ProposalCreated")
+  state          String                @default("ProposalCreated")
   proposalType   String                @default("Internal")
   votes          ProposalVote[]
   participants   ProposalParticipant[]

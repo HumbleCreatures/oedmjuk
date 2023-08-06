@@ -417,7 +417,7 @@ const LoadingSpaceView: NextPage = () => {
 
 export default LoadingSpaceView;
 
-function FormattedEventDateAndTime({
+export function FormattedEventDateAndTime({
   startAt,
   endAt,
 }: {

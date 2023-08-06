@@ -1,17 +1,20 @@
 import { Group, Text, ThemeIcon } from "@mantine/core";
-import { Content, Space } from "@prisma/client";
+import {FeedbackRound, Selection, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
-import { IconAlignBoxLeftMiddle } from "@tabler/icons";
+import { IconRecycle } from "@tabler/icons";
 import { SpaceFeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
+import { FeedbackRoundStatusBadge } from "./FeedbackRoundStatusBadge";
 
-export function FeedItemContentCard({content, eventItem, space} : {content: Content, eventItem: FeedEventItem, space?: Space}) {
+
+
+export function FeedItemFeedbackCard({ feedbackRound, eventItem, space} : {feedbackRound: FeedbackRound, eventItem: FeedEventItem, space?: Space}) {
   const { classes: generalClasses } = useGeneralStyles();  
   return (
         <Link
-          href={`/app/space/${content.spaceId}/content/${content.id}`}
+          href={`/app/space/${feedbackRound.spaceId}/feedback/${feedbackRound.id}`}
           key={eventItem.id}
           className={generalClasses.listLinkItem}
         >
@@ -19,8 +22,8 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentCreated && "Content page created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentUpdated && "Content page updated"}
+                  {eventItem.eventType === SpaceFeedEventTypes.FeedbackRoundCreated && "Feedback round created"}
+                  {eventItem.eventType === SpaceFeedEventTypes.FeedbackRoundUpdated && "Feedback round updated"}                  
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)
@@ -34,15 +37,22 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
                 </div>
 
                 <ThemeIcon size="xl" color="gray">
-                  <IconAlignBoxLeftMiddle />
+                <IconRecycle />
                 </ThemeIcon>
               </Group>
 
               <Group position="apart" className={generalClasses.cardContentArea}>
+                <div>
                 <Text fz="xl" fw={500} color="earth.9">
-                  {content.title}
+                  {feedbackRound.title}
                 </Text>
+               
+                </div>
+                
+                <FeedbackRoundStatusBadge state={feedbackRound.state} />
+                
               </Group>
+              
 
         </Link>
       );

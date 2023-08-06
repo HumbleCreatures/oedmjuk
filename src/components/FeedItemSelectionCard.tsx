@@ -1,17 +1,20 @@
 import { Group, Text, ThemeIcon } from "@mantine/core";
-import { Content, Space } from "@prisma/client";
+import {Selection, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
-import { IconAlignBoxLeftMiddle } from "@tabler/icons";
-import { SpaceFeedEventTypes } from "../utils/enums";
+import { IconColorSwatch } from "@tabler/icons";
+import { SpaceFeedEventTypes, UserFeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
+import { SelectionStatusBadge } from "./SelectionStatusBadge";
 
-export function FeedItemContentCard({content, eventItem, space} : {content: Content, eventItem: FeedEventItem, space?: Space}) {
+
+
+export function FeedItemSelectionCard({ selection, eventItem, space} : {selection: Selection, eventItem: FeedEventItem, space?: Space}) {
   const { classes: generalClasses } = useGeneralStyles();  
   return (
         <Link
-          href={`/app/space/${content.spaceId}/content/${content.id}`}
+          href={`/app/space/${selection.spaceId}/selection/${selection.id}`}
           key={eventItem.id}
           className={generalClasses.listLinkItem}
         >
@@ -19,8 +22,11 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentCreated && "Content page created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentUpdated && "Content page updated"}
+                  {eventItem.eventType === SpaceFeedEventTypes.SelectionCreated && "Selection created"}
+                  {eventItem.eventType === SpaceFeedEventTypes.SelectionUpdated && "Selection updated"}
+                  {eventItem.eventType === UserFeedEventTypes.SelectionAlternativeAdded && "Selection alternative added"}
+                  {eventItem.eventType === UserFeedEventTypes.SelectionVoteStarted && "Selection vote started"}
+                  {eventItem.eventType === UserFeedEventTypes.SelectionVoteEnded && "Selection vote finished"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)
@@ -34,15 +40,22 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
                 </div>
 
                 <ThemeIcon size="xl" color="gray">
-                  <IconAlignBoxLeftMiddle />
+                <IconColorSwatch />
                 </ThemeIcon>
               </Group>
 
               <Group position="apart" className={generalClasses.cardContentArea}>
+                <div>
                 <Text fz="xl" fw={500} color="earth.9">
-                  {content.title}
+                  {selection.title}
                 </Text>
+               
+                </div>
+                
+                <SelectionStatusBadge state={selection.state} />
+                
               </Group>
+              
 
         </Link>
       );
