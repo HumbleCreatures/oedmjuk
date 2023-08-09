@@ -3,7 +3,7 @@ import { CalendarEvent, Content, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { IconCalendarEvent } from "@tabler/icons";
-import { SpaceFeedEventTypes, UserFeedEventTypes } from "../utils/enums";
+import { FeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 import { FormattedEventDateAndTime } from "../pages/app/space/[spaceId]/calendarEvent/[itemId]";
@@ -23,10 +23,10 @@ export function FeedItemCalendarEventCard({ calendarEvent, eventItem, space} : {
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.CalendarEventCreated && "Calendar event created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.CalendarEventUpdated && "Calendar event updated"}
-                  {eventItem.eventType === UserFeedEventTypes.CalendarEventNotAttending && "Not attending calendar event"}
-                  {eventItem.eventType === UserFeedEventTypes.CalendarEventAttending && "Attending calendar event"}
+                  {eventItem.eventType === FeedEventTypes.CalendarEventCreated && "Calendar event created"}
+                  {eventItem.eventType === FeedEventTypes.CalendarEventUpdated && "Calendar event updated"}
+                  {eventItem.eventType === FeedEventTypes.CalendarEventNotAttending && "Not attending calendar event"}
+                  {eventItem.eventType === FeedEventTypes.CalendarEventAttending && "Attending calendar event"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)

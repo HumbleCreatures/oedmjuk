@@ -3,7 +3,7 @@ import {Selection, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { IconColorSwatch } from "@tabler/icons";
-import { SpaceFeedEventTypes, UserFeedEventTypes } from "../utils/enums";
+import { FeedEventTypes} from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 import { SelectionStatusBadge } from "./SelectionStatusBadge";
@@ -22,11 +22,11 @@ export function FeedItemSelectionCard({ selection, eventItem, space} : {selectio
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.SelectionCreated && "Selection created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.SelectionUpdated && "Selection updated"}
-                  {eventItem.eventType === UserFeedEventTypes.SelectionAlternativeAdded && "Selection alternative added"}
-                  {eventItem.eventType === UserFeedEventTypes.SelectionVoteStarted && "Selection vote started"}
-                  {eventItem.eventType === UserFeedEventTypes.SelectionVoteEnded && "Selection vote finished"}
+                  {eventItem.eventType === FeedEventTypes.SelectionCreated && "Selection created"}
+                  {eventItem.eventType === FeedEventTypes.SelectionUpdated && "Selection updated"}
+                  {eventItem.eventType === FeedEventTypes.SelectionAlternativeAdded && "Selection alternative added"}
+                  {eventItem.eventType === FeedEventTypes.SelectionVoteStarted && "Selection vote started"}
+                  {eventItem.eventType === FeedEventTypes.SelectionVoteEnded && "Selection vote finished"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)

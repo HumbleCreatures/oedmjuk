@@ -3,7 +3,7 @@ import { Content, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { IconAlignBoxLeftMiddle } from "@tabler/icons";
-import { SpaceFeedEventTypes } from "../utils/enums";
+import { FeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 
@@ -19,8 +19,8 @@ export function FeedItemContentCard({content, eventItem, space} : {content: Cont
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentCreated && "Content page created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.ContentUpdated && "Content page updated"}
+                  {eventItem.eventType === FeedEventTypes.ContentCreated && "Content page created"}
+                  {eventItem.eventType === FeedEventTypes.ContentUpdated && "Content page updated"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)

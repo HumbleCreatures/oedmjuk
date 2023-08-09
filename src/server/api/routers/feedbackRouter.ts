@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ChannelEventTypes, EventChannels, FeedbackRoundStates, SpaceFeedEventTypes } from "../../../utils/enums";
+import { ChannelEventTypes, EventChannels, FeedbackRoundStates, FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import sanitizeHtml from 'sanitize-html';
@@ -31,7 +31,7 @@ export const feedbackRouter = createTRPCRouter({
       return ctx.prisma.feedbackRound.create({
         data: {
           title: input.title,
-          body: sanitizeHtml(input.body),
+          body: input.body,
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
           feedbackColumns: {
@@ -50,7 +50,7 @@ export const feedbackRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              eventType: SpaceFeedEventTypes.FeedbackRoundCreated,
+              eventType: FeedEventTypes.FeedbackRoundCreated,
             },
           },
         },
@@ -278,7 +278,13 @@ export const feedbackRouter = createTRPCRouter({
           id: input.itemId,
         },
         data: {
-          state: FeedbackRoundStates.Started
+          state: FeedbackRoundStates.Started,
+          spaceFeedItem: {
+            create: {
+              spaceId: feedbackRound.spaceId,
+              eventType: FeedEventTypes.FeedbackRoundStarted,
+            },
+          },
         },
       });
     }),

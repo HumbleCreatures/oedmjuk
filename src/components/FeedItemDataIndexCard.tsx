@@ -3,7 +3,7 @@ import {  DataIndex, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { IconChartBar } from "@tabler/icons";
-import { SpaceFeedEventTypes } from "../utils/enums";
+import { FeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 
@@ -19,8 +19,8 @@ export function FeedItemDataIndexCard({dataIndex, eventItem, space} : {dataIndex
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.DataIndexUpdated && "Data index created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.DataIndexCreated && "Data index updated"}
+                  {eventItem.eventType === FeedEventTypes.DataIndexUpdated && "Data index created"}
+                  {eventItem.eventType === FeedEventTypes.DataIndexCreated && "Data index updated"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)

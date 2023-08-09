@@ -1,8 +1,7 @@
 import { z } from "zod";
 import {
-  SpaceFeedEventTypes,
+  FeedEventTypes,
   SelectionStates,
-  UserFeedEventTypes,
 } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -29,14 +28,14 @@ export const selectionRouter = createTRPCRouter({
       const userFeedItems = space.spaceMembers.map((sm) => ({ 
         spaceId: input.spaceId,
         userId: sm.userId,
-        eventType: UserFeedEventTypes.SelectionCreated,
+        eventType: FeedEventTypes.SelectionCreated,
       }))
 
       if(!isMember) {
         userFeedItems.push({
           spaceId: input.spaceId,
           userId: ctx.session.user.id,
-          eventType: UserFeedEventTypes.SelectionCreated,
+          eventType: FeedEventTypes.SelectionCreated,
         })
       }
 
@@ -49,7 +48,7 @@ export const selectionRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: input.spaceId,
-              eventType: SpaceFeedEventTypes.SelectionCreated,
+              eventType: FeedEventTypes.SelectionCreated,
             },
           },
           UserFeedItem: {
@@ -100,7 +99,7 @@ export const selectionRouter = createTRPCRouter({
         data: {
           userId: selection.creatorId,
           selectionId: input.selectionId,
-          eventType: UserFeedEventTypes.SelectionAlternativeAdded,
+          eventType: FeedEventTypes.SelectionAlternativeAdded,
           spaceId: selection.spaceId,
         }
       });
@@ -108,7 +107,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           selectionId: input.selectionId,
-          eventType: UserFeedEventTypes.SelectionAlternativeAdded,
+          eventType: FeedEventTypes.SelectionAlternativeAdded,
           spaceId: selection.spaceId,
         }          
        });
@@ -157,7 +156,7 @@ export const selectionRouter = createTRPCRouter({
         data: {
           userId: selection.creatorId,
           selectionId: input.selectionId,
-          eventType: UserFeedEventTypes.SelectionVoteStarted,
+          eventType: FeedEventTypes.SelectionVoteStarted,
           spaceId: selection.spaceId,
         }
       });
@@ -165,7 +164,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           selectionId: input.selectionId,
-          eventType: UserFeedEventTypes.SelectionVoteStarted,
+          eventType: FeedEventTypes.SelectionVoteStarted,
           spaceId: selection.spaceId,
         }          
        });
@@ -285,7 +284,7 @@ export const selectionRouter = createTRPCRouter({
         data: {
           userId: updatedSelection.creatorId,
           selectionId: input.selectionId,
-          eventType: UserFeedEventTypes.SelectionVoteEnded,
+          eventType: FeedEventTypes.SelectionVoteEnded,
           spaceId: selection.spaceId,
         }
       });
@@ -293,7 +292,7 @@ export const selectionRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           selectionId: input.selectionId,
-          eventType: UserFeedEventTypes.SelectionVoteEnded,
+          eventType: FeedEventTypes.SelectionVoteEnded,
           spaceId: selection.spaceId,
         }          
        });

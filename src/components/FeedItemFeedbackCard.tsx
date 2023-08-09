@@ -3,7 +3,7 @@ import {FeedbackRound, Selection, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { IconRecycle } from "@tabler/icons";
-import { SpaceFeedEventTypes } from "../utils/enums";
+import { FeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 import { FeedbackRoundStatusBadge } from "./FeedbackRoundStatusBadge";
@@ -22,8 +22,8 @@ export function FeedItemFeedbackCard({ feedbackRound, eventItem, space} : {feedb
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.FeedbackRoundCreated && "Feedback round created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.FeedbackRoundUpdated && "Feedback round updated"}                  
+                  {eventItem.eventType === FeedEventTypes.FeedbackRoundCreated && "Feedback round created"}
+                  {eventItem.eventType === FeedEventTypes.FeedbackRoundUpdated && "Feedback round updated"}                  
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)

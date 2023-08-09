@@ -1,15 +1,16 @@
 import { type NextPage } from "next";
-import AppLayout from "../../../components/AppLayout";
+import AppLayout from "../../../../components/AppLayout";
 import { useForm } from "@mantine/form";
 import { TextInput, Button, Container, Title, Alert, Text, createStyles, SimpleGrid } from "@mantine/core";
-import { api } from "../../../utils/api";
+import { api } from "../../../../utils/api";
 import { IconAlertCircle } from '@tabler/icons';
-import { SettingsNavBar } from "../../../components/SettingsNavBar";
-import { SettingsLoader } from "../../../components/Loaders/SettingsLoader";
-import { DynamicBlockEditor } from "../../../components/DynamicBlockEditor";
+import { SettingsNavBar } from "../../../../components/SettingsNavBar";
+import { SettingsLoader } from "../../../../components/Loaders/SettingsLoader";
+import { DynamicBlockEditor } from "../../../../components/DynamicBlockEditor";
 import { OutputData } from "@editorjs/editorjs";
-import Link from "next/link";
-import { useGeneralStyles } from "../../../styles/generalStyles";
+
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -33,6 +34,7 @@ const useStyles = createStyles((theme) => ({
   },
   areaTitle: {
     fontSize: theme.fontSizes.md,
+    marginBottom: theme.spacing.md,
   },
   editorWrapper: {
     marginTop: theme.spacing.md,
@@ -53,13 +55,13 @@ const useStyles = createStyles((theme) => ({
   }
 }));
 
-const DataIndexTypesPage: NextPage = () => {
+const DatIndexTypeView = ({dataIndexTypeId }:{dataIndexTypeId: string}) => {
   const { classes } = useStyles();
-  const { classes: generalClasses } = useGeneralStyles();
-  const form = useForm<{name: string, body: OutputData | undefined}>({
+  const form = useForm<{name: string, unitName: string, description: string | null}>({
     initialValues: {
-      name: "",
-      body: undefined,
+        name: "",
+        unitName: "",
+        description: "",
     },
     validate: {
         name: (value) =>
@@ -68,12 +70,18 @@ const DataIndexTypesPage: NextPage = () => {
   });
 
   const utils = api.useContext();
-  const query = api.bodyTemplate.getAllTemplates.useQuery();
-  const mutation = api.bodyTemplate.createTemplate.useMutation({
+  const query = api.dataIndex.getIndexType.useQuery({dataIndexTypeId: dataIndexTypeId});
+  const mutation = api.dataIndex.updateIndexType.useMutation({
     onSuccess() {
-      void utils.bodyTemplate.getAllTemplates.invalidate();
+      void utils.dataIndex.getAllIndexTypes.invalidate();
     },
   });
+
+  useEffect(() => {
+    if (query.data) {
+        form.setValues(query.data);
+    }
+   }, [query.data])
 
   if(query.isLoading) return (<SettingsLoader />);
   if(!query.data) return (<div>could not load types...</div>);
@@ -84,32 +92,13 @@ const DataIndexTypesPage: NextPage = () => {
     <AppLayout>
       <Container size="sm">
       <SettingsNavBar />
-      <Container size="sm" className={classes.clearArea}>
-      <div className={generalClasses.listHeader}>
-      <Title className={classes.areaTitle} order={2}>Content Templates</Title>
-      </div>
-      <SimpleGrid cols={1} spacing="xs">
 
-    
-      
-
-      {query.data.map((template) =>{
-        const currentVersion = template.bodyTemplateVersions[0];
-
-        return (
-          <Link className={classes.listLinkItem} key={template.id} href={`/app/settings/templates/${template.id}`}>
-          {currentVersion && <Text>{currentVersion.name}</Text>}
-          </Link>
-        )
-      })}
-      </SimpleGrid>
-      </Container>
       <Container size="sm" className={classes.editArea}>
-        <Title order={2} className={classes.areaTitle}>Create a new template</Title>
+        <Title className={classes.areaTitle} order={2}>Edit Data Index Type</Title>
 
         <form
           onSubmit={form.onSubmit((values) => {
-            mutation.mutate(values);
+            mutation.mutate({...values, dataIndexTypeId: dataIndexTypeId, description: values.description ? values.description : undefined});
           })}
         >
           <TextInput
@@ -117,9 +106,15 @@ const DataIndexTypesPage: NextPage = () => {
             placeholder="Name"
             {...form.getInputProps("name")}
           />
+          <TextInput
+            label="Unit Name"
+            placeholder="Unit Name"
+            {...form.getInputProps("unitName")}
+          />
          <div className={classes.editorWrapper}>
-          <Text fz="sm" fw={500}>Template Body</Text>
-              <DynamicBlockEditor holder="blockeditor-container" onChange={(data) => form.setFieldValue('body', data)}  />
+          <Text fz="sm" fw={500}>Description</Text>
+ <DynamicBlockEditor data={form.getInputProps('description').value ? JSON.parse(form.getInputProps('description').value as string) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('description', JSON.stringify(data))}}  />
               </div>
           <Button type="submit" mt="sm">
             Submit
@@ -134,4 +129,14 @@ const DataIndexTypesPage: NextPage = () => {
   );
 };
 
-export default DataIndexTypesPage;
+const LoadingDataIndexTypeView: NextPage = () => {
+    const router = useRouter();
+  
+    const { dataIndexTypeId } = router.query;
+    if (!dataIndexTypeId) return <div>loading...</div>;
+  
+    return <DatIndexTypeView dataIndexTypeId={dataIndexTypeId as string} />;
+  };
+  
+  export default LoadingDataIndexTypeView;
+

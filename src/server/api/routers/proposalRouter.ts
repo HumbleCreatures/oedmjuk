@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
-  SpaceFeedEventTypes,
-  UserFeedEventTypes,
+  FeedEventTypes,
   ProposalStates,
   VoteValue,
 } from "../../../utils/enums";
@@ -29,14 +28,14 @@ export const proposalRouter = createTRPCRouter({
       const userFeedItems = space.spaceMembers.map((sm) => ({ 
         spaceId: input.spaceId,
         userId: sm.userId,
-        eventType: UserFeedEventTypes.ProposalEventCreated,
+        eventType: FeedEventTypes.ProposalEventCreated,
       }))
 
       if(!isMember) {
         userFeedItems.push({
           spaceId: input.spaceId,
           userId: ctx.session.user.id,
-          eventType: UserFeedEventTypes.ProposalEventCreated,
+          eventType: FeedEventTypes.ProposalEventCreated,
         })
       }
 
@@ -95,7 +94,7 @@ export const proposalRouter = createTRPCRouter({
       const userFeedItems = space.spaceMembers.map((sm) => ({ 
         spaceId: proposal.spaceId,
         userId: sm.userId,
-        eventType: UserFeedEventTypes.ProposalEventCreated,
+        eventType: FeedEventTypes.ProposalEventCreated,
       }))
 
       const updatedProposal = await ctx.prisma.proposal.update({
@@ -107,7 +106,7 @@ export const proposalRouter = createTRPCRouter({
           spaceFeedItem: {
             create: {
               spaceId: proposal.spaceId,
-              eventType: SpaceFeedEventTypes.ProposalEventCreated,
+              eventType: FeedEventTypes.ProposalEventCreated,
             },
           },
           UserFeedItem: {
@@ -120,7 +119,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }
       });
@@ -128,7 +127,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }          
        });
@@ -160,7 +159,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: proposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          eventType: FeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
         }
       });
@@ -168,7 +167,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          eventType: FeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
         }          
        });
@@ -245,7 +244,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }
       });
@@ -253,7 +252,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }          
        });
@@ -334,7 +333,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingEnded,
+          eventType: FeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
         }
       });
@@ -342,7 +341,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingEnded,
+          eventType: FeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
         }          
        });

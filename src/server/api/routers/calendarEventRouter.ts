@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SpaceFeedEventTypes, UserFeedEventTypes } from "../../../utils/enums";
+import { FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import sanitizeHtml from 'sanitize-html';
@@ -30,14 +30,14 @@ export const calendarEventRouter = createTRPCRouter({
       const userFeedItems = space.spaceMembers.map((sm) => ({
         spaceId: input.spaceId,
         userId: sm.userId,
-        eventType: UserFeedEventTypes.CalendarEventCreated,
+        eventType: FeedEventTypes.CalendarEventCreated,
       }));
 
       if (!isMember) {
         userFeedItems.push({
           spaceId: input.spaceId,
           userId: ctx.session.user.id,
-          eventType: UserFeedEventTypes.CalendarEventCreated,
+          eventType: FeedEventTypes.CalendarEventCreated,
         });
       }
 
@@ -53,7 +53,7 @@ export const calendarEventRouter = createTRPCRouter({
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                eventType: SpaceFeedEventTypes.CalendarEventCreated,
+                eventType: FeedEventTypes.CalendarEventCreated,
               },
             },
             userCalendar: {
@@ -97,7 +97,7 @@ export const calendarEventRouter = createTRPCRouter({
         .map((cea) => ({
           spaceId: calendarEvent.spaceId,
           userId: cea.userId,
-          eventType: UserFeedEventTypes.CalendarEventUpdate,
+          eventType: FeedEventTypes.CalendarEventUpdate,
           calendarEventId: calendarEvent.id,
         }));
 
@@ -107,7 +107,7 @@ export const calendarEventRouter = createTRPCRouter({
         updateUserFeedList.push({
           spaceId: calendarEvent.spaceId,
           userId: calendarEvent.creatorId,
-          eventType: UserFeedEventTypes.CalendarEventUpdate,
+          eventType: FeedEventTypes.CalendarEventUpdate,
           calendarEventId: calendarEvent.id,
         });
       }
@@ -122,7 +122,7 @@ export const calendarEventRouter = createTRPCRouter({
         data: {
           spaceId: calendarEvent.spaceId,
           calendarEventId: calendarEvent.id,
-          eventType: SpaceFeedEventTypes.CalendarEventUpdated,
+          eventType: FeedEventTypes.CalendarEventUpdated,
         }          
        });
 
@@ -306,7 +306,7 @@ export const calendarEventRouter = createTRPCRouter({
           data: {
             userId: attendee.userId,
             calendarEventId: attendee.calendarEventId,
-            eventType: UserFeedEventTypes.CalendarEventAttending,
+            eventType: FeedEventTypes.CalendarEventAttending,
             spaceId: calendarEvent.spaceId,
           },
         });
@@ -327,7 +327,7 @@ export const calendarEventRouter = createTRPCRouter({
           data: {
             userId: newAttendee.userId,
             calendarEventId: newAttendee.calendarEventId,
-            eventType: UserFeedEventTypes.CalendarEventAttending,
+            eventType: FeedEventTypes.CalendarEventAttending,
             spaceId: calendarEvent.spaceId,
           },
         });
@@ -372,7 +372,7 @@ export const calendarEventRouter = createTRPCRouter({
           data: {
             userId: updatedAttending.userId,
             calendarEventId: updatedAttending.calendarEventId,
-            eventType: UserFeedEventTypes.CalendarEventNotAttending,
+            eventType: FeedEventTypes.CalendarEventNotAttending,
             spaceId: calendarEvent.spaceId,
           },
         });
@@ -393,7 +393,7 @@ export const calendarEventRouter = createTRPCRouter({
           data: {
             userId: newAttendee.userId,
             calendarEventId: newAttendee.calendarEventId,
-            eventType: UserFeedEventTypes.CalendarEventNotAttending,
+            eventType: FeedEventTypes.CalendarEventNotAttending,
             spaceId: calendarEvent.spaceId,
           },
         });

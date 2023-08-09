@@ -3,7 +3,7 @@ import { CalendarEvent, Content, Proposal, Space } from "@prisma/client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { IconNotebook } from "@tabler/icons";
-import { SpaceFeedEventTypes, UserFeedEventTypes } from "../utils/enums";
+import { FeedEventTypes } from "../utils/enums";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { FeedEventItem } from "../utils/types";
 import { ProposalStatusBadge } from "./ProposalStatusBadge";
@@ -22,11 +22,11 @@ export function FeedItemProposalCard({ proposal: proposal, eventItem, space} : {
               <Group position="apart" className={generalClasses.cardInfoArea}>
                 <div>
                 <Text fz="md" fw={500}>
-                  {eventItem.eventType === SpaceFeedEventTypes.ProposalEventCreated && "Proposal created"}
-                  {eventItem.eventType === SpaceFeedEventTypes.ProposalEventUpdated && "Proposal updated"}
-                  {eventItem.eventType === UserFeedEventTypes.ProposalObjectionAdded && "Proposal objection added"}
-                  {eventItem.eventType === UserFeedEventTypes.ProposalVotingStarted && "Proposal voting started"}
-                  {eventItem.eventType === UserFeedEventTypes.ProposalVotingEnded && "Proposal vote finished"}
+                  {eventItem.eventType === FeedEventTypes.ProposalEventCreated && "Proposal created"}
+                  {eventItem.eventType === FeedEventTypes.ProposalEventUpdated && "Proposal updated"}
+                  {eventItem.eventType === FeedEventTypes.ProposalObjectionAdded && "Proposal objection added"}
+                  {eventItem.eventType === FeedEventTypes.ProposalVotingStarted && "Proposal voting started"}
+                  {eventItem.eventType === FeedEventTypes.ProposalVotingEnded && "Proposal vote finished"}
                   </Text>
                   <Text fz="sm" fw={300}>
                     {DateTime.fromJSDate(eventItem.createdAt)

@@ -1,8 +1,5 @@
-export enum SpaceFeedEventTypes { 
+export enum FeedEventTypes { 
     ContentCreated = 'ContentCreated',
-    CalendarEventCreated = 'CalendarEventCreated',
-    ProposalEventCreated = 'ProposalEventCreated',
-    SelectionCreated = 'SelectionCreated',
     FeedbackRoundCreated = 'FeedbackRoundCreated',
     DataIndexCreated = 'DataIndexCreated',
     ContentUpdated = 'ContentUpdated',
@@ -10,10 +7,8 @@ export enum SpaceFeedEventTypes {
     ProposalEventUpdated = 'ProposalEventUpdated',
     SelectionUpdated = 'SelectionUpdated',
     FeedbackRoundUpdated = 'FeedbackRoundUpdated',
+    FeedbackRoundStarted = 'FeedbackRoundStarted',
     DataIndexUpdated = 'DataIndexUpdated',
-}
-
-export enum UserFeedEventTypes { 
     ProposalEventCreated = 'ProposalEventCreated',
     ProposalObjectionAdded = 'ProposalObjectionAdded',
     ProposalVotingStarted = 'ProposalVotingStarted',
@@ -26,7 +21,6 @@ export enum UserFeedEventTypes {
     CalendarEventUpdate = 'CalendarEventUpdated',
     CalendarEventAttending = 'CalendarEventAttending',
     CalendarEventNotAttending = 'CalendarEventNotAttending',
-    
 }
 
 export enum ProposalStates { 

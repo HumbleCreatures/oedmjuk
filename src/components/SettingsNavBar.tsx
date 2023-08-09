@@ -96,18 +96,13 @@ export function SettingsNavBar() {
       <div className={classes.inner}>
         <Group spacing={5} className={classes.links}>
 
-          <Link href={`/app/settings/dataIndexType`} className={classes.link}>
+          <Link href={`/app/settings/dataIndexTypes`} className={classes.link}>
             Data Index Types
             </Link>
 
             <Link href={`/app/settings/templates`} className={classes.link}>
             Templates
-            </Link>   
-
-            <Link href={`/app/settings`} className={classes.link}>
-            General
-            </Link>         
-
+            </Link>  
         </Group>
       </div>
     </Container>
