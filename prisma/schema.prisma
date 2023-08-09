@@ -505,21 +505,60 @@ model DataIndexPoint {
   dataIndex   DataIndex @relation(fields: [dataIndexId], references: [id])
   dataIndexId String
 }
+model AccessRequestType { 
+  id          String           @id @default(cuid())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  name        String
+  description String?
+  hasOnBehalfOfUser Boolean?
+  onBehalfOfUserIsRequired Boolean?
+  hasOnBehalfOfSpace Boolean?
+  onBehalfOfSpaceIsRequired Boolean?
+  numberOfApprovals Int?
+}
 
+model AccessRequestStep { 
+  id          String           @id @default(cuid())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  name        String
+  description String?
+  joinSpace   Boolean?
+  manualAction Int?
+  approvalFromRequester Boolean?
+  approvalFromOnBehalfOfUser Boolean?
+  approvalFromOnBehalfOfSpace Int?
+  accessRequestType AccessRequestType @relation(fields: [accessRequestTypeId], references: [id])
+  accessRequestTypeId String
+}
+
+model AccessRequestExecution { 
+  id          String           @id @default(cuid())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  log         String?
+  markAsDone  Boolean @default(false)
+  executingUser User? @relation(fields: [executingUserId], references: [id])
+  executingUserId String?
+  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id])
+  accessRequestId String
+  accessRequestStep AccessRequestStep @relation(fields: [accessRequestStepId], references: [id])
+  accessRequestStepId String
+}
 model AccessRequest {
   id                     String                   @id @default(cuid())
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
-  executedAt             DateTime?
-  executer               User?                    @relation(name: "accessRequestExecuter", fields: [executerId], references: [id])
-  executerId             String?
   space                  Space                    @relation(fields: [spaceId], references: [id])
   spaceId                String
   creator                User                     @relation(name: "accessRequestCreator", fields: [creatorId], references: [id])
   creatorId              String
   state                  String                   @default("Created")
-  user                   User?                    @relation(name: "accessRequestUser", fields: [userId], references: [id])
-  userId                 String?
+  onBehalfOfUser                   User?                    @relation(name: "accessRequestUser", fields: [userId], references: [id])
+  onBehalfOfUserId                 String?
+  onBehalfOfSpace        Space?                   @relation(name: "accessRequestOnbehalfOfSpace", fields: [onbehalfOfSpaceId], references: [id])
+  onBehalfOfSpaceId      String?
   userUrl                String?
   objectUrl              String?
   title                  String
@@ -530,31 +569,37 @@ model AccessRequest {
   AccessRequestObjection AccessRequestObjection[]
 }
 
+model AccessRequestComment {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
+  accessRequestId String
+  author         User          @relation(fields: [authorId], references: [id])
+  authorId       String
+  body         String
+}
+
 model AccessRequestApproval {
   id              String        @id @default(cuid())
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
   accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
   accessRequestId String
   creator         User          @relation(fields: [creatorId], references: [id])
   creatorId       String
+  comment         String
 }
 
 model AccessRequestObjection {
   id              String        @id @default(cuid())
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
   accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
   accessRequestId String
   creator         User          @relation(name: "accessRequestObjectionCreator", fields: [creatorId], references: [id])
   creatorId       String
-  body            String
-  resolvedAt      DateTime?
-  resolvedBy      User?         @relation(name: "accessRequestObjectionResolver", fields: [resolvedById], references: [id])
-  resolvedById    String?
-  resolvedComment String?
+  comment            String
 }
 
 model BodyTemplate {
