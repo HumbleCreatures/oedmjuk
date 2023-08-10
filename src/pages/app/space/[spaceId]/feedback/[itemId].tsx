@@ -17,9 +17,6 @@ import {
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
-import { FeedbackItemEditor } from "../../../../../components/FeedbackItemEditor";
-import { ExternalFeedbackItemCardList } from "../../../../../containers/ExternalFeedbackItemCardList";
-import { MyFeedbackItemCardList } from "../../../../../containers/MyFeedbackItemCardList";
 import { IconAlertCircle, IconRecycle } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
@@ -34,6 +31,11 @@ import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 import { useGeneralStyles } from "../../../../../styles/generalStyles";
 import { FeedbackRoundStatusBadge } from "../../../../../components/FeedbackRoundStatusBadge";
 import { FeedbackItemCardList } from "../../../../../components/FeedbackItemCardList";
+import dynamic from "next/dynamic";
+
+const DynamicFeedbackEditor = dynamic(() => import('../../../../../components/FeedbackItemEditor'), {
+  ssr: false,
+})
 
 Pusher.logToConsole = true;
 
@@ -334,7 +336,7 @@ function FeedbackView({
       <SimpleGrid cols={2} className={classes.alignItemsStart} >
 
         {feedbackRound.state !== FeedbackRoundStates.Closed &&
-                <FeedbackItemEditor feedbackRoundId={feedbackRoundId} />
+                <DynamicFeedbackEditor feedbackRoundId={feedbackRoundId} />
            }
               <FeedbackItemCardList
                 feedbackColumns={feedbackRound.feedbackColumns}

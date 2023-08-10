@@ -1,10 +1,10 @@
 import { Button, Container, TextInput, createStyles, Title, Card } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
-import { DynamicBlockEditor } from "./DynamicBlockEditor";
 import type { OutputData } from '@editorjs/editorjs';
 import { useState } from "react";
 import { ClearTriggerValues } from "./BlockEditor";
+import { BlockEditor } from "./BlockEditor";
 
 const useStyles = createStyles((theme) => ({
 
@@ -60,7 +60,7 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
           {...form.getInputProps("title")}
         />
         <div>Body</div>
-        <DynamicBlockEditor holder="blockeditor-container" clearTrigger={clearTrigger} onChange={(data:OutputData) => {
+        <BlockEditor holder="blockeditor-container" clearTrigger={clearTrigger} onChange={(data:OutputData) => {
               form.setFieldValue('body', JSON.stringify(data))}} />
         <Button type="submit" mt="sm">
           Create feedback item
@@ -70,3 +70,5 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
     </Card>
   );
 }
+
+export default FeedbackItemEditor;

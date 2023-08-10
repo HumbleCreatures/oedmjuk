@@ -3,14 +3,18 @@ import { type NextPage } from "next";
 import AppLayout from "../../../../../../../components/AppLayout";
 import { Container, Text, Title, createStyles, SimpleGrid, Button, Card, List, ThemeIcon, Group, Badge } from "@mantine/core";
 import { api } from "../../../../../../../utils/api";
-import { FeedbackNoteEditor } from "../../../../../../../components/FeedbackNoteEditor";
 import { UserLinkWithData } from "../../../../../../../components/UserButton";
 import { DateTime } from "luxon";
-import { IconArrowMoveRight, IconNotes, IconNotesOff, IconPaperBag } from "@tabler/icons";
+import { IconArrowMoveRight, IconNotes, IconPaperBag } from "@tabler/icons";
 import { FeedbackRoundStates } from "../../../../../../../utils/enums";
 import EditorJsRenderer from "../../../../../../../components/EditorJsRenderer";
 import { useGeneralStyles } from "../../../../../../../styles/generalStyles";
 import { SpaceLoader } from "../../../../../../../components/Loaders/SpaceLoader";
+import dynamic from "next/dynamic";
+
+const DynamicNoteEditor = dynamic(() => import('../../../../../../../components/FeedbackNoteEditor'), {
+  ssr: false,
+})
 
 const useStyles = createStyles((theme) => ({
   areaTitle: {
@@ -168,7 +172,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
       <Title order={2} className={classes.areaTitle}>
               Create feedback note
             </Title>
-        <FeedbackNoteEditor
+        <DynamicNoteEditor
           feedbackItemId={feedbackItemId}
           feedbackRoundId={feedbackItem.feedbackRoundId}
         />
