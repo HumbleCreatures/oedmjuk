@@ -1,10 +1,13 @@
-import { Button, Container, Text } from "@mantine/core";
+import { Button, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
 import type { OutputData } from '@editorjs/editorjs';
-import { DynamicBlockEditor } from "./DynamicBlockEditor";
+import { useState } from "react";
+import { ClearTriggerValues } from "./BlockEditor";
+import BlockEditor from "./BlockEditor";
 
 export function FeedbackNoteEditor({feedbackRoundId, feedbackItemId}: {feedbackRoundId: string, feedbackItemId:string}) {
+  const [clearTrigger, setClearTrigger] = useState<ClearTriggerValues>();
   const form = useForm({
     initialValues: {
       body: "",
@@ -25,22 +28,25 @@ export function FeedbackNoteEditor({feedbackRoundId, feedbackItemId}: {feedbackR
   });
 
   return (
-    <Container>
+    <div>
         <form
         onSubmit={form.onSubmit((values) => {
-          mutation.mutate({ ...values, feedbackItemId })
+          mutation.mutate({ ...values, feedbackItemId });
+          setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear);
         })}
       >
         
         <Text fz="sm" fw={500}>
                 Body
               </Text>
-              <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
-              form.setFieldValue('body', JSON.stringify(data))}}  />
+
+              <BlockEditor clearTrigger={clearTrigger}  holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
         <Button type="submit" mt="sm">
           Create feedback item
         </Button>
-      </form>
-    </Container>
+      </form></div>
   );
 }
+
+export default FeedbackNoteEditor;

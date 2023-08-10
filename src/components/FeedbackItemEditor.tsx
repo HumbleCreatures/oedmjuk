@@ -1,8 +1,10 @@
-import { Button, Container, TextInput, createStyles, Title } from "@mantine/core";
+import { Button, Container, TextInput, createStyles, Title, Card } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { api } from "../utils/api";
-import { DynamicBlockEditor } from "./DynamicBlockEditor";
 import type { OutputData } from '@editorjs/editorjs';
+import { useState } from "react";
+import { ClearTriggerValues } from "./BlockEditor";
+import { BlockEditor } from "./BlockEditor";
 
 const useStyles = createStyles((theme) => ({
 
@@ -10,7 +12,7 @@ const useStyles = createStyles((theme) => ({
     fontSize: theme.fontSizes.md,
     marginBottom: theme.spacing.xs,
   },
-  editorContainer: {
+  cardWrapper: {
     width: 300,
   }
  
@@ -18,6 +20,7 @@ const useStyles = createStyles((theme) => ({
 
 export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string}) {
   const { classes } = useStyles();
+  const [clearTrigger, setClearTrigger] = useState<ClearTriggerValues>();
   const form = useForm({
     initialValues: {
       title: "",
@@ -39,13 +42,16 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
   });
 
   return (
-    <Container className={classes.editorContainer}>
+    <Card shadow="sm" padding="lg" radius="md" withBorder mb="md" className={classes.cardWrapper}>
+      <Card.Section p="sm">
         <Title order={3} className={classes.areaTitle}>
               Create feedback item
             </Title>
         <form
         onSubmit={form.onSubmit((values) => {
-          mutation.mutate({ ...values, feedbackRoundId })
+          mutation.mutate({ ...values, feedbackRoundId });
+          form.reset();
+          setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear);
         })}
       >
         <TextInput
@@ -54,12 +60,15 @@ export function FeedbackItemEditor({feedbackRoundId}: {feedbackRoundId: string})
           {...form.getInputProps("title")}
         />
         <div>Body</div>
-        <DynamicBlockEditor holder="blockeditor-container" onChange={(data:OutputData) => {
+        <BlockEditor holder="blockeditor-container" clearTrigger={clearTrigger} onChange={(data:OutputData) => {
               form.setFieldValue('body', JSON.stringify(data))}} />
         <Button type="submit" mt="sm">
           Create feedback item
         </Button>
       </form>
-    </Container>
+      </Card.Section>
+    </Card>
   );
 }
+
+export default FeedbackItemEditor;

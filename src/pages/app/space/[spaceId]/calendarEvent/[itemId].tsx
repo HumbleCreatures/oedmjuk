@@ -172,7 +172,6 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
         </Group>
         </div>
         
-
         <div className={generalClasses.bodyArea}>
           <Group position="apart" className={generalClasses.topGroup}>
           <div>
@@ -418,7 +417,7 @@ const LoadingSpaceView: NextPage = () => {
 
 export default LoadingSpaceView;
 
-function FormattedEventDateAndTime({
+export function FormattedEventDateAndTime({
   startAt,
   endAt,
 }: {

@@ -58,43 +58,43 @@ model Session {
 }
 
 model User {
-  id                             String                   @id @default(cuid())
-  name                           String?
-  email                          String?                  @unique
-  emailVerified                  DateTime?
-  image                          String?
-  accounts                       Account[]
-  sessions                       Session[]
-  spaceMember                    SpaceMember[]
-  content                        Content[]
-  proposalVotes                  ProposalVote[]           @relation("ProposalVote")
-  proposalPicks                  ProposalVote[]           @relation("ProposalPick")
-  proposalObjections             ProposalObjection[]      @relation("ProposalObjection")
-  proposalObjectionResolves      ProposalObjection[]      @relation("ProposalObjectionResolves")
-  accessRequestCreated           AccessRequest[]          @relation("accessRequestCreator")
-  accessRequestUsers             AccessRequest[]          @relation("accessRequestUser")
-  accessRequestExecutes          AccessRequest[]          @relation("accessRequestExecuter")
-  accessRequestObjectionCreated  AccessRequestObjection[] @relation("accessRequestObjectionCreator")
-  accessRequestObjectionResolves AccessRequestObjection[] @relation("accessRequestObjectionResolver")
-  feedbackItems                  FeedbackItem[]           @relation("FeedbackItem")
-  contentVersion                 ContentVersion[]
-  comment                        Comment[]
-  calendarEvent                  CalendarEvent[]
-  calendarEventAttendee          CalendarEventAttendee[]
-  userCalendar                   UserCalendar[]
-  proposal                       Proposal[]
-  feedbackRound                  FeedbackRound[]
-  selection                      Selection[]
-  selectionAlternatives          SelectionAlternative[]
-  selectionVoteEntry             SelectionVoteEntry[]
-  dataIndex                      DataIndex[]
-  contentSignature               ContentSignature[]
-  proposalParticipant            ProposalParticipant[]
-  selectionParticipant           SelectionParticipant[]
-  feedbackNote                   FeedbackNote[]
-  feedbackMovement               FeedbackMovement[]
-  UserFeedItem                   UserFeedItem[]
-  AccessRequestApproval          AccessRequestApproval[]
+  id                        String                       @id @default(cuid())
+  name                      String?
+  email                     String?                      @unique
+  emailVerified             DateTime?
+  image                     String?
+  accounts                  Account[]
+  sessions                  Session[]
+  spaceMember               SpaceMember[]
+  content                   Content[]
+  proposalVotes             ProposalVote[]               @relation("ProposalVote")
+  proposalPicks             ProposalVote[]               @relation("ProposalPick")
+  proposalObjections        ProposalObjection[]          @relation("ProposalObjection")
+  proposalObjectionResolves ProposalObjection[]          @relation("ProposalObjectionResolves")
+  feedbackItems             FeedbackItem[]               @relation("FeedbackItem")
+  onBehalfOfAccessRequests  AccessRequest[]              @relation("accessRequestOnBehalfOfUser")
+  contentVersion            ContentVersion[]
+  comment                   Comment[]
+  calendarEvent             CalendarEvent[]
+  calendarEventAttendee     CalendarEventAttendee[]
+  userCalendar              UserCalendar[]
+  proposal                  Proposal[]
+  feedbackRound             FeedbackRound[]
+  selection                 Selection[]
+  selectionAlternatives     SelectionAlternative[]
+  selectionVoteEntry        SelectionVoteEntry[]
+  dataIndex                 DataIndex[]
+  contentSignature          ContentSignature[]
+  proposalParticipant       ProposalParticipant[]
+  selectionParticipant      SelectionParticipant[]
+  feedbackNote              FeedbackNote[]
+  feedbackMovement          FeedbackMovement[]
+  userFeedItem              UserFeedItem[]
+  accessRequestApprovals    AccessRequestApproval[]
+  accessRequestObjections   AccessRequestObjection[]
+  accessRequestComments     AccessRequestComment[]
+  createdAccessRequests     AccessRequest[]              @relation("accessRequestCreator")
+  accessRequestExecutions   AccessRequestStepExecution[]
 }
 
 model VerificationToken {
@@ -106,21 +106,23 @@ model VerificationToken {
 }
 
 model Space {
-  id             String          @id @default(cuid())
-  name           String
-  description    String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  spaceMembers   SpaceMember[]
-  content        Content[]
-  calendarEvents CalendarEvent[]
-  spaceFeedItem  SpaceFeedItem[]
-  proposal       Proposal[]
-  dataIndex      DataIndex[]
-  selection      Selection[]
-  feedbackRound  FeedbackRound[]
-  UserFeedItem   UserFeedItem[]
-  AccessRequest  AccessRequest[]
+  id                       String              @id @default(cuid())
+  name                     String
+  description              String?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  spaceMembers             SpaceMember[]
+  content                  Content[]
+  calendarEvents           CalendarEvent[]
+  spaceFeedItem            SpaceFeedItem[]
+  proposal                 Proposal[]
+  dataIndex                DataIndex[]
+  selection                Selection[]
+  feedbackRound            FeedbackRound[]
+  userFeedItems            UserFeedItem[]
+  accessRequests           AccessRequest[]
+  accessRequestTypes       AccessRequestType[]
+  onBehalfOfAccessRequests AccessRequest[]     @relation("accessRequestOnbehalfOfSpace")
 }
 
 model SpaceFeedItem {
@@ -289,7 +291,7 @@ model Proposal {
   spaceId        String
   creator        User                  @relation(fields: [creatorId], references: [id])
   creatorId      String
-  proposalState  String                @default("ProposalCreated")
+  state          String                @default("ProposalCreated")
   proposalType   String                @default("Internal")
   votes          ProposalVote[]
   participants   ProposalParticipant[]
@@ -506,62 +508,119 @@ model DataIndexPoint {
   dataIndexId String
 }
 
+model AccessRequestType {
+  id                        String              @id @default(cuid())
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  name                      String
+  description               String?
+  hasOnBehalfOfUser         Boolean?
+  onBehalfOfUserIsRequired  Boolean?
+  hasOnBehalfOfSpace        Boolean?
+  onBehalfOfSpaceIsRequired Boolean?
+  numberOfApprovals         Int?
+  steps                     AccessRequestStep[]
+  space                     Space               @relation(fields: [spaceId], references: [id])
+  spaceId                   String
+  accessRequests            AccessRequest[]
+}
+
+model AccessRequestStep {
+  id                          String                       @id @default(cuid())
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  name                        String
+  description                 String?
+  joinSpace                   Boolean?
+  manualAction                Int?
+  approvalFromRequester       Boolean?
+  approvalFromOnBehalfOfUser  Boolean?
+  approvalFromOnBehalfOfSpace Int?
+  accessRequestType           AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
+  accessRequestTypeId         String
+  stepExecutions              AccessRequestStepExecution[]
+}
+
+model AccessRequestStepExecution {
+  id                  String            @id @default(cuid())
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  log                 String?
+  markAsDone          Boolean           @default(false)
+  executingUser       User?             @relation(fields: [executingUserId], references: [id])
+  executingUserId     String?
+  accessRequest       AccessRequest     @relation(fields: [accessRequestId], references: [id])
+  accessRequestId     String
+  accessRequestStep   AccessRequestStep @relation(fields: [accessRequestStepId], references: [id])
+  accessRequestStepId String
+}
+
 model AccessRequest {
-  id                     String                   @id @default(cuid())
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  executedAt             DateTime?
-  executer               User?                    @relation(name: "accessRequestExecuter", fields: [executerId], references: [id])
-  executerId             String?
-  space                  Space                    @relation(fields: [spaceId], references: [id])
+  id                     String                       @id @default(cuid())
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  space                  Space                        @relation(fields: [spaceId], references: [id])
   spaceId                String
-  creator                User                     @relation(name: "accessRequestCreator", fields: [creatorId], references: [id])
+  creator                User                         @relation(name: "accessRequestCreator", fields: [creatorId], references: [id])
   creatorId              String
-  state                  String                   @default("Created")
-  user                   User?                    @relation(name: "accessRequestUser", fields: [userId], references: [id])
-  userId                 String?
+  state                  String                       @default("Created")
+  onBehalfOfUser         User?                        @relation(name: "accessRequestOnBehalfOfUser", fields: [onBehalfOfUserId], references: [id])
+  onBehalfOfUserId       String?
+  onBehalfOfSpace        Space?                       @relation(name: "accessRequestOnbehalfOfSpace", fields: [onBehalfOfSpaceId], references: [id])
+  onBehalfOfSpaceId      String?
   userUrl                String?
   objectUrl              String?
   title                  String
   body                   String
-  spaceFeedItems         SpaceFeedItem[]
-  userFeedItems          UserFeedItem[]
+  accessRequestType      AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
+  accessRequestTypeId    String
   accessRequestApproval  AccessRequestApproval[]
-  AccessRequestObjection AccessRequestObjection[]
+  accessRequestObjection AccessRequestObjection[]
+  stepExecutions         AccessRequestStepExecution[]
+  accessRequestComments  AccessRequestComment[]
+  spaceFeedItem          SpaceFeedItem[]
+  userFeedItems          UserFeedItem[]
+}
+
+model AccessRequestComment {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
+  accessRequestId String
+  author          User          @relation(fields: [authorId], references: [id])
+  authorId        String
+  body            String
+  isExternalUser  Boolean
 }
 
 model AccessRequestApproval {
   id              String        @id @default(cuid())
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
   accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
   accessRequestId String
   creator         User          @relation(fields: [creatorId], references: [id])
   creatorId       String
+  comment         String
 }
 
 model AccessRequestObjection {
   id              String        @id @default(cuid())
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
   accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
   accessRequestId String
-  creator         User          @relation(name: "accessRequestObjectionCreator", fields: [creatorId], references: [id])
+  creator         User          @relation(fields: [creatorId], references: [id])
   creatorId       String
-  body            String
-  resolvedAt      DateTime?
-  resolvedBy      User?         @relation(name: "accessRequestObjectionResolver", fields: [resolvedById], references: [id])
-  resolvedById    String?
-  resolvedComment String?
+  comment         String
 }
 
 model BodyTemplate {
-  id                  String                @id @default(cuid())
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  deletedAt           DateTime?
+  id                   String                @id @default(cuid())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
   bodyTemplateVersions BodyTemplateVersion[] @relation("versions")
 }
 

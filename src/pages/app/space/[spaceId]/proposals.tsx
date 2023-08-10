@@ -21,7 +21,7 @@ import { IconNotebook } from "@tabler/icons";
 import { useGeneralStyles } from "../../../../styles/generalStyles";
 import { Proposal } from "@prisma/client";
 import { ProposalStates } from "../../../../utils/enums";
-import { ProposalStatusBadge } from "../../../../components/ProposalBadge";
+import { ProposalStatusBadge } from "../../../../components/ProposalStatusBadge";
 import { SpaceLoader } from "../../../../components/Loaders/SpaceLoader";
 
 const useStyles = createStyles((theme) => ({
@@ -60,10 +60,10 @@ function SpaceView({ spaceId }: { spaceId: string }) {
   if (!proposalResult.data)
     return <div>Could not find content pages</div>;
 
-  const openProposals = proposalResult.data.filter(p => p.proposalState === ProposalStates.ProposalOpen);
-  const votingProposals = proposalResult.data.filter(p => p.proposalState === ProposalStates.ObjectionsResolved);
-  const finishedProposals = proposalResult.data.filter(p => p.proposalState === ProposalStates.VoteClosed);
-  const draftProposals = proposalResult.data.filter(p => p.proposalState === ProposalStates.ProposalCreated);
+  const openProposals = proposalResult.data.filter(p => p.state === ProposalStates.ProposalOpen);
+  const votingProposals = proposalResult.data.filter(p => p.state === ProposalStates.ObjectionsResolved);
+  const finishedProposals = proposalResult.data.filter(p => p.state === ProposalStates.VoteClosed);
+  const draftProposals = proposalResult.data.filter(p => p.state === ProposalStates.ProposalCreated);
 
   return (
     <AppLayout>
@@ -199,7 +199,7 @@ function ProposalList ({proposals}: {proposals: Proposal[]}) {
             <Text fz="lg" fw={500}>
               {proposal.title}
             </Text>
-            <ProposalStatusBadge state={proposal.proposalState} />
+            <ProposalStatusBadge state={proposal.state} />
           </Group>
           
           <div>

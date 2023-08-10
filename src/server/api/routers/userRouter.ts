@@ -11,6 +11,7 @@ export const userRouter = createTRPCRouter({
   .query(({ ctx }) => { 
     return ctx.prisma.userFeedItem.findMany({
       where:{ userId: ctx.session?.user?.id },
+      orderBy: { createdAt: 'desc' },
       include: {
         content: true,
         calendarEvent: true,

@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
-  SpaceFeedEventTypes,
-  UserFeedEventTypes,
+  FeedEventTypes,
   ProposalStates,
   VoteValue,
 } from "../../../utils/enums";
@@ -29,14 +28,14 @@ export const proposalRouter = createTRPCRouter({
       const userFeedItems = space.spaceMembers.map((sm) => ({ 
         spaceId: input.spaceId,
         userId: sm.userId,
-        eventType: UserFeedEventTypes.ProposalEventCreated,
+        eventType: FeedEventTypes.ProposalEventCreated,
       }))
 
       if(!isMember) {
         userFeedItems.push({
           spaceId: input.spaceId,
           userId: ctx.session.user.id,
-          eventType: UserFeedEventTypes.ProposalEventCreated,
+          eventType: FeedEventTypes.ProposalEventCreated,
         })
       }
 
@@ -80,7 +79,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Objection not found");
 
-      if(proposal.proposalState !== ProposalStates.ProposalCreated) 
+      if(proposal.state !== ProposalStates.ProposalCreated) 
           throw new Error("Can only open created proposal");
 
       const space = await ctx.prisma.space.findUnique({where: {id: proposal.spaceId},
@@ -95,7 +94,7 @@ export const proposalRouter = createTRPCRouter({
       const userFeedItems = space.spaceMembers.map((sm) => ({ 
         spaceId: proposal.spaceId,
         userId: sm.userId,
-        eventType: UserFeedEventTypes.ProposalEventCreated,
+        eventType: FeedEventTypes.ProposalEventCreated,
       }))
 
       const updatedProposal = await ctx.prisma.proposal.update({
@@ -103,11 +102,11 @@ export const proposalRouter = createTRPCRouter({
           id: input.proposalId,
         },
         data: {
-          proposalState: ProposalStates.ProposalOpen,
+          state: ProposalStates.ProposalOpen,
           spaceFeedItem: {
             create: {
               spaceId: proposal.spaceId,
-              eventType: SpaceFeedEventTypes.ProposalEventCreated,
+              eventType: FeedEventTypes.ProposalEventCreated,
             },
           },
           UserFeedItem: {
@@ -120,7 +119,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }
       });
@@ -128,7 +127,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }          
        });
@@ -145,7 +144,7 @@ export const proposalRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const proposal = await ctx.prisma.proposal.findUnique({ where: { id: input.proposalId } });
       if(!proposal) throw new Error("Proposal not found");
-      if(proposal.proposalState !== ProposalStates.ProposalOpen) 
+      if(proposal.state !== ProposalStates.ProposalOpen) 
         throw new Error("Proposal needs to be open for objections");
 
       const objection = await ctx.prisma.proposalObjection.create({
@@ -160,7 +159,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: proposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          eventType: FeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
         }
       });
@@ -168,7 +167,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalObjectionAdded,
+          eventType: FeedEventTypes.ProposalObjectionAdded,
           spaceId: proposal.spaceId,
         }          
        });
@@ -216,7 +215,7 @@ export const proposalRouter = createTRPCRouter({
       });
 
       if (!proposal) throw new Error("Objection not found");
-      if (proposal.proposalState !== ProposalStates.ProposalOpen) 
+      if (proposal.state !== ProposalStates.ProposalOpen) 
         throw new Error("Can only close open proposals");
 
       const openObjections = proposal.objections.filter((o) => !o.resolvedAt);
@@ -234,7 +233,7 @@ export const proposalRouter = createTRPCRouter({
           id: input.proposalId,
         },
         data: {
-          proposalState: ProposalStates.ObjectionsResolved,
+          state: ProposalStates.ObjectionsResolved,
           participants: {
             create: allSpaceUsers.map((u) => ({ participantId: u.userId })),
           },
@@ -245,7 +244,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }
       });
@@ -253,7 +252,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingStarted,
+          eventType: FeedEventTypes.ProposalVotingStarted,
           spaceId: proposal.spaceId,
         }          
        });
@@ -280,7 +279,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Objection not found");
 
-      if (proposal.proposalState !== ProposalStates.ObjectionsResolved)
+      if (proposal.state !== ProposalStates.ObjectionsResolved)
         throw new Error("Proposal not in votable state");
 
       const isParticipant = proposal.participants.some(p => p.participantId === ctx.session.user.id);
@@ -318,7 +317,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Proposal not found");
 
-      if (proposal.proposalState !== ProposalStates.ObjectionsResolved) 
+      if (proposal.state !== ProposalStates.ObjectionsResolved) 
         throw new Error("Can only end voting on resolved proposals");
 
       const updatedProposal = await ctx.prisma.proposal.update({
@@ -326,7 +325,7 @@ export const proposalRouter = createTRPCRouter({
           id: input.proposalId,
         },
         data: {
-          proposalState: ProposalStates.VoteClosed,
+          state: ProposalStates.VoteClosed,
         },
       });
 
@@ -334,7 +333,7 @@ export const proposalRouter = createTRPCRouter({
         data: {
           userId: updatedProposal.creatorId,
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingEnded,
+          eventType: FeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
         }
       });
@@ -342,7 +341,7 @@ export const proposalRouter = createTRPCRouter({
       await ctx.prisma.spaceFeedItem.create({
         data: {
           proposalId: input.proposalId,
-          eventType: UserFeedEventTypes.ProposalVotingEnded,
+          eventType: FeedEventTypes.ProposalVotingEnded,
           spaceId: proposal.spaceId,
         }          
        });
@@ -373,7 +372,7 @@ export const proposalRouter = createTRPCRouter({
     .input(z.object({ spaceId: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.proposal.findMany({
-        where: { spaceId: input.spaceId, proposalState: ProposalStates.ProposalCreated },
+        where: { spaceId: input.spaceId, state: ProposalStates.ProposalCreated },
         include: {
           objections: true,
         },
@@ -389,7 +388,7 @@ export const proposalRouter = createTRPCRouter({
 
       if (!proposal) throw new Error("Proposal not found");
 
-      if (proposal.proposalState === ProposalStates.VoteClosed) {
+      if (proposal.state === ProposalStates.VoteClosed) {
         const votes = await ctx.prisma.proposalVote.findMany({
           where: { proposalId: proposal.id },
         });

@@ -13,6 +13,7 @@ const useStyles = createStyles((theme) => ({
   },
   cardWrapper: {
     width: 300,
+    overflow: "visible"
   }
 }));
 
@@ -39,6 +40,8 @@ export function FeedbackItemCard({
       void utils.feedback.getExternalFeedbackItems.refetch({
         itemId: feedbackItem.feedbackRoundId,
       });
+      void utils.feedback.getNamedFeedbackItems.refetch({ itemId: feedbackItem.feedbackRoundId, columnName: "Done" });
+      void utils.feedback.getNamedFeedbackItems.refetch({ itemId: feedbackItem.feedbackRoundId, columnName: "Ongoing" });
     },
   });
 

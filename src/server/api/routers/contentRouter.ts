@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SpaceFeedEventTypes } from "../../../utils/enums";
+import { FeedEventTypes } from "../../../utils/enums";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const contentRouter = createTRPCRouter({
@@ -22,7 +22,7 @@ export const contentRouter = createTRPCRouter({
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                eventType: SpaceFeedEventTypes.ContentCreated,
+                eventType: FeedEventTypes.ContentCreated,
               },
             },            
           },

@@ -14,8 +14,6 @@ import { api } from "../../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../../components/SpaceNavBar";
 import { useForm } from "@mantine/form";
 import { IconAlertCircle } from "@tabler/icons";
-import { StarterKit } from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
 import { OutputData } from "@editorjs/editorjs";
 import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";

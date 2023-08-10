@@ -1,4 +1,4 @@
-import {createStyles } from "@mantine/core";
+import {createStyles, getStylesRef } from "@mantine/core";
 
 export const useGeneralStyles = createStyles((theme) => ({
     area: {
@@ -47,19 +47,38 @@ export const useGeneralStyles = createStyles((theme) => ({
         paddingBottom: theme.spacing.md,
         marginBottom: theme.spacing.xl,
       },
-      
+      cardInfoArea: {
+        backgroundColor: theme.colors.gray[4],
+        padding: theme.spacing.sm,
+        paddingLeft: '2rem',
+        marginLeft: '-1rem',
+        borderTopLeftRadius: theme.radius.md,
+        borderTopRightRadius: theme.radius.md,
+        ref: getStylesRef('cardInfoArea'),
+      },
       listLinkItem: {
         borderRadius: theme.radius.md,
         boxShadow: theme.shadows.sm,
         backgroundColor: theme.white,
         paddingLeft: theme.spacing.md,
         color: theme.black,
+        
         '&:hover': { 
           borderLeft: `0.5rem solid ${theme.colors.earth[2]}`,
-          paddingLeft: '0.5rem', 
+          paddingLeft: '0.5rem',
+          [`& .${getStylesRef('cardInfoArea')}`]: {
+            marginLeft: '-0.5rem',
+            paddingLeft: '1.5rem',
+              borderTopLeftRadius: 0, 
+          }, 
         }
       },
       topGroup: {
+        alignItems: "flex-start",
+      },
+      
+      cardContentArea: {
+        padding: theme.spacing.sm,
         alignItems: "flex-start",
       }
   }));

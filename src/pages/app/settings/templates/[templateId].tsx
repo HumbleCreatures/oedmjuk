@@ -57,10 +57,10 @@ const useStyles = createStyles((theme) => ({
 
 const TemplateView = ({templateId}:{templateId: string}) => {
   const { classes } = useStyles();
-  const form = useForm<{name: string, body: OutputData | undefined}>({
+  const form = useForm<{name: string, body: string}>({
     initialValues: {
       name: "",
-      body: undefined,
+      body: "",
     },
     validate: {
         name: (value) =>
@@ -69,7 +69,6 @@ const TemplateView = ({templateId}:{templateId: string}) => {
   });
 
   const utils = api.useContext();
-  const [initialBody, setInitialBody] = useState<OutputData | undefined>(undefined);
   const query = api.bodyTemplate.getTemplate.useQuery({templateId});
   const mutation = api.bodyTemplate.updateTemplate.useMutation({
     onSuccess() {
@@ -81,9 +80,7 @@ const TemplateView = ({templateId}:{templateId: string}) => {
     if (query.data) {
         const currentVersion = query.data.bodyTemplateVersions.find((v) => v.isCurrentVersion);
         if(currentVersion) {
-            const data = JSON.parse(currentVersion.body) as OutputData;
-            setInitialBody(data);
-            form.setValues({name: currentVersion.name, body: JSON.parse(currentVersion.body) as OutputData});
+            form.setValues({name: currentVersion.name, body: currentVersion.body });
         }
     }
    }, [query.data])
@@ -113,7 +110,10 @@ const TemplateView = ({templateId}:{templateId: string}) => {
           />
          <div className={classes.editorWrapper}>
           <Text fz="sm" fw={500}>Template Body</Text>
-              <DynamicBlockEditor data={initialBody} holder="blockeditor-container" onChange={(data:OutputData) => form.setFieldValue('body', data)}  />
+
+              
+              <DynamicBlockEditor data={form.getInputProps('body').value ? JSON.parse(form.getInputProps('body').value as string) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
+            form.setFieldValue('body', JSON.stringify(data))}}  />
               </div>
           <Button type="submit" mt="sm">
             Submit

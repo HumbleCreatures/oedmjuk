@@ -1,19 +1,25 @@
 import { useRouter } from "next/router";
 import { type NextPage } from "next";
 import AppLayout from "../../../../../../../components/AppLayout";
-import { Container, Text, Title, createStyles, SimpleGrid, Button, Card, List, ThemeIcon } from "@mantine/core";
+import { Container, Text, Title, createStyles, SimpleGrid, Button, Card, List, ThemeIcon, Group, Badge } from "@mantine/core";
 import { api } from "../../../../../../../utils/api";
-import { FeedbackNoteEditor } from "../../../../../../../components/FeedbackNoteEditor";
 import { UserLinkWithData } from "../../../../../../../components/UserButton";
 import { DateTime } from "luxon";
-import { IconArrowMoveRight } from "@tabler/icons";
+import { IconArrowMoveRight, IconNotes, IconPaperBag } from "@tabler/icons";
 import { FeedbackRoundStates } from "../../../../../../../utils/enums";
 import EditorJsRenderer from "../../../../../../../components/EditorJsRenderer";
+import { useGeneralStyles } from "../../../../../../../styles/generalStyles";
+import { SpaceLoader } from "../../../../../../../components/Loaders/SpaceLoader";
+import dynamic from "next/dynamic";
+
+const DynamicNoteEditor = dynamic(() => import('../../../../../../../components/FeedbackNoteEditor'), {
+  ssr: false,
+})
 
 const useStyles = createStyles((theme) => ({
   areaTitle: {
     fontSize: theme.fontSizes.md,
-    marginBottom: theme.spacing.xs,
+    marginBottom: theme.spacing.xs, 
   },
   area: {
     backgroundColor: theme.colors.gray[4],
@@ -46,12 +52,14 @@ const useStyles = createStyles((theme) => ({
 
 function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
   const { classes } = useStyles();
+  const { classes: generalClasses } = useGeneralStyles();
+
   const router = useRouter();
   const feedbackResult = api.feedback.getFeedbackItem.useQuery({
     itemId: feedbackItemId,
   });
 
-  if (feedbackResult.isLoading) return <div>loading...</div>;
+  if (feedbackResult.isLoading) return <SpaceLoader />;
 
   if (!feedbackResult.data) return <div>Could not load feedback round</div>;
   const feedbackItem = feedbackResult.data;
@@ -62,38 +70,71 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
       <Container size="sm" className={classes.topArea}>
         <Button onClick={() => router.back()}>Back to feedback round</Button>
       </Container>
-      <Container size="sm" className={classes.itemArea}>
-          <SimpleGrid cols={1}>
-            <Title order={2} fw={500} fz="xl"> {title}</Title>
-            <Text fz="sm" fw={300}>
-               Created{" "}
-              <Text fz="sm" fw={500} className={classes.makeInline}>
-                {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
-              </Text>
-              {" "}by{" "}
-              <Text fz="sm" fw={500} className={classes.makeInline}>
-                <UserLinkWithData userId={creatorId} />
-              </Text>
-              {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
-                <>
-                and last updated{" "}
-                <Text fz="sm" fw={500} className={classes.makeInline}>
-                  {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
-                </Text></>
-            )}
-            </Text>
 
-            {body && <EditorJsRenderer data={body} /> }
-          </SimpleGrid>
+      <Container size="sm" className={generalClasses.area}>
+          <div className={generalClasses.metaArea}>
+        <Group position="apart" className={generalClasses.topGroup}>
+          <Group className={generalClasses.topGroup}>
+        <ThemeIcon size="xl">
+        <IconPaperBag />
+          </ThemeIcon>
+          <div>
+          <Text fz="sm" fw={500} >Feedback item</Text>
         
-      </Container>
+          <Text fz="sm" fw={300} className={generalClasses.inlineText}>
+            created{" "}
+            <Text fz="sm" fw={500} className={generalClasses.inlineText}>
+              {DateTime.fromJSDate(createdAt).setLocale("en").toRelative()}
+            </Text>
+          </Text>
 
+          <Text fz="sm" className={generalClasses.inlineText}>
+            {" "}by{" "}
+            <Text fz="sm" fw={500} className={generalClasses.inlineText}>
+              <UserLinkWithData userId={creatorId} />
+            </Text>
+          </Text>
 
-      <Container size="sm"  className={classes.area}>
-         <Title order={2} className={classes.areaTitle}>
-              Feedback notes
-            </Title>
-            <SimpleGrid cols={1}>
+          {updatedAt && updatedAt.getTime() !== createdAt.getTime() && (
+            <Text fz="sm" fw={300}>
+             last updated{" "}
+              <Text fz="sm" fw={500} className={generalClasses.inlineText}>
+                {DateTime.fromJSDate(updatedAt).setLocale("en").toRelative()}
+              </Text>
+            </Text>
+          )}
+
+          
+        </div>
+          </Group>
+          
+        </Group>
+        </div>
+        
+        <div className={generalClasses.bodyArea}>
+          <Group position="apart" className={generalClasses.topGroup}>
+          <div>
+          <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
+          
+          </div>
+
+          {createdByExternalUser && <Badge>External</Badge> }
+
+        </Group>
+        
+        {body && <EditorJsRenderer data={body} />}
+        </div>
+        </Container>
+
+      <Container size="sm"  className={generalClasses.clearArea}>
+      
+            <Group className={generalClasses.listHeader}>
+        
+                  <IconNotes />
+        <Title order={2} className={classes.areaTitle}>Feedback notes</Title>
+        </Group>
+
+            <SimpleGrid cols={1} spacing="sm">
         {feedbackItem.feedbackNotes &&
           feedbackItem.feedbackNotes.map((note) => (
 <Card key={note.id} shadow="sm" padding="lg" radius="md" withBorder mb="md">
@@ -131,7 +172,7 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
       <Title order={2} className={classes.areaTitle}>
               Create feedback note
             </Title>
-        <FeedbackNoteEditor
+        <DynamicNoteEditor
           feedbackItemId={feedbackItemId}
           feedbackRoundId={feedbackItem.feedbackRoundId}
         />

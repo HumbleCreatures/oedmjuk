@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SpaceFeedEventTypes } from "../../../utils/enums";
+import { FeedEventTypes } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { getDatesBetween } from "../../../utils/dateFormaters";
@@ -27,6 +27,43 @@ export const dataIndexRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       return await ctx.prisma.dataIndexType.findMany();
     }),
+    getIndexType: protectedProcedure
+    .input(
+      z.object({
+        dataIndexTypeId: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      return await ctx.prisma.dataIndexType.findUnique({ where: { id: input.dataIndexTypeId }});
+    }),
+    updateIndexType: protectedProcedure
+    .input(
+      z.object({
+        dataIndexTypeId: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        unitName: z.string().max(10),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+
+      const indexType = await ctx.prisma.dataIndexType.findUnique({
+        where: {id: input.dataIndexTypeId}
+      });
+
+      if(!indexType) {
+        throw new Error('Data index type not found');
+      }
+      
+      return ctx.prisma.dataIndexType.update({ 
+        where: { id: input.dataIndexTypeId },
+        data: { 
+          name: input.name,
+          description: input.description,
+          unitName: input.unitName,
+        }
+      });
+    }),
   createDataIndex: protectedProcedure
     .input(
       z.object({
@@ -47,7 +84,7 @@ export const dataIndexRouter = createTRPCRouter({
             spaceFeedItem: {
               create: {
                 spaceId: input.spaceId,
-                eventType: SpaceFeedEventTypes.DataIndexCreated,
+                eventType: FeedEventTypes.DataIndexCreated,
               },
             },            
           },
