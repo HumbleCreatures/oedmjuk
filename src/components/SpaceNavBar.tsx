@@ -12,7 +12,7 @@ import {
 import { Space } from "@prisma/client";
 import Link from "next/link";
 import { api } from "../utils/api";
-import { IconAlignBoxLeftMiddle, IconArrowsLeftRight, IconCalendar, IconCalendarEvent, IconChartBar, IconColorSwatch, IconMessageCircle, IconNotebook, IconPhoto, IconPlus, IconRecycle, IconSettings, IconTrash } from "@tabler/icons";
+import { IconAlignBoxLeftMiddle, IconCalendarEvent, IconChartBar, IconColorSwatch, IconLockAccess, IconMessageCircle, IconNotebook, IconPhoto, IconPlus, IconRecycle, IconSettings, IconTrash } from "@tabler/icons";
 import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
@@ -159,6 +159,13 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
             <Link href={`/app/space/${space.id}/members`} className={classes.link}>
             Members
             </Link>
+            <Link href={`/app/space/${space.id}/accessRequests`} className={classes.link}>
+            Access Requests
+            </Link>
+
+            <Link href={`/app/space/${space.id}/settings/requestAccessTypes`} className={classes.link}>
+            Settings
+            </Link>
         </Group>
       </div>
     </Container>
@@ -181,9 +188,7 @@ function CreationMenu({ spaceId }: { spaceId: string}) {
         <Menu.Item icon={<IconColorSwatch size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/selection/create`)}>Create selection</Menu.Item>
         <Menu.Item icon={<IconRecycle size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/feedback/create`)}>Create feedback round</Menu.Item>
         <Menu.Item icon={<IconChartBar size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/dataIndex/create`)}>Create data index</Menu.Item>
-        
-
-  
+        <Menu.Item icon={<IconLockAccess size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/accessRequest/create`)}>Create access request</Menu.Item>
 
       </Menu.Dropdown>
     </Menu>

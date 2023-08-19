@@ -518,7 +518,8 @@ model AccessRequestType {
   onBehalfOfUserIsRequired  Boolean?
   hasOnBehalfOfSpace        Boolean?
   onBehalfOfSpaceIsRequired Boolean?
-  numberOfApprovals         Int?
+  minimumNumberOfApprovals  Int?
+  autoApproved              Boolean?
   steps                     AccessRequestStep[]
   space                     Space               @relation(fields: [spaceId], references: [id])
   spaceId                   String
@@ -529,6 +530,8 @@ model AccessRequestStep {
   id                          String                       @id @default(cuid())
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
+  deletedAt                   DateTime?
+  stepType                    String 
   name                        String
   description                 String?
   joinSpace                   Boolean?
@@ -539,6 +542,7 @@ model AccessRequestStep {
   accessRequestType           AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
   accessRequestTypeId         String
   stepExecutions              AccessRequestStepExecution[]
+  order                       Int
 }
 
 model AccessRequestStepExecution {
@@ -546,7 +550,10 @@ model AccessRequestStepExecution {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   log                 String?
-  markAsDone          Boolean           @default(false)
+  stepFinished        Boolean           @default(false)
+  done                Boolean           @default(false)
+  failed              Boolean           @default(false)
+  denied              Boolean           @default(false)
   executingUser       User?             @relation(fields: [executingUserId], references: [id])
   executingUserId     String?
   accessRequest       AccessRequest     @relation(fields: [accessRequestId], references: [id])
@@ -570,7 +577,6 @@ model AccessRequest {
   onBehalfOfSpaceId      String?
   userUrl                String?
   objectUrl              String?
-  title                  String
   body                   String
   accessRequestType      AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
   accessRequestTypeId    String
@@ -602,7 +608,7 @@ model AccessRequestApproval {
   accessRequestId String
   creator         User          @relation(fields: [creatorId], references: [id])
   creatorId       String
-  comment         String
+  comment         String?
 }
 
 model AccessRequestObjection {

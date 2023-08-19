@@ -43,11 +43,19 @@ export enum FeedbackRoundStates {
     Closed = 'Closed',
 }
 
-export enum RequestAccessStates { 
+export enum AccessRequestStates { 
     Created = 'Created',
     Approved = 'Approved',
     Denied = 'Denied',
-    Executed = 'Executed',
+    Finished = 'Finished',
+}
+
+export enum AccessRequestStepTypes { 
+    Manual = 'Manual',
+    JoinSpace = 'JoinSpace',
+    OnBehalfOfUserApproval = 'OnBehalfOfUser',
+    OnBehalfOfSpaceApproval = 'OnBehalfOfSpace',
+    RequesterApproval = 'RequesterApproval',
 }
 
 export enum VoteValue {

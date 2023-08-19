@@ -64,24 +64,4 @@ export const contentRouter = createTRPCRouter({
       
       return content;
     })
-  /*getAllSpaces: publicProcedure.query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getMySpaces: protectedProcedure
-  .query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getSpace: protectedProcedure
-  .input(z.object({ id: z.string() }))
-  .query(({ ctx }) => { 
-    return ctx.prisma.space.findMany();
-  }),
-
-  getSpaceMembers: protectedProcedure
-  .input(z.object({ spaceId: z.string() }))
-  .query(({ ctx }) => { 
-    return ctx.prisma.spaceMembership.findMany();
-  }),*/
 });

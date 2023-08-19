@@ -8,6 +8,7 @@ import { selectionRouter } from "./routers/selectionRouter";
 import { feedbackRouter } from "./routers/feedbackRouter";
 import { dataIndexRouter } from "./routers/dataIndexRouter";
 import { bodyTemplateRouter } from "./routers/bodyTemplateRouter";
+import { accessRequestRouter } from "./routers/accessRequestRouter";
 
 /**
  * This is the primary router for your server.
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   feedback: feedbackRouter,
   dataIndex: dataIndexRouter,
   bodyTemplate: bodyTemplateRouter,
+  accessRequest: accessRequestRouter
 });
 
 // export type definition of API

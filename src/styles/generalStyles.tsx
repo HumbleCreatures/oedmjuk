@@ -73,6 +73,13 @@ export const useGeneralStyles = createStyles((theme) => ({
           }, 
         }
       },
+      listItem: {
+        borderRadius: theme.radius.md,
+        boxShadow: theme.shadows.sm,
+        backgroundColor: theme.white,
+        padding: theme.spacing.md,
+        color: theme.black,        
+      },
       topGroup: {
         alignItems: "flex-start",
       },
@@ -80,5 +87,9 @@ export const useGeneralStyles = createStyles((theme) => ({
       cardContentArea: {
         padding: theme.spacing.sm,
         alignItems: "flex-start",
+      },
+      switchContainer: {
+        paddingTop: theme.spacing.sm,
+        paddingBottom: theme.spacing.sm,
       }
   }));

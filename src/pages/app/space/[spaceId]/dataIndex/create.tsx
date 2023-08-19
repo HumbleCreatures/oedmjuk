@@ -74,7 +74,6 @@ function DataIndexEditorView({spaceId}: {spaceId: string}) {
 
         <form
           onSubmit={form.onSubmit((values) => {
-            console.log(values);
             mutation.mutate({...values, spaceId: space.id});
           })}
         >

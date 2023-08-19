@@ -7,6 +7,10 @@ export const userRouter = createTRPCRouter({
   .query(({ ctx, input }) => { 
     return ctx.prisma.user.findUnique({where:{ id:input.userId }});
   }),
+  getAllUser: protectedProcedure
+  .query(({ ctx, input }) => { 
+    return ctx.prisma.user.findMany();
+  }),
   getUserFeed: protectedProcedure
   .query(({ ctx }) => { 
     return ctx.prisma.userFeedItem.findMany({
