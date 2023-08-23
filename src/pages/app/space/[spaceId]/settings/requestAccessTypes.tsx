@@ -23,8 +23,6 @@ import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 import { useRouter } from "next/router";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
-import { useState } from "react";
-import { ClearTriggerValues } from "../../../../../components/BlockEditor";
 import dynamic from "next/dynamic";
 
 export const DynamicAccessRequestTypeEditor = dynamic(() => import("../../../../../components/AccessRequestTypeEditor"), {

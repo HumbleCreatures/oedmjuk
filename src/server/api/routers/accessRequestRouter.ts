@@ -173,7 +173,7 @@ export const accessRequestRouter = createTRPCRouter({
           {
             spaceId: accessRequestType.spaceId,
             userId: ctx.session.user.id,
-            eventType: FeedEventTypes.CalendarEventCreated,
+            eventType: FeedEventTypes.AccessRequestCreator,
           }
         ]
 
