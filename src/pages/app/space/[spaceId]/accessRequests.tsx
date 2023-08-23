@@ -23,6 +23,7 @@ import { AccessRequest, AccessRequestType, Proposal } from "@prisma/client";
 import { ProposalStates, AccessRequestStates } from "../../../../utils/enums";
 import { ProposalStatusBadge } from "../../../../components/ProposalStatusBadge";
 import { SpaceLoader } from "../../../../components/Loaders/SpaceLoader";
+import { AccessRequestStatusBadge } from "../../../../components/AccessRequestStatusBadge";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -43,7 +44,11 @@ const useStyles = createStyles((theme) => ({
   },
   titleWrapper: {
     marginBottom: theme.spacing.md,
-  }
+  },
+  idText: {
+    display: "inline",
+    color: theme.colors.earth[5],
+  },
 }));
 
 function SpaceView({ spaceId }: { spaceId: string }) {
@@ -198,10 +203,14 @@ function AccessRequestList ({accessRequests}: {accessRequests: AccessRequestWith
       >
         <Card>
           <Group position="apart">
+            <div>
             <Text fz="lg" fw={500}>
               {accessRequest.accessRequestType.name}
             </Text>
-            <ProposalStatusBadge state={accessRequest.state} />
+            <Text fz="sm" fw={500} className={classes.idText}>
+              Id: {accessRequest.id}
+            </Text></div>
+            <AccessRequestStatusBadge state={accessRequest.state} />
           </Group>
           
           <div>

@@ -21,7 +21,12 @@ import { OutputData } from "@editorjs/editorjs";
 import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
 import { SpaceLoader } from "../../../../../../components/Loaders/SpaceLoader";
 import { useGeneralStyles } from "../../../../../../styles/generalStyles";
-import { AccessRequestStepsEditor } from "../../../../../../components/AccessRequestStepsEditor";
+
+import dynamic from "next/dynamic";
+
+export const DynamicAccessRequestStepsEditor = dynamic(() => import("../../../../../../components/AccessRequestStepsEditor"), {
+    ssr: false,
+})
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -208,7 +213,7 @@ function EditAccessRequestTypeView({
             )}
           </form>
         </Container>
-        <AccessRequestStepsEditor accessRequestType={accessRequestTypeQuery.data} />
+        <DynamicAccessRequestStepsEditor accessRequestType={accessRequestTypeQuery.data} />
       </Container>
     </AppLayout>
   );

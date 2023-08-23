@@ -25,6 +25,11 @@ import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
 import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 import { useState } from "react";
 import { ClearTriggerValues } from "../../../../../components/BlockEditor";
+import dynamic from "next/dynamic";
+
+export const DynamicAccessRequestTypeEditor = dynamic(() => import("../../../../../components/AccessRequestTypeEditor"), {
+  ssr: false,
+})
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -61,30 +66,7 @@ const useStyles = createStyles((theme) => ({
 const RequestAccessTypesPage = ({ spaceId }: { spaceId: string }) => {
   const { classes } = useStyles();
   const { classes: generalClasses } = useGeneralStyles();
-  const form = useForm({
-    initialValues: {
-      name: "",
-      description: "",
-      hasOnBehalfOfUser: false,
-      onBehalfOfUserIsRequired: false,
-      hasOnBehalfOfSpace: false,
-      onBehalfOfSpaceIsRequired: false,
-      minimumNumberOfApprovals: 0,
-    },
-    validate: {
-      name: (value) =>
-        value.length < 2 ? "Name must have at least 2 letters" : null,
-    },
-  });
-  const [clearTrigger, setClearTrigger] = useState<ClearTriggerValues>();
-  const utils = api.useContext();
-  const mutation = api.accessRequest.createAccessRequestType.useMutation({
-    onSuccess() {
-      void utils.accessRequest.getAllAccessRequestTypesForSpace.invalidate({
-        spaceId,
-      });
-    },
-  });
+
   const spaceResult = api.space.getSpace.useQuery({ spaceId });
   const accessRequestTypesResult =
     api.accessRequest.getAllAccessRequestTypesForSpace.useQuery({ spaceId });
@@ -126,81 +108,7 @@ const RequestAccessTypesPage = ({ spaceId }: { spaceId: string }) => {
             })}
           </SimpleGrid>
         </Container>
-        <Container size="sm" className={classes.editArea}>
-          <Title order={1} className={classes.areaTitle}>
-            Create a access request type
-          </Title>
-
-          <form
-            onSubmit={form.onSubmit((values) => {
-              mutation.mutate({ ...values, spaceId });
-              form.reset();
-              setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear); 
-            })}
-          >
-            <TextInput
-              label="Name"
-              placeholder="Name"
-              {...form.getInputProps("name")}
-            />
-            <div className={generalClasses.switchContainer}> 
-            <Switch
-              label="Has behalf of user?"
-              {...form.getInputProps("hasOnBehalfOfUser")}
-              checked={form.values.hasOnBehalfOfUser}
-            /></div>
-            <div className={generalClasses.switchContainer}>
-            <Switch
-              label="Behalf of user is required?"
-              {...form.getInputProps("onBehalfOfUserIsRequired")}
-              checked={form.values.onBehalfOfUserIsRequired}
-            /></div>
-            <div className={generalClasses.switchContainer}>
-            <Switch
-              label="Has behalf of space?"
-              {...form.getInputProps("hasOnBehalfOfSpace")}
-              checked={form.values.hasOnBehalfOfSpace}
-            /></div>
-            <div className={generalClasses.switchContainer}>
-            <Switch
-              label="Behalf of space is required?"
-              {...form.getInputProps("onBehalfOfSpaceIsRequired")}
-              checked={form.values.onBehalfOfSpaceIsRequired}
-            />
-            </div>
-
-            <NumberInput
-              defaultValue={0}
-              placeholder="Minimum number of approvals"
-              label="Minimum number of approvals"
-              {...form.getInputProps("minimumNumberOfApprovals")}
-            />
-
-            <Text fz="sm" fw={500}>
-              Description
-            </Text>
-            <DynamicBlockEditor
-                clearTrigger={clearTrigger} 
-              holder="blockeditor-container"
-              onChange={(data: OutputData) => {
-                form.setFieldValue("description", JSON.stringify(data));
-              }}
-            />
-            <Button type="submit" mt="sm">
-              Submit
-            </Button>
-
-            {mutation.error && (
-              <Alert
-                icon={<IconAlertCircle size={16} />}
-                title="Bummer!"
-                color="red"
-              >
-                Something went wrong! {mutation.error.message}
-              </Alert>
-            )}
-          </form>
-        </Container>
+        <DynamicAccessRequestTypeEditor spaceId={spaceId} />
       </Container>
     </AppLayout>
   );

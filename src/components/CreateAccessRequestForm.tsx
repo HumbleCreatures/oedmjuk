@@ -1,7 +1,8 @@
 import { useForm } from "@mantine/form";
 import type { AccessRequestType } from "@prisma/client";
-import { Alert, Button, Container, TextInput, Title, createStyles, Text, Box, Select } from "@mantine/core";
+import { Alert, Button, Text, Box, Select } from "@mantine/core";
 import EditorJsRenderer from "./EditorJsRenderer";
+import type { OutputData } from '@editorjs/editorjs';
 import { DynamicBlockEditor } from "./DynamicBlockEditor";
 import { api } from "../utils/api";
 import { useRouter } from "next/router";
@@ -75,12 +76,12 @@ export function CreateAccessRequestForm({accessRequestType}: {accessRequestType:
       
       const selectableUsers = allUsersResult.data?.map((user) => ({
         value: user.id,
-        label: user.name,
+        label: user.name ? user.name : "no name",
       }));
 
       const selectableSpaces = allSpacesResult.data?.map((space) => ({
         value: space.id,
-        label: space.name,
+        label: space.name ? space.name : "no name",
       }));
     
       return <>
@@ -90,13 +91,13 @@ export function CreateAccessRequestForm({accessRequestType}: {accessRequestType:
         </Text>
         <form
           onSubmit={form.onSubmit((values) => {
-            alert(JSON.stringify(values));
             mutation.mutate({...values, accessRequestTypeId: accessRequestType.id});
-            
           })}
         >
 
-        {(accessRequestType.onBehalfOfUserIsRequired || accessRequestType.hasOnBehalfOfUser) && <Select
+        {(accessRequestType.onBehalfOfUserIsRequired || accessRequestType.hasOnBehalfOfUser) && selectableUsers &&
+        
+        <Select
             label="Choose behalf of user"
             placeholder="Pick one"
             itemComponent={SelectItemUser}
@@ -114,7 +115,7 @@ export function CreateAccessRequestForm({accessRequestType}: {accessRequestType:
                 form.setFieldValue('onBehalfOfUserId', value ? value : undefined);
             }}
             /> }
-{(accessRequestType.onBehalfOfSpaceIsRequired || accessRequestType.hasOnBehalfOfSpace) && 
+{(accessRequestType.onBehalfOfSpaceIsRequired || accessRequestType.hasOnBehalfOfSpace) && selectableSpaces && 
             <Select
             label="Choose behalf of space"
             placeholder="Pick one"

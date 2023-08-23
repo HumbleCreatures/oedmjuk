@@ -23,8 +23,8 @@ export const BlockEditor = ({ data, onChange, holder, clearTrigger }: BlockEdito
   const [currentData, setCurrentData] = React.useState<OutputData | undefined>(undefined);
   useEffect(() => {
     console.log("TRIGGER SHOULD BE CALLED", clearTrigger);
-    if (clearTrigger && editorRef.current) {     
-      editorRef.current?.clear();
+    if (clearTrigger && editorRef.current && editorRef.current?.clear) {     
+      editorRef.current.clear();
     }
   }, [clearTrigger]);
   //initialize editorjs

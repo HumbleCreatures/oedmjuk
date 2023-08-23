@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { AccessRequestStates, AccessRequestStepTypes } from "../../../utils/enums";
-import { Prisma, PrismaClient } from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime";
+import { AccessRequestStates, AccessRequestStepTypes, FeedEventTypes } from "../../../utils/enums";
+import type { Prisma, PrismaClient } from "@prisma/client";
+import type { DefaultArgs } from "@prisma/client/runtime";
+import { OnBehalfOfSpaceStepAction } from "../../../components/AccessRequestSteps/OnBehalfOfSpaceStepAction";
 
 export const accessRequestRouter = createTRPCRouter({
   createAccessRequestType: protectedProcedure
@@ -154,6 +155,36 @@ export const accessRequestRouter = createTRPCRouter({
           throw new Error('On Behalf Of Space is required');
         }
 
+        const spaceFeedItems = [
+          {
+            spaceId: accessRequestType.spaceId,
+            eventType: FeedEventTypes.AccessRequestCreated,
+          }
+        ]
+
+        if(input.onBehalfOfSpaceId) {
+          spaceFeedItems.push({
+            spaceId: input.onBehalfOfSpaceId,
+            eventType: FeedEventTypes.AccessRequestOnBehalfOfSpace,
+          })
+        }
+
+        const userFeedItems = [
+          {
+            spaceId: accessRequestType.spaceId,
+            userId: ctx.session.user.id,
+            eventType: FeedEventTypes.CalendarEventCreated,
+          }
+        ]
+
+        if(input.onBehalfOfUserId) {
+          userFeedItems.push({
+            spaceId: accessRequestType.spaceId,
+            userId: input.onBehalfOfUserId,
+            eventType: FeedEventTypes.AccessRequestOnBehalfOfUser,
+          })
+        }
+
         return ctx.prisma.accessRequest.create({
           data: {
             body: input.body,
@@ -163,6 +194,12 @@ export const accessRequestRouter = createTRPCRouter({
             onBehalfOfSpaceId: input.onBehalfOfSpaceId,
             creatorId: ctx.session.user.id,
             spaceId: accessRequestType.spaceId,
+            spaceFeedItem: {
+              create: spaceFeedItems,
+            },
+            userFeedItems: {
+              create: userFeedItems,
+            },
           },
         })
     }),
@@ -331,6 +368,10 @@ export const accessRequestRouter = createTRPCRouter({
           throw new Error('Access Request Type Step not found');
         }
 
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.Manual) {
+          throw new Error('Access Request Type has to be Manual');
+        }
+
         const accessRequest = await ctx.prisma.accessRequest.findUnique(
           {where: { id: input.accessRequestId }}
           
@@ -366,7 +407,7 @@ export const accessRequestRouter = createTRPCRouter({
             }
           });
 
-          if(await ShouldFinishAccessRequest(accessRequest.id, ctx.prisma)){
+          if(await ShouldFinishAccessRequest(ctx.session.user.id, accessRequest.id, ctx.prisma)){
             await ctx.prisma.accessRequest.update({
               where: {id: accessRequest.id},
               data: {
@@ -397,6 +438,10 @@ export const accessRequestRouter = createTRPCRouter({
 
         if(!accessRequestStep) {
           throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.Manual) {
+          throw new Error('Access Request Type has to be Manual');
         }
 
         const accessRequest = await ctx.prisma.accessRequest.findUnique(
@@ -433,6 +478,567 @@ export const accessRequestRouter = createTRPCRouter({
           
           return createResult;
     }),
+
+    markOnBehalfOfUserStepAsDone: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.OnBehalfOfUserApproval) {
+          throw new Error('Access Request Type has to be OnBehalfOfUserApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        
+        if(accessRequest.onBehalfOfUserId !== ctx.session.user.id) {
+          throw new Error('Only on behalf of user can set done');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+        
+        const createResult = await ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              done: true,
+              log: input.comment,
+              stepFinished: true 
+            }
+          });
+
+          if(await ShouldFinishAccessRequest(ctx.session.user.id, accessRequest.id, ctx.prisma)){
+            await ctx.prisma.accessRequest.update({
+              where: {id: accessRequest.id},
+              data: {
+                state: AccessRequestStates.Finished,
+              }
+              
+            })
+          }
+          
+          return createResult;
+    }),
+
+    markOnBehalfOfUserStepAsFailure: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.OnBehalfOfUserApproval) {
+          throw new Error('Access Request Type has to be OnBehalfOfUserApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        
+        if(accessRequest.onBehalfOfUserId !== ctx.session.user.id) {
+          throw new Error('Only on behalf of user can set done');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+        
+        const createResult = await ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              failed: true,
+              log: input.comment, 
+            }
+          });
+          
+          return createResult;
+    }),
+
+    markOnBehalfOfUserStepAsDenied: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.OnBehalfOfUserApproval) {
+          throw new Error('Access Request Type has to be OnBehalfOfUserApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        
+        if(accessRequest.onBehalfOfUserId !== ctx.session.user.id) {
+          throw new Error('Only on behalf of user can set done');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+        
+          return ctx.prisma.$transaction([
+            ctx.prisma.accessRequestStepExecution.create({
+              data: {
+                accessRequestId: accessRequest.id,
+                accessRequestStepId: accessRequestStep.id,
+                executingUserId: ctx.session.user.id,
+                failed: true,
+                log: input.comment,
+                denied: true 
+              }
+            }),
+
+            ctx.prisma.accessRequest.update({
+            where: {id: accessRequest.id},
+            data: {
+              state: AccessRequestStates.Denied,
+            }
+          }),        
+        ]);
+    }),
+    markRequesterStepAsDone: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.RequesterApproval) {
+          throw new Error('Access Request Type has to be RequesterApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        
+        if(accessRequest.creatorId !== ctx.session.user.id) {
+          throw new Error('Only on behalf of user can set done');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+        
+        const createResult = await ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              done: true,
+              log: input.comment,
+              stepFinished: true 
+            }
+          });
+
+          if(await ShouldFinishAccessRequest(ctx.session.user.id, accessRequest.id, ctx.prisma)){
+            await ctx.prisma.accessRequest.update({
+              where: {id: accessRequest.id},
+              data: {
+                state: AccessRequestStates.Finished,
+              }
+              
+            })
+          }
+          
+          return createResult;
+    }),
+
+    markRequesterStepAsFailure: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.RequesterApproval) {
+          throw new Error('Access Request Type has to be RequesterApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        
+        if(accessRequest.creatorId !== ctx.session.user.id) {
+          throw new Error('Only on behalf of user can set done');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+        
+        const createResult = await ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              failed: true,
+              log: input.comment, 
+            }
+          });
+          
+          return createResult;
+    }),
+
+    markRequesterStepAsDenied: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.RequesterApproval) {
+          throw new Error('Access Request Type has to be RequesterApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        
+        if(accessRequest.creatorId !== ctx.session.user.id) {
+          throw new Error('Only on behalf of user can set done');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+        
+          return ctx.prisma.$transaction([
+            ctx.prisma.accessRequestStepExecution.create({
+              data: {
+                accessRequestId: accessRequest.id,
+                accessRequestStepId: accessRequestStep.id,
+                executingUserId: ctx.session.user.id,
+                log: input.comment,
+                denied: true 
+              }
+            }),
+
+            ctx.prisma.accessRequest.update({
+            where: {id: accessRequest.id},
+            data: {
+              state: AccessRequestStates.Denied,
+            }
+          }),        
+        ]);
+    }),
+
+    markOnBehalfOfSpaceStepAsDone: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.OnBehalfOfSpaceApproval) {
+          throw new Error('Access Request Type has to be OnBehalfOfSpaceApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.accessRequestId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request not found');
+        }
+        if(!accessRequest.onBehalfOfSpaceId) {
+          throw new Error('On behalf of space have to be set.');
+        }
+        const membership = await ctx.prisma.spaceMember.findMany({
+          where: {
+            spaceId: accessRequest.onBehalfOfSpaceId,
+            userId: ctx.session.user.id
+          }
+        })
+        if(!membership) {
+          throw new Error('only members on on behalf space can set done.');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished  && step.id === input.stepId)) {
+          throw new Error('Step already finished.');
+        }
+
+        const stepFinished = accessRequestStep.manualAction ? accessRequestStep.manualAction <=
+        accessRequestStep.stepExecutions.filter(step => step.done).length + 1 : true;
+
+        const createResult = await ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              done: true,
+              log: input.comment,
+              stepFinished 
+            }
+          });
+
+          if(await ShouldFinishAccessRequest(ctx.session.user.id, accessRequest.id, ctx.prisma)){
+            await ctx.prisma.accessRequest.update({
+              where: {id: accessRequest.id},
+              data: {
+                state: AccessRequestStates.Finished,
+              }
+              
+            })
+          }
+          
+          return createResult;
+    }),
+
+    markOnBehalfOfSpaceStepAsFailure: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.OnBehalfOfSpaceApproval) {
+          throw new Error('Access Request Type has to be OnBehalfOfSpaceApproval');
+        }
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.stepId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished)) {
+          throw new Error('Step already finished.');
+        }
+
+        if(!accessRequest.onBehalfOfSpaceId) {
+          throw new Error('On behalf of space have to be set.');
+        }
+
+        const membership = await ctx.prisma.spaceMember.findMany({
+          where: {
+            spaceId: accessRequest.onBehalfOfSpaceId,
+            userId: ctx.session.user.id
+          }
+        })
+        if(!membership) {
+          throw new Error('only members can set done.');
+        }
+
+        const createResult = await ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              failed: true,
+              log: input.comment, 
+            }
+          });
+
+          
+          return createResult;
+    }),
+    markOnBehalfOfSpaceStepAsDenied: protectedProcedure
+    .input(
+      z.object({
+        stepId: z.string(),
+        accessRequestId: z.string(),
+        comment: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+        const accessRequestStep = await ctx.prisma.accessRequestStep.findUnique({
+          where: { id: input.stepId },
+          include: {
+            stepExecutions: true,
+          }
+        });
+
+        if(!accessRequestStep) {
+          throw new Error('Access Request Type Step not found');
+        }
+
+        if(accessRequestStep.stepType !== AccessRequestStepTypes.OnBehalfOfSpaceApproval) {
+          throw new Error('Access Request Type has to be OnBehalfOfSpaceApproval');
+        }
+
+
+        const accessRequest = await ctx.prisma.accessRequest.findUnique(
+          {where: { id: input.stepId }}
+          
+        );
+        if(!accessRequest) {
+          throw new Error('Access Request Type Step not found');
+        }
+        if(accessRequestStep.stepExecutions.some(step => step.stepFinished)) {
+          throw new Error('Step already finished.');
+        }
+        if(!accessRequest.onBehalfOfSpaceId) {
+          throw new Error('On behalf of space have to be set.');
+        }
+
+        const membership = await ctx.prisma.spaceMember.findMany({
+          where: {
+            spaceId: accessRequest.onBehalfOfSpaceId,
+            userId: ctx.session.user.id
+          }
+        })
+        if(!membership) {
+          throw new Error('only members can set done.');
+        }
+        return ctx.prisma.$transaction([
+          ctx.prisma.accessRequestStepExecution.create({
+            data: {
+              accessRequestId: accessRequest.id,
+              accessRequestStepId: accessRequestStep.id,
+              executingUserId: ctx.session.user.id,
+              log: input.comment,
+              denied: true 
+            }
+          }),
+
+          ctx.prisma.accessRequest.update({
+          where: {id: accessRequest.id},
+          data: {
+            state: AccessRequestStates.Denied,
+          }
+        }),        
+      ]);
+    }),
+
     getStepStatusForUser: protectedProcedure
     .input(z.object({ 
       stepId: z.string(),
@@ -525,7 +1131,7 @@ export const accessRequestRouter = createTRPCRouter({
   
 });
 
-async function ShouldFinishAccessRequest (accessRequestId: string, prisma: PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined, DefaultArgs>) {
+async function ShouldFinishAccessRequest (userId:string,accessRequestId: string, prisma: PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined, DefaultArgs>) {
   const accessRequest = await prisma.accessRequest.findUnique({
     where: { id: accessRequestId },
     include: {
@@ -542,8 +1148,36 @@ async function ShouldFinishAccessRequest (accessRequestId: string, prisma: Prism
     return false;
   }
 
-  return accessRequest.accessRequestType.steps.filter(step => {
-    return accessRequest.stepExecutions.some(execution => execution.stepFinished);
-  }).length === 0;
+  const stepsLeft = accessRequest.accessRequestType.steps.filter(step => {
+    return !accessRequest.stepExecutions.some(execution => execution.stepFinished && execution.accessRequestStepId === step.id);
+  });
 
+  if(stepsLeft.length === 0){
+    return true;
+  }
+
+  if(stepsLeft[0] && stepsLeft[0].stepType === AccessRequestStepTypes.JoinSpace) {
+    const existingMemberships = await prisma.spaceMember.findMany({
+      where:{
+        spaceId: accessRequest.spaceId,
+        userId: userId,
+        leftAt: null
+      }
+    });
+
+    if(existingMemberships.length !== 0) { 
+      return stepsLeft.length === 1;
+    }
+
+    await prisma.spaceMember.create({
+      data: {
+        spaceId: accessRequest.spaceId,
+        userId: userId
+       }
+    });
+
+    return stepsLeft.length === 1;
+  } 
+
+  
 }

@@ -144,7 +144,7 @@ model SpaceFeedItem {
   feedbackRoundId String?
   dataIndex       DataIndex?     @relation(fields: [dataIndexId], references: [id])
   dataIndexId     String?
-  AccessRequest   AccessRequest? @relation(fields: [accessRequestId], references: [id])
+  accessRequest   AccessRequest? @relation(fields: [accessRequestId], references: [id])
   accessRequestId String?
 }
 
@@ -170,7 +170,7 @@ model UserFeedItem {
   feedbackRoundId String?
   dataIndex       DataIndex?     @relation(fields: [dataIndexId], references: [id])
   dataIndexId     String?
-  AccessRequest   AccessRequest? @relation(fields: [accessRequestId], references: [id])
+  accessRequest   AccessRequest? @relation(fields: [accessRequestId], references: [id])
   accessRequestId String?
 }
 
@@ -255,7 +255,7 @@ model CalendarEvent {
   dataIndices           DataIndex[]
   feedbackRound         FeedbackRound?          @relation(fields: [feedbackRoundId], references: [id])
   feedbackRoundId       String?
-  UserFeedItem          UserFeedItem[]
+  userFeedItems          UserFeedItem[]
 }
 
 model CalendarEventAttendee {

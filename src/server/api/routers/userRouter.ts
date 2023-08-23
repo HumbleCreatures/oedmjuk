@@ -23,6 +23,11 @@ export const userRouter = createTRPCRouter({
         selection: true,
         feedbackRound: true,
         space: true,
+        accessRequest: {
+          include: {
+            accessRequestType: true,
+          }
+        },
         dataIndex: {
           include: {
             unitType: true,

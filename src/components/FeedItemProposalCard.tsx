@@ -10,7 +10,7 @@ import { ProposalStatusBadge } from "./ProposalStatusBadge";
 
 
 
-export function FeedItemProposalCard({ proposal: proposal, eventItem, space} : {proposal: Proposal, eventItem: FeedEventItem, space?: Space}) {
+export function FeedItemProposalCard({ proposal, eventItem, space} : {proposal: Proposal, eventItem: FeedEventItem, space?: Space}) {
   const { classes: generalClasses } = useGeneralStyles();  
   return (
         <Link

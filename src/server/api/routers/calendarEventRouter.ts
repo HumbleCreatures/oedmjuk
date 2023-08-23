@@ -45,7 +45,7 @@ export const calendarEventRouter = createTRPCRouter({
         ctx.prisma.calendarEvent.create({
           data: {
             title: input.title,
-            body: sanitizeHtml(input.body),
+            body: input.body,
             spaceId: input.spaceId,
             startAt: input.startAt,
             endAt: input.endAt,
@@ -63,7 +63,7 @@ export const calendarEventRouter = createTRPCRouter({
                 endAt: input.endAt,
               },
             },
-            UserFeedItem: {
+            userFeedItems: {
               create: userFeedItems,
             },
           },

@@ -2,16 +2,8 @@ import { Card, Container, Group, SimpleGrid, Text, ThemeIcon, Title, createStyle
 import Link from "next/link";
 import { api } from "../utils/api";
 import {
-  IconAlignBoxLeftMiddle,
-  IconCalendarEvent,
-  IconChartBar,
   IconClipboardList,
-  IconColorSwatch,
-  IconNotebook,
-  IconRecycle,
 } from "@tabler/icons";
-import { DateTime } from "luxon";
-import { formatDateLengthBetween } from "../utils/dateFormaters";
 import { useGeneralStyles } from "../styles/generalStyles";
 import { CleanLoader } from "./Loaders/CleanLoader";
 import { FeedItemContentCard } from "./FeedItemContentCard";
@@ -20,6 +12,7 @@ import { FeedItemProposalCard } from "./FeedItemProposalCard";
 import { FeedItemSelectionCard } from "./FeedItemSelectionCard";
 import { FeedItemFeedbackCard } from "./FeedItemFeedbackCard";
 import { FeedItemDataIndexCard } from "./FeedItemDataIndexCard";
+import { FeedItemAccessRequestCard } from "./FeedItemAccessRequestCard";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -83,6 +76,10 @@ export function UserFeed() {
 
     if (item.dataIndex) {
       return <FeedItemDataIndexCard key={item.id} dataIndex={item.dataIndex} eventItem={item} space={item.space} />;
+    }
+
+    if (item.accessRequest) {
+      return <FeedItemAccessRequestCard key={item.id} accessRequestType={item.accessRequest.accessRequestType} accessRequest={item.accessRequest} eventItem={item} space={item.space}/>;
     }
   });
 

@@ -91,8 +91,8 @@ const { space, isMember } = spaceResult.data;
                 if(selected) setSelectedAccessRequestType(selected);
             } }
             filter={(value, item) =>
-                item.label.toLowerCase().includes(value.toLowerCase().trim()) ||
-                item.description.toLowerCase().includes(value.toLowerCase().trim())
+              item.label ? item.label.toLowerCase().includes(value.toLowerCase().trim()) : false
+                
             }
             />
 

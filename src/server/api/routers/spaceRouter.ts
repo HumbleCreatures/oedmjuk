@@ -109,6 +109,11 @@ export const spaceRouter = createTRPCRouter({
         proposal: true,
         selection: true,
         feedbackRound: true,
+        accessRequest: {
+          include: {
+            accessRequestType: true,
+          }
+        },
         dataIndex: {
           include: {
             unitType: true,

@@ -7,7 +7,6 @@ import {
   Alert,
   Text,
   createStyles,
-  Switch,
   SimpleGrid,
   NumberInput,
   List,
@@ -76,7 +75,13 @@ const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
 
 SelectItem.displayName = "StepTypeSelector"
 
-const stepTypeList = [{
+const stepTypeList = [
+  {
+    value: "",
+    label: "Select step type",
+    description: "Choose a step type of your liking.",
+  },
+  {
   value: AccessRequestStepTypes.JoinSpace,
   label: "Join space",
   description: "Behalf of user will join this space. If behalf of user is not set the requesting user will be set as behalf of.",
@@ -214,7 +219,7 @@ export const AccessRequestStepsEditor = ({ accessRequestType }: { accessRequestT
                 console.log("Step Type must be selected");
                 return;
               }
-              createMutation.mutate({ ...values, accessRequestTypeId: accessRequestType.id });
+              createMutation.mutate({ ...values, accessRequestTypeId: accessRequestType.id, stepType: values.stepType ? values.stepType : AccessRequestStepTypes.Manual });
               form.reset();
               setClearTrigger(clearTrigger === ClearTriggerValues.clear ? ClearTriggerValues.clearAgain : ClearTriggerValues.clear); 
             })}
@@ -286,6 +291,7 @@ export const AccessRequestStepsEditor = ({ accessRequestType }: { accessRequestT
   );
 };
 
+export default AccessRequestStepsEditor;
 
 
   

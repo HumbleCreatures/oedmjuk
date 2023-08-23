@@ -17,6 +17,7 @@ import { FeedItemProposalCard } from "./FeedItemProposalCard";
 import { FeedItemSelectionCard } from "./FeedItemSelectionCard";
 import { FeedItemDataIndexCard } from "./FeedItemDataIndexCard";
 import { FeedItemFeedbackCard } from "./FeedItemFeedbackCard";
+import { FeedItemAccessRequestCard } from "./FeedItemAccessRequestCard";
 
 
 export function SpaceFeed({ spaceId }: { spaceId: string }) {
@@ -46,6 +47,10 @@ export function SpaceFeed({ spaceId }: { spaceId: string }) {
 
     if (item.dataIndex) {
       return <FeedItemDataIndexCard key={item.id} dataIndex={item.dataIndex} eventItem={item} />;
+    }
+
+    if (item.accessRequest) {
+      return <FeedItemAccessRequestCard key={item.id} accessRequestType={item.accessRequest.accessRequestType} accessRequest={item.accessRequest} eventItem={item} />;
     }
   });
 

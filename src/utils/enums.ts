@@ -21,6 +21,10 @@ export enum FeedEventTypes {
     CalendarEventUpdate = 'CalendarEventUpdated',
     CalendarEventAttending = 'CalendarEventAttending',
     CalendarEventNotAttending = 'CalendarEventNotAttending',
+    AccessRequestOnBehalfOfUser = 'AccessRequestOnBehalfOfUser',
+    AccessRequestOnBehalfOfSpace = 'AccessRequestOnBehalfOfSpace',
+    AccessRequestCreator = 'AccessRequestCreator',
+    AccessRequestCreated = 'AccessRequestCreated',
 }
 
 export enum ProposalStates { 
