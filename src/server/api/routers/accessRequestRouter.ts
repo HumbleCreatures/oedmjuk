@@ -2,8 +2,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AccessRequestStates, AccessRequestStepTypes, FeedEventTypes } from "../../../utils/enums";
 import type { Prisma, PrismaClient } from "@prisma/client";
-import type { DefaultArgs } from "@prisma/client/runtime";
-import { OnBehalfOfSpaceStepAction } from "../../../components/AccessRequestSteps/OnBehalfOfSpaceStepAction";
 
 export const accessRequestRouter = createTRPCRouter({
   createAccessRequestType: protectedProcedure
@@ -1131,7 +1129,7 @@ export const accessRequestRouter = createTRPCRouter({
   
 });
 
-async function ShouldFinishAccessRequest (userId:string,accessRequestId: string, prisma: PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined, DefaultArgs>) {
+async function ShouldFinishAccessRequest (userId:string,accessRequestId: string, prisma: PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>) {
   const accessRequest = await prisma.accessRequest.findUnique({
     where: { id: accessRequestId },
     include: {
