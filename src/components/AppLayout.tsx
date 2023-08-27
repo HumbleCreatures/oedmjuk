@@ -2,6 +2,8 @@ import { useState } from "react";
 import { NavbarSearch } from "../components/NavBar";
 import { AppShell, createStyles, Header, Navbar,MediaQuery, Aside,
   Burger,useMantineTheme, Text } from "@mantine/core";
+import logo from "../../public/oedmjuk_logo.svg";
+import Image from "next/image";
 
 const useStyles = createStyles((theme) => ({
     main: {
@@ -14,7 +16,7 @@ const useStyles = createStyles((theme) => ({
       color: theme.colors.gray[0],
       fontWeight: 700,
       marginLeft: theme.spacing.sm,
-      marginTop: theme.spacing.xs,
+      marginTop: 0,
       fontSize: theme.fontSizes.lg,
     },
     navbar: {
@@ -51,7 +53,12 @@ export default function AppLayout({
                 mr="xl"
               />
             </MediaQuery>
-            <Text className={classes.nameLogo}>Oedmjuk</Text></Header>}
+            <Image
+      priority
+      src={logo}
+      alt="Oedmjuk"
+      height={60}
+    /></Header>}
         styles={(theme) => ({
           main: {  },
         })}
