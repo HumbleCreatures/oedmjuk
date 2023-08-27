@@ -55,6 +55,7 @@ export default function AppLayout({
             </MediaQuery>
             <Image
       priority
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       src={logo}
       alt="Oedmjuk"
       height={60}
