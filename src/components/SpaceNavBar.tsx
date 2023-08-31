@@ -20,6 +20,8 @@ const useStyles = createStyles((theme) => ({
     backgroundColor: theme.colors.earth[9],
     borderBottom: 0,
     borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+
   },
 
   inner: {
@@ -29,11 +31,6 @@ const useStyles = createStyles((theme) => ({
     alignItems: "center",
   },
 
-  links: {
-    [theme.fn.smallerThan("sm")]: {
-      display: "none",
-    },
-  },
 
   burger: {
     [theme.fn.largerThan("sm")]: {
@@ -41,8 +38,16 @@ const useStyles = createStyles((theme) => ({
     },
   },
   spaceTitle: {
-    color: theme.white,
     fontSize: theme.fontSizes.xl,
+    color: theme.colors.earth[1],
+    marginBottom: theme.spacing.xl,
+  },
+
+  listOfCapabilities: {
+    width: "100%",
+    [theme.fn.largerThan("sm")]: {
+      maxWidth: 300,
+    },
   },
 
   link: {
@@ -70,14 +75,13 @@ const useStyles = createStyles((theme) => ({
 
   topRow: {
     width: "100%",
+  },
+  topGroup: {
+    alignItems: "flex-start",
   }
 
   
 }));
-
-interface HeaderSearchProps {
-  links: { link: string; label: string }[];
-}
 
 export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boolean }) {
   const { classes } = useStyles();
@@ -102,72 +106,70 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
 
   return (
     <Container className={classes.header}>
-      <div className={classes.inner}>
-      <SimpleGrid cols={2} className={classes.topRow} >
-        <div>
-          <Title order={1} className={classes.spaceTitle}>Space {space.name}</Title>
-        </div>
 
-        <Flex
-          gap="sm"
-          justify="flex-end"
-          align="flex-start"
-          direction="row"
-          wrap="wrap"
-        >
-          
-        {isMember  && <CreationMenu spaceId={space.id} /> }
+      <Group position="apart" className={classes.topGroup}>
+      <div>
+          <Title order={1} className={classes.spaceTitle}>Space {space.name}</Title>
+          <Group>
+          {isMember  && <CreationMenu spaceId={space.id} /> }
         {isMember ?
-            <Button size="xs" onClick={() => { leaveMutation.mutate({spaceId: space.id}) }} className={classes.link}>
+            <Button size="xs" onClick={() => { leaveMutation.mutate({spaceId: space.id}) }} >
             Leave space
             </Button> :
-            <Button size="xs" onClick={() => { joinMutation.mutate({spaceId: space.id}) }} className={classes.link}>
+            <Button size="xs" onClick={() => { joinMutation.mutate({spaceId: space.id}) }}>
             Join space
             </Button>
         }
-        </Flex>
-
-      </SimpleGrid>
-      </div>
-      
-       
-
-      <div className={classes.inner}>
-        <Group spacing={5} className={classes.links}>
-
-          <Link href={`/app/space/${space.id}/`} className={classes.link}>
-            Feed
-            </Link>
-            <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
-            Calendar
-            </Link>
-            <Link href={`/app/space/${space.id}/content`} className={classes.link}>
-            Content
-            </Link>
-            <Link href={`/app/space/${space.id}/dataIndices`} className={classes.link}>
-            Data
-            </Link>
-            <Link href={`/app/space/${space.id}/proposals`} className={classes.link}>
-            Proposals
-            </Link>
-            <Link href={`/app/space/${space.id}/selections`} className={classes.link}>
-            Selections
-            </Link>
-            <Link href={`/app/space/${space.id}/feedback`} className={classes.link}>
-            Feedback
-            </Link>
-            <Link href={`/app/space/${space.id}/members`} className={classes.link}>
-            Members
-            </Link>
-            <Link href={`/app/space/${space.id}/accessRequests`} className={classes.link}>
-            Access Requests
-            </Link>
-
-            <Link href={`/app/space/${space.id}/settings/requestAccessTypes`} className={classes.link}>
-            Settings
-            </Link>
         </Group>
-      </div>
+        </div>
+
+        <div>
+        <Group spacing={2} className={classes.listOfCapabilities}>
+
+<Link href={`/app/space/${space.id}/`} className={classes.link}>
+  Feed
+  </Link>
+  <Link href={`/app/space/${space.id}/members`} className={classes.link}>
+  Members
+  </Link>
+  <Link href={`/app/space/${space.id}/settings/requestAccessTypes`} className={classes.link}>
+  Settings
+  </Link>
+  
+
+
+  <Link href={`/app/space/${space.id}/calendar`} className={classes.link}>
+  Calendar
+  </Link>
+  <Link href={`/app/space/${space.id}/content`} className={classes.link}>
+  Content
+  </Link>
+  <Link href={`/app/space/${space.id}/dataIndices`} className={classes.link}>
+  Data
+  </Link>
+  <Link href={`/app/space/${space.id}/accessRequests`} className={classes.link}>
+  Requests
+  </Link>
+
+  <Link href={`/app/space/${space.id}/proposals`} className={classes.link}>
+  Proposals
+  </Link>
+  <Link href={`/app/space/${space.id}/selections`} className={classes.link}>
+  Selections
+  </Link>
+  <Link href={`/app/space/${space.id}/feedback`} className={classes.link}>
+  Feedback
+  </Link>
+
+
+
+</Group>
+        </div>
+
+      </Group>
+
+
+
     </Container>
   );
 }

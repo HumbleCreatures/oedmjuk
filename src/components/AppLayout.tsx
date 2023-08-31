@@ -15,9 +15,15 @@ const useStyles = createStyles((theme) => ({
       border: 'none',
       color: theme.colors.gray[0],
       fontWeight: 700,
-      marginLeft: theme.spacing.sm,
+      [theme.fn.largerThan("sm")]: {
+        marginLeft: theme.spacing.sm,
+        backgroundColor: 'transparent',
+      },
       marginTop: 0,
       fontSize: theme.fontSizes.lg,
+      backgroundColor: theme.colors.earth[9],
+      paddingTop: 7,
+      paddingLeft: theme.spacing.sm,
     },
     navbar: {
       background: 'none',
@@ -43,13 +49,13 @@ export default function AppLayout({
         navbarOffsetBreakpoint="sm"
         asideOffsetBreakpoint="sm"
         navbar={<Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} className={classes.navbar}><NavbarSearch /></Navbar>}
-        header={<Header  height={{ base: 50, md: 70 }} p="md" className={classes.header}>
+        header={<Header  height={{ base: 70, md: 70 }} className={classes.header}>
            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
               <Burger
                 opened={opened}
                 onClick={() => setOpened((o) => !o)}
                 size="sm"
-                color={theme.colors.gray[6]}
+                color={theme.white}
                 mr="xl"
               />
             </MediaQuery>
