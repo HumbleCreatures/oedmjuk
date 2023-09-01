@@ -15,7 +15,7 @@ export function FeedItemAccessRequestCard({ accessRequest, accessRequestType, ev
   const { classes: generalClasses } = useGeneralStyles();  
   return (
         <Link
-          href={`/app/space/${accessRequest.spaceId}/proposal/${accessRequest.id}`}
+          href={`/app/space/${accessRequest.spaceId}/accessRequest/${accessRequest.id}`}
           key={eventItem.id}
           className={generalClasses.listLinkItem}
         >
@@ -66,8 +66,6 @@ export function FeedItemAccessRequestCard({ accessRequest, accessRequestType, ev
                 <AccessRequestStatusBadge state={accessRequest.state} />
                 
               </Group>
-              
-
         </Link>
       );
 }
