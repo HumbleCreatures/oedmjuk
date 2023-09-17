@@ -11,6 +11,7 @@ import {
   Group,
   ThemeIcon,
   SimpleGrid,
+  Badge,
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
@@ -390,6 +391,7 @@ function ProposalInfo({
     updatedAt,
     state,
     objections,
+    createdByExternalUser,
   } = proposal;
 
   const hasObjections = objections.filter((o) => !o.resolvedAt).length > 0;
@@ -474,6 +476,7 @@ function ProposalInfo({
         
       <Title order={2} className={generalClasses.mainTitle}>{title}</Title>
       <ProposalStatusBadge state={state} />
+      {createdByExternalUser && <Badge>Created by external user</Badge>}
         </Group>
         {body && <EditorJsRenderer data={body} />}
         </div>

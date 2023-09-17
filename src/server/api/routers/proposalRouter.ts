@@ -45,6 +45,7 @@ export const proposalRouter = createTRPCRouter({
           body: input.body,
           spaceId: input.spaceId,
           creatorId: ctx.session.user.id,
+          createdByExternalUser: !isMember
         },
       });
     }),
@@ -109,7 +110,7 @@ export const proposalRouter = createTRPCRouter({
               eventType: FeedEventTypes.ProposalEventCreated,
             },
           },
-          UserFeedItem: {
+          userFeedItem: {
             create: userFeedItems,
           },
         },
