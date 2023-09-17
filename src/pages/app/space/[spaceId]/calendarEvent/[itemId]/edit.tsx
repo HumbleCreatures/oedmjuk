@@ -24,6 +24,7 @@ import { DataIndexToCalendarEventEditor } from "../../../../../../components/Dat
 import { FeedbackRoundToCalendarEventEditor } from "../../../../../../components/FeedbackRoundToCalendarEventEditor";
 import { DynamicBlockEditor } from "../../../../../../components/DynamicBlockEditor";
 import { OutputData } from "@editorjs/editorjs";
+import { AccessRequestToCalendarEventEditor } from "../../../../../../components/AccessRequesrtToCalendarEventEditor";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -170,6 +171,7 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               <SelectionToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedSelections={calendarEventQuery.data.calendarEvent.selections}  />
               <DataIndexToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedDataIndex={calendarEventQuery.data.calendarEvent.dataIndices}  />
               <FeedbackRoundToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedFeedbackRoundId={calendarEventQuery.data.calendarEvent.feedbackRoundId}  />
+              <AccessRequestToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedAccessRequests={calendarEventQuery.data.calendarEvent.accessRequests}  />
       </Container>
     </AppLayout>
   );

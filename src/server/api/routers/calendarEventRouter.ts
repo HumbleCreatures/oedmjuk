@@ -172,6 +172,40 @@ export const calendarEventRouter = createTRPCRouter({
         },
       });
     }),
+    addAccessRequestToCalendarEvent: protectedProcedure
+    .input(
+      z.object({
+        proposalId: z.string(),
+        calendarEventId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
+          accessRequests: {
+            connect: { id: input.proposalId },
+          },
+        },
+      });
+    }),
+  removeAccessRequestFromCalendarEvent: protectedProcedure
+    .input(
+      z.object({
+        accessRequestIds: z.string().array(),
+        calendarEventId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.calendarEvent.update({
+        where: { id: input.calendarEventId },
+        data: {
+          accessRequests: {
+            disconnect: input.accessRequestIds.map((id) => ({ id })),
+          },
+        },
+      });
+    }),
   addSelectionToCalendarEvent: protectedProcedure
     .input(
       z.object({
@@ -436,6 +470,7 @@ export const calendarEventRouter = createTRPCRouter({
           dataIndices: true,
           selections: true,
           feedbackRound: true,
+          accessRequests: true,
         },
       });
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AccessRequestStates, AccessRequestStepTypes, FeedEventTypes } from "../../../utils/enums";
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { nanoid } from 'nanoid';
 
 export const accessRequestRouter = createTRPCRouter({
   createAccessRequestType: protectedProcedure
@@ -185,6 +186,7 @@ export const accessRequestRouter = createTRPCRouter({
 
         return ctx.prisma.accessRequest.create({
           data: {
+            readableId: nanoid(9),
             body: input.body,
             state: AccessRequestStates.Created,
             accessRequestTypeId: input.accessRequestTypeId,

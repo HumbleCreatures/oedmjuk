@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { type NextPage } from "next";
 import AppLayout from "../../../../../../../components/AppLayout";
-import { Container, Text, Title, createStyles, SimpleGrid, Button, Card, List, ThemeIcon, Group, Badge } from "@mantine/core";
+import { Container, Text, Title, createStyles, SimpleGrid, Button, Card, List, ThemeIcon, Group, Badge, Timeline } from "@mantine/core";
 import { api } from "../../../../../../../utils/api";
 import { UserLinkWithData } from "../../../../../../../components/UserButton";
 import { DateTime } from "luxon";
@@ -182,28 +182,64 @@ function FeedbackItemView({ feedbackItemId }: { feedbackItemId: string }) {
       <Title order={2} className={classes.areaTitle}>
               Moves
             </Title>
-            <List
-      spacing="xs"
-      size="sm"
-      center
-      icon={
-        <ThemeIcon color="earth" size={24} radius="xl">
-          <IconArrowMoveRight size="1rem" />
-        </ThemeIcon>
-      }
-    >
-          {feedbackItem.feedbackMovement.map((move) => {
-            if(move.feedbackColumn){
-              return <List.Item key={move.id} >Moved to <Text fz="sm" fw={500} className={classes.makeInline}>{move.feedbackColumn.title}</Text> <Text fz="sm" fw={500} className={classes.makeInline}>{DateTime.fromJSDate(move.createdAt).setLocale("en").toRelative()}</Text> by <Text fz="sm" fw={500} className={classes.makeInline}><UserLinkWithData userId={move.moverId} /></Text></List.Item>
-            }
-            if(move.feedbackColumn && createdByExternalUser) {
-              return <List.Item key={move.id} >Moved back to external feedback by <UserLinkWithData userId={move.moverId} /></List.Item>
-            }
-            return <List.Item key={move.id} >Moved back to users feedback by <UserLinkWithData userId={move.moverId} /></List.Item>
-          }
+
+          <Timeline active={feedbackItem.feedbackMovement.length}>
+            {feedbackItem.feedbackMovement.map((move) => {
+               if(move.feedbackColumn) {
+                const title = "Moved to " + move.feedbackColumn.title;
+                return <Timeline.Item
+                  key={move.id}
+                  active={true}
+                  title={title}
+                  bulletSize={24}
+                >
+                  <Text color="dimmed" size="sm">
+                    {DateTime.fromJSDate(move.createdAt)
+                      .setLocale("en")
+                      .toRelative()}
+                     {" "}by{" "}
+                    <UserLinkWithData userId={move.moverId} />
+                  </Text>
+                </Timeline.Item>
+              }
+              if(move.feedbackColumn && createdByExternalUser) {
+                const title = "Moved back to external feedback";
+                return <Timeline.Item
+                  key={move.id}
+                  active={true}
+                  title={title}
+                  bulletSize={24}
+                >
+                  <Text color="dimmed" size="sm">
+                    {DateTime.fromJSDate(move.createdAt)
+                      .setLocale("en")
+                      .toRelative()}
+                     {" "}by{" "}
+                    <UserLinkWithData userId={move.moverId} />
+                  </Text>
+                </Timeline.Item>
+
+              }
+                const title = ">Moved back to users feedback";
+                return <Timeline.Item
+                  key={move.id}
+                  active={true}
+                  title={title}
+                  bulletSize={24}
+                >
+                  <Text color="dimmed" size="sm">
+                    {DateTime.fromJSDate(move.createdAt)
+                      .setLocale("en")
+                      .toRelative()}
+                     {" "}by{" "}
+                    <UserLinkWithData userId={move.moverId} />
+                  </Text>
+                </Timeline.Item>
+             
+            })}
+
             
-          )}
-          </List>
+          </Timeline>
       </Container> }
     </AppLayout>
   );

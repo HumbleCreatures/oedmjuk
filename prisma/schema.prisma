@@ -123,6 +123,7 @@ model Space {
   accessRequests           AccessRequest[]
   accessRequestTypes       AccessRequestType[]
   onBehalfOfAccessRequests AccessRequest[]     @relation("accessRequestOnbehalfOfSpace")
+  interestingProposals     Proposal[]          @relation("interestedProposals")
 }
 
 model SpaceFeedItem {
@@ -255,7 +256,8 @@ model CalendarEvent {
   dataIndices           DataIndex[]
   feedbackRound         FeedbackRound?          @relation(fields: [feedbackRoundId], references: [id])
   feedbackRoundId       String?
-  userFeedItems          UserFeedItem[]
+  userFeedItems         UserFeedItem[]
+  accessRequests        AccessRequest[]
 }
 
 model CalendarEventAttendee {
@@ -293,12 +295,14 @@ model Proposal {
   creatorId      String
   state          String                @default("ProposalCreated")
   proposalType   String                @default("Internal")
+  createdByExternalUser Boolean
   votes          ProposalVote[]
   participants   ProposalParticipant[]
   objections     ProposalObjection[]
   calendarEvents CalendarEvent[]
   spaceFeedItem  SpaceFeedItem[]
-  UserFeedItem   UserFeedItem[]
+  userFeedItem   UserFeedItem[]
+  interestedSpaces Space[]    @relation("interestedProposals")
 }
 
 model ProposalParticipant {
@@ -564,6 +568,7 @@ model AccessRequestStepExecution {
 
 model AccessRequest {
   id                     String                       @id @default(cuid())
+  readableId             String                       @unique
   createdAt              DateTime                     @default(now())
   updatedAt              DateTime                     @updatedAt
   space                  Space                        @relation(fields: [spaceId], references: [id])
@@ -586,6 +591,8 @@ model AccessRequest {
   accessRequestComments  AccessRequestComment[]
   spaceFeedItem          SpaceFeedItem[]
   userFeedItems          UserFeedItem[]
+  calendarEvent          CalendarEvent? @relation(fields: [calendarEventId], references: [id])
+  calendarEventId        String?
 }
 
 model AccessRequestComment {

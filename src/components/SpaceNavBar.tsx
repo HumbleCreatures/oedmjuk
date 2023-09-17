@@ -112,12 +112,10 @@ export function SpaceNavBar({ space, isMember }: { space: Space, isMember: boole
           <Title order={1} className={classes.spaceTitle}>Space {space.name}</Title>
           <Group>
           {isMember  && <CreationMenu spaceId={space.id} /> }
-        {isMember ?
+          {!isMember  && <ExternalCreationMenu spaceId={space.id} /> }
+        {isMember &&
             <Button size="xs" onClick={() => { leaveMutation.mutate({spaceId: space.id}) }} >
             Leave space
-            </Button> :
-            <Button size="xs" onClick={() => { joinMutation.mutate({spaceId: space.id}) }}>
-            Join space
             </Button>
         }
         </Group>
@@ -192,6 +190,22 @@ function CreationMenu({ spaceId }: { spaceId: string}) {
         <Menu.Item icon={<IconChartBar size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/dataIndex/create`)}>Create data index</Menu.Item>
         <Menu.Item icon={<IconLockAccess size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/accessRequest/create`)}>Create access request</Menu.Item>
 
+      </Menu.Dropdown>
+    </Menu>
+}
+
+function ExternalCreationMenu({ spaceId }: { spaceId: string}) {
+  const router = useRouter();
+
+  return <Menu shadow="md" width={200}>
+      <Menu.Target>
+        <Button size="xs" leftIcon={<IconPlus />}>Create</Button>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        <Menu.Label>Create</Menu.Label>
+        <Menu.Item icon={<IconNotebook size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/proposal/create`)}>Create proposal</Menu.Item>
+        <Menu.Item icon={<IconLockAccess size={14} />} onClick={() => void router.push(`/app/space/${spaceId}/accessRequest/create`)}>Create access request</Menu.Item>
       </Menu.Dropdown>
     </Menu>
 }

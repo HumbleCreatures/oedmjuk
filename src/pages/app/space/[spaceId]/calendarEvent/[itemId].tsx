@@ -16,7 +16,7 @@ import {
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
-import { IconCalendarEvent, IconChartBar, IconColorSwatch, IconNotebook, IconRecycle, IconUserCheck, IconUserX } from "@tabler/icons";
+import { IconCalendarEvent, IconChartBar, IconColorSwatch, IconLockAccess, IconNotebook, IconRecycle, IconUserCheck, IconUserX } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData, UserLinkWithDataWhite } from "../../../../../components/UserButton";
 import Link from "next/link";
@@ -236,6 +236,25 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             center
             icon={
               <ThemeIcon color="earth" size={24} radius="xl">
+                <IconLockAccess size="1rem" />
+              </ThemeIcon>
+            }
+          >
+            {calendarResult.data.calendarEvent.accessRequests.map((accessRequest) => (
+              <List.Item key={accessRequest.id}>
+                <Link href={`/app/space/${accessRequest.spaceId}/accessRequest/${accessRequest.id}`}>{accessRequest.readableId}</Link>
+              </List.Item>
+            ))}
+          </List>
+
+
+          <List
+            spacing="xs"
+            size="sm"
+            mb="xs"
+            center
+            icon={
+              <ThemeIcon color="earth" size={24} radius="xl">
                 <IconChartBar size="1rem" />
               </ThemeIcon>
             }
@@ -246,6 +265,8 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
               </List.Item>
             ))}
           </List>
+
+
 
           {calendarResult.data.calendarEvent.feedbackRound && <List
             spacing="xs"
