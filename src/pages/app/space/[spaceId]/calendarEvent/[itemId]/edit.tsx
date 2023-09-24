@@ -166,12 +166,6 @@ function SpaceView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
             )}
           </form>
         </Container>
-
-              <ProposalToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedProposals={calendarEventQuery.data.calendarEvent.proposals}  />
-              <SelectionToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedSelections={calendarEventQuery.data.calendarEvent.selections}  />
-              <DataIndexToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedDataIndex={calendarEventQuery.data.calendarEvent.dataIndices}  />
-              <FeedbackRoundToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedFeedbackRoundId={calendarEventQuery.data.calendarEvent.feedbackRoundId}  />
-              <AccessRequestToCalendarEventEditor spaceId={spaceId} itemId={itemId} selectedAccessRequests={calendarEventQuery.data.calendarEvent.accessRequests}  />
       </Container>
     </AppLayout>
   );

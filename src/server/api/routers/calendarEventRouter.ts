@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeedEventTypes } from "../../../utils/enums";
+import { FeedEventTypes, ProposalStates } from "../../../utils/enums";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import sanitizeHtml from 'sanitize-html';
@@ -175,7 +175,7 @@ export const calendarEventRouter = createTRPCRouter({
     addAccessRequestToCalendarEvent: protectedProcedure
     .input(
       z.object({
-        proposalId: z.string(),
+        accessRequestId: z.string(),
         calendarEventId: z.string(),
       })
     )
@@ -184,7 +184,7 @@ export const calendarEventRouter = createTRPCRouter({
         where: { id: input.calendarEventId },
         data: {
           accessRequests: {
-            connect: { id: input.proposalId },
+            connect: { id: input.accessRequestId },
           },
         },
       });
@@ -506,6 +506,65 @@ export const calendarEventRouter = createTRPCRouter({
         attending,
         notAttending,
         notAnswered,
+      };
+    }),
+    getPossibleAgendaItems: protectedProcedure
+    .input(z.object({ calendarEventId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const calendarEvent = await ctx.prisma.calendarEvent.findUnique({
+        where: { id: input.calendarEventId },
+        include: {
+          proposals: true,
+          selections: true,
+          accessRequests: true,
+        },
+      });
+
+      if(!calendarEvent) {
+        throw new Error('Calendar event not found');
+      }
+
+      const spaceProposalsPromise = ctx.prisma.proposal.findMany({
+        where: {
+          spaceId: calendarEvent.spaceId,
+          state: {not: ProposalStates.ProposalCreated},
+        },
+      });
+
+      const spaceSelectionsPromise = ctx.prisma.selection.findMany({
+        where: {
+          spaceId: calendarEvent.spaceId,
+        },
+      });
+
+      const spaceAccessRequestPromise = ctx.prisma.accessRequest.findMany({
+        where: {
+          spaceId: calendarEvent.spaceId,
+        },
+      });
+
+      const [spaceProposals, spaceSelections, spaceAccessRequests] = await Promise.all([
+        spaceProposalsPromise,
+        spaceSelectionsPromise,
+        spaceAccessRequestPromise,
+      ]);
+
+      const proposals = spaceProposals.filter((proposal) => {
+        return !calendarEvent.proposals.some((p) => p.id === proposal.id);
+      });
+
+      const selections = spaceSelections.filter((selection) => {
+        return !calendarEvent.selections.some((s) => s.id === selection.id);
+      });
+
+      const accessRequests = spaceAccessRequests.filter((accessRequest) => {
+        return !calendarEvent.accessRequests.some((ar) => ar.id === accessRequest.id);
+      });
+
+      return {
+        proposals,
+        selections,
+        accessRequests,
       };
     }),
 });

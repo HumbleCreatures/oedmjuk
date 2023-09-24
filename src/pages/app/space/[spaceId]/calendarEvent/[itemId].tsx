@@ -13,10 +13,12 @@ import {
   Badge,
   SimpleGrid,
   Tabs,
+  Center,
+  ActionIcon
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
-import { IconCalendarEvent, IconChartBar, IconColorSwatch, IconLockAccess, IconNotebook, IconRecycle, IconUserCheck, IconUserX } from "@tabler/icons";
+import { IconCalendarEvent, IconChartBar, IconColorSwatch, IconLockAccess, IconNotebook, IconRecycle, IconUserCheck, IconUserX, IconX } from "@tabler/icons";
 import { DateTime } from "luxon";
 import { UserLinkWithData, UserLinkWithDataWhite } from "../../../../../components/UserButton";
 import Link from "next/link";
@@ -26,6 +28,7 @@ import EditorJsRenderer from "../../../../../components/EditorJsRenderer";
 import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 import { useGeneralStyles } from "../../../../../styles/generalStyles";
 import { CalendarBadge } from "../../../../../components/CalendarEventStatusBadge";
+import { AgendaConnector } from "../../../../../components/AgendaConnector";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -60,11 +63,13 @@ const useStyles = createStyles((theme) => ({
     color: theme.colors.earth[5],
   },
   agendaTitle: {
-    borderTop: `2px solid ${theme.colors.earth[2]}`,
     fontSize: theme.fontSizes.sm,
     paddingTop: theme.spacing.xs,
     paddingBottom: theme.spacing.md,
   },
+  agendaSection: {
+    borderTop: `2px solid ${theme.colors.earth[2]}`,
+  }
 
 }));
 
@@ -90,7 +95,33 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
       },
     }
   );
-  const [changeAttendee, setChangeAttendee] = useState<boolean>(false);
+
+  const removeProposalMutation =
+    api.calendarEvents.removeProposalFromCalendarEvent.useMutation({
+      onSuccess() {
+        void utils.calendarEvents.getCalendarEvent.invalidate({ itemId });
+        void utils.calendarEvents.getPossibleAgendaItems.invalidate({ calendarEventId: itemId });
+      },
+    });
+  
+    
+  const removeSelectionMutation =
+  api.calendarEvents.removeSelectionFromCalendarEvent.useMutation({
+    onSuccess() {
+      void utils.calendarEvents.getCalendarEvent.invalidate({ itemId });
+      void utils.calendarEvents.getPossibleAgendaItems.invalidate({ calendarEventId: itemId });
+    },
+  });
+
+
+  const removeAccessRequestMutation =
+    api.calendarEvents.removeAccessRequestFromCalendarEvent.useMutation({
+      onSuccess() {
+        void utils.calendarEvents.getCalendarEvent.invalidate({ itemId });
+        void utils.calendarEvents.getPossibleAgendaItems.invalidate({ calendarEventId: itemId });
+      },
+    });
+    const [changeAttendee, setChangeAttendee] = useState<boolean>(false);
 
   if (spaceResult.isLoading) return <SpaceLoader />;
   if (!spaceResult.data) return <div>Could not load space</div>;
@@ -190,82 +221,64 @@ function ContentView({ spaceId, itemId }: { spaceId: string; itemId: string }) {
         </div>
 
         <div className={generalClasses.bodyArea}>
+          <Group className={classes.agendaSection}>
           <Title order={3} className={classes.agendaTitle}>
             Agenda
           </Title>
-          <List
-            spacing="xs"
-            size="sm"
-            mb="xs"
-            center
-            icon={
-              <ThemeIcon color="earth" size={24} radius="xl">
-                <IconNotebook size="1rem" />
-              </ThemeIcon>
-            }
-          >
-            {calendarResult.data.calendarEvent.proposals.map((proposal) => (
-              <List.Item key={proposal.id}>
-                <Link href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}`}>{proposal.title}</Link>
-              </List.Item>
+          <AgendaConnector calendarEventId={itemId} />
+          </Group>
+          <Group>
+
+          {calendarResult.data.calendarEvent.proposals.map((proposal) => (
+            <Center key={proposal.id}>
+            <Link href={`/app/space/${proposal.spaceId}/proposal/${proposal.id}`}>
+            <ThemeIcon color="earth" size={24} radius="sm">
+                            <IconNotebook size="1rem" />
+                          </ThemeIcon> 
+            <span style={{marginLeft: 8, marginRight: 4}}>{proposal.title}</span>
+            </Link>
+            <ActionIcon
+            onClick={() => removeProposalMutation.mutate({ proposalIds: [proposal.id], calendarEventId: itemId })} 
+            variant="filled" color="gray.5" size="xs" radius="xl" aria-label="Remove connection">
+              <IconX size="0.5rem" /></ActionIcon>
+            </Center>
+
             ))}
-          </List>
 
-          <List
-            spacing="xs"
-            size="sm"
-            mb="xs"
-            center
-            icon={
-              <ThemeIcon color="earth" size={24} radius="xl">
-                <IconColorSwatch size="1rem" />
-              </ThemeIcon>
-            }
-          >
-            {calendarResult.data.calendarEvent.selections.map((selection) => (
-              <List.Item key={selection.id}>
-                <Link href={`/app/space/${selection.spaceId}/selection/${selection.id}`}>{selection.title}</Link>
-              </List.Item>
+        {calendarResult.data.calendarEvent.selections.map((selection) => (
+            <Center key={selection.id}>
+            <Link href={`/app/space/${selection.spaceId}/selection/${selection.id}`}>
+            <ThemeIcon color="earth" size={24} radius="sm">
+                            <IconColorSwatch size="1rem" />
+                          </ThemeIcon> 
+            <span style={{marginLeft: 8, marginRight: 4}}>{selection.title}</span>
+            </Link>
+            <ActionIcon
+            onClick={() => removeSelectionMutation.mutate({ selectionIds: [selection.id], calendarEventId: itemId })} 
+            variant="filled" color="gray.5" size="xs" radius="xl" aria-label="Remove connection">
+              <IconX size="0.5rem" /></ActionIcon>
+            </Center>
+
             ))}
-          </List>
 
-          <List
-            spacing="xs"
-            size="sm"
-            mb="xs"
-            center
-            icon={
-              <ThemeIcon color="earth" size={24} radius="xl">
-                <IconLockAccess size="1rem" />
-              </ThemeIcon>
-            }
-          >
-            {calendarResult.data.calendarEvent.accessRequests.map((accessRequest) => (
-              <List.Item key={accessRequest.id}>
-                <Link href={`/app/space/${accessRequest.spaceId}/accessRequest/${accessRequest.id}`}>{accessRequest.readableId}</Link>
-              </List.Item>
+          {calendarResult.data.calendarEvent.accessRequests.map((selection) => (
+            <Center key={selection.id}>
+            <Link href={`/app/space/${selection.spaceId}/accessRequests/${selection.id}`}>
+            <ThemeIcon color="earth" size={24} radius="sm">
+                            <IconLockAccess size="1rem" />
+                          </ThemeIcon> 
+            <span style={{marginLeft: 8, marginRight: 4}}>{selection.readableId}</span>
+            </Link>
+            <ActionIcon
+            onClick={() => removeSelectionMutation.mutate({ selectionIds: [selection.id], calendarEventId: itemId })} 
+            variant="filled" color="gray.5" size="xs" radius="xl" aria-label="Remove connection">
+              <IconX size="0.5rem" /></ActionIcon>
+            </Center>
+
             ))}
-          </List>
 
-
-          <List
-            spacing="xs"
-            size="sm"
-            mb="xs"
-            center
-            icon={
-              <ThemeIcon color="earth" size={24} radius="xl">
-                <IconChartBar size="1rem" />
-              </ThemeIcon>
-            }
-          >
-            {calendarResult.data.calendarEvent.dataIndices.map((dataIndex) => (
-              <List.Item key={dataIndex.id}>
-                <Link href={`/app/space/${dataIndex.spaceId}/dataIndex/${dataIndex.id}`}>{dataIndex.title}</Link>
-              </List.Item>
-            ))}
-          </List>
-
+            
+          </Group>
 
 
           {calendarResult.data.calendarEvent.feedbackRound && <List

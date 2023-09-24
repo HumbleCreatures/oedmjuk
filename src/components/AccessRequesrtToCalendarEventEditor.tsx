@@ -97,7 +97,7 @@ export function AccessRequestToCalendarEventEditor({spaceId, itemId, selectedAcc
         if (lastValue === undefined) return;
         addAccessRequestMutation.mutate({
           calendarEventId: itemId,
-          proposalId: lastValue,
+          accessRequestId: lastValue,
         });
       }}
       value={accessRequestSelectValue}
