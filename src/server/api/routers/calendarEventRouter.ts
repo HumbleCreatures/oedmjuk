@@ -541,6 +541,7 @@ export const calendarEventRouter = createTRPCRouter({
         where: {
           spaceId: calendarEvent.spaceId,
         },
+        include: { accessRequestType: true}
       });
 
       const [spaceProposals, spaceSelections, spaceAccessRequests] = await Promise.all([

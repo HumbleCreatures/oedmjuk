@@ -81,7 +81,7 @@ export function AgendaConnector({ calendarEventId }:  { calendarEventId: string}
     value: accessRequest.id, 
     group: "Access Requests",
     accessRequest: accessRequest,
-    name: accessRequest.readableId
+    name: `${accessRequest.accessRequestType?.name} (${accessRequest.readableId})` 
   }));
   
   return (
