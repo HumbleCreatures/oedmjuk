@@ -12,6 +12,8 @@ import {
   ThemeIcon,
   SimpleGrid,
   Badge,
+  Center,
+  ActionIcon
 } from "@mantine/core";
 import { api } from "../../../../../utils/api";
 import { SpaceNavBar } from "../../../../../components/SpaceNavBar";
@@ -20,7 +22,7 @@ import { ListOfObjections } from "../../../../../components/ObjectionList";
 import { ProposalStates } from "../../../../../utils/enums";
 import { useState } from "react";
 import { VoteValue } from "../../../../../utils/enums";
-import { IconNotebook } from "@tabler/icons";
+import { IconBox, IconNotebook, IconX } from "@tabler/icons";
 import type {
   Proposal,
   ProposalObjection,
@@ -34,6 +36,7 @@ import { SpaceLoader } from "../../../../../components/Loaders/SpaceLoader";
 import { useGeneralStyles } from "../../../../../styles/generalStyles";
 import { ProposalStatusBadge } from "../../../../../components/ProposalStatusBadge";
 import dynamic from "next/dynamic";
+import { SpaceConnector } from "../../../../../components/SpaceConnector";
 const DynamicObjectionEditor = dynamic(() => import('../../../../../components/ObjectionEditor'), {
   ssr: false,
 })
@@ -66,6 +69,20 @@ const useStyles = createStyles((theme) => ({
   inlineText: {
     display: "inline",
   },
+  connectionTitle: {
+    fontSize: theme.fontSizes.sm,
+  },
+  connectionHeader: {
+    marginBottom: theme.spacing.sm,
+  },
+  connectionSection: {
+    borderTop: `2px solid ${theme.colors.earth[2]}`,
+    
+    paddingTop: theme.spacing.xs,
+    paddingBottom: theme.spacing.md,
+    marginLeft: theme.spacing.md,
+    marginRight: theme.spacing.md,
+  }
 }));
 
 function ProposalView({
@@ -123,7 +140,7 @@ function ProposalView({
       <AppLayout>
         <Container size="sm">
           <SpaceNavBar space={space} isMember={isMember} />
-          <ProposalInfo proposal={proposal} />
+          <ProposalInfo proposal={proposal} connectedSpaces={proposal.connectedSpaces} />
 
             
           <Container size="sm" className={classes.area}>
@@ -359,6 +376,7 @@ function ProposalInfo({
   proposal: Proposal & {
     participants: ProposalParticipant[];
     objections: ProposalObjection[];
+    connectedSpaces: Space[];
   };
 }) {
   const utils = api.useContext();
@@ -381,6 +399,13 @@ function ProposalInfo({
     },
   });
 
+  const disconnectMutation = api.proposal.disconnectSpaceFromProposal.useMutation({
+    onSuccess: async () => {
+      await utils.proposal.getProposal.refetch({itemId: proposal.id});
+      await utils.proposal.getSpacesAvailableToConnect.refetch({proposalId: proposal.id});
+    }
+  });
+
   const { classes } = useStyles();
   const { classes: generalClasses } = useGeneralStyles();
   const {
@@ -395,6 +420,7 @@ function ProposalInfo({
   } = proposal;
 
   const hasObjections = objections.filter((o) => !o.resolvedAt).length > 0;
+
   return (
     <>
       <Container size="sm" className={generalClasses.area}>
@@ -466,6 +492,8 @@ function ProposalInfo({
         {state === ProposalStates.ObjectionsResolved && (<Button onClick={() => endVoting.mutate({ proposalId:proposal.id })}>
                 End vote
               </Button>)}
+
+
           </Group>
           
         </Group>
@@ -479,6 +507,28 @@ function ProposalInfo({
       {createdByExternalUser && <Badge>Created by external user</Badge>}
         </Group>
         {body && <EditorJsRenderer data={body} />}
+        </div>
+
+          <div className={classes.connectionSection}>
+        <Group className={classes.connectionHeader}>
+          <Title order={3} className={classes.connectionTitle}>
+            Connections
+        </Title>
+        <SpaceConnector proposalId={proposal.id} />
+        </Group>
+        {proposal.connectedSpaces && <Group>
+          {proposal.connectedSpaces.map((space) => (
+          <Center key={space.id}>
+            <ThemeIcon color="earth" size={24} radius="sm">
+                            <IconBox size="1rem" />
+                          </ThemeIcon> 
+            <span style={{marginLeft: 8, marginRight: 4}}>{space.name}</span>
+            <ActionIcon
+            onClick={() => disconnectMutation.mutate({ proposalId: proposal.id, spaceId: space.id })} 
+            variant="filled" color="gray.5" size="xs" radius="xl" aria-label="Remove connection"><IconX size="0.5rem" /></ActionIcon>
+          </Center>))}              
+          
+        </Group> }
         </div>
       </Container> 
     </>

@@ -123,7 +123,7 @@ model Space {
   accessRequests           AccessRequest[]
   accessRequestTypes       AccessRequestType[]
   onBehalfOfAccessRequests AccessRequest[]     @relation("accessRequestOnbehalfOfSpace")
-  interestingProposals     Proposal[]          @relation("interestedProposals")
+  connectedProposals       Proposal[]          @relation("connectedSpaces")
 }
 
 model SpaceFeedItem {
@@ -302,7 +302,7 @@ model Proposal {
   calendarEvents CalendarEvent[]
   spaceFeedItem  SpaceFeedItem[]
   userFeedItem   UserFeedItem[]
-  interestedSpaces Space[]    @relation("interestedProposals")
+  connectedSpaces Space[]    @relation("connectedSpaces")
 }
 
 model ProposalParticipant {

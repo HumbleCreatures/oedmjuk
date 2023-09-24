@@ -147,6 +147,7 @@ function AccessRequestView({
   const { space, isMember } = spaceResult.data;
   const {
     id,
+    readableId,
     createdAt,
     creatorId,
     updatedAt,
@@ -248,7 +249,7 @@ function AccessRequestView({
               <AccessRequestStatusBadge state={state} />
             </Group>
             <Text fz="sm" fw={500} className={classes.idText}>
-              Id: {id}
+              Id: {readableId}
             </Text>
             {body && <EditorJsRenderer data={body} />}
             <Group spacing="xl" className={classes.spaceAndUserGroup}>

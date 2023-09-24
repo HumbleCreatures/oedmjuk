@@ -384,7 +384,7 @@ export const proposalRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const proposal = await ctx.prisma.proposal.findUnique({
         where: { id: input.itemId },
-        include: { objections: true, participants: true },
+        include: { objections: true, participants: true, connectedSpaces: true },
       });
 
       if (!proposal) throw new Error("Proposal not found");
@@ -456,4 +456,75 @@ export const proposalRouter = createTRPCRouter({
       }
       return { proposal, votingResult: undefined };
     }),
+    getConnectedSpaces: protectedProcedure
+    .input(z.object({ proposalId: z.string() }))
+    .query(async ({ ctx, input }) => { 
+      const proposal = await ctx.prisma.proposal.findUnique({
+        where: { id: input.proposalId },
+        include: { connectedSpaces: true },
+      });
+
+      if (!proposal) throw new Error("Proposal not found");
+      
+     return proposal.connectedSpaces;
+    }),
+    getSpacesAvailableToConnect: protectedProcedure
+    .input(z.object({ proposalId: z.string() }))
+    .query(async ({ ctx, input }) => { 
+      const proposal = await ctx.prisma.proposal.findUnique({
+        where: { id: input.proposalId },
+        include: { connectedSpaces: true },
+      });
+
+      if(!proposal) throw new Error("Proposal not found"); 
+
+      const spaces = await ctx.prisma.space.findMany();
+      const availableSpaces = spaces.filter((s) => s.id !== proposal.spaceId && !proposal.connectedSpaces.some((cs) => cs.id === s.id));
+      
+     return availableSpaces;
+    }),
+    connectSpaceToProposal: protectedProcedure
+    .input(z.object({ proposalId: z.string(), spaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => { 
+      const proposal = await ctx.prisma.proposal.findUnique({
+        where: { id: input.proposalId },
+        include: { connectedSpaces: true },
+      });
+
+      if (!proposal) throw new Error("Proposal not found");
+
+      const connection = proposal.connectedSpaces.find((cs) => cs.id === input.spaceId);
+      if(connection) return connection;
+
+      return ctx.prisma.proposal.update({ 
+        where: { id: input.proposalId },
+        data: {
+          connectedSpaces: {
+            connect: { id: input.spaceId }
+          }
+        } 
+      });
+    }),
+    disconnectSpaceFromProposal: protectedProcedure
+    .input(z.object({ proposalId: z.string(), spaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => { 
+      const proposal = await ctx.prisma.proposal.findUnique({
+        where: { id: input.proposalId },
+        include: { connectedSpaces: true },
+      });
+
+      if (!proposal) throw new Error("Proposal not found");
+
+      const connection = proposal.connectedSpaces.find((cs) => cs.id === input.spaceId);
+      if(!connection) return null;
+
+      return ctx.prisma.proposal.update({ 
+        where: { id: input.proposalId },
+        data: {
+          connectedSpaces: {
+            disconnect: { id: input.spaceId }
+          }
+        } 
+      });
+    })
 });

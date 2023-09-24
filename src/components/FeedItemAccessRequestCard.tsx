@@ -49,8 +49,8 @@ export function FeedItemAccessRequestCard({ accessRequest, accessRequestType, ev
                 <Text fz="xl" fw={500} color="earth.9">
                   {accessRequestType.name}
                 </Text>
-                <Text fz="sm" fw={500} color="earth.9">
-                  {accessRequestType.id}
+                <Text fz="sm" fw={500} color="earth.6">
+                  {accessRequest.readableId}
                 </Text>
 
                 {eventItem.eventType === FeedEventTypes.AccessRequestOnBehalfOfSpace && accessRequest.onBehalfOfSpaceId && 

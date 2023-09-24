@@ -208,7 +208,7 @@ function AccessRequestList ({accessRequests}: {accessRequests: AccessRequestWith
               {accessRequest.accessRequestType.name}
             </Text>
             <Text fz="sm" fw={500} className={classes.idText}>
-              Id: {accessRequest.id}
+              Id: {accessRequest.readableId}
             </Text></div>
             <AccessRequestStatusBadge state={accessRequest.state} />
           </Group>
