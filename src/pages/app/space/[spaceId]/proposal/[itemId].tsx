@@ -27,6 +27,7 @@ import type {
   Proposal,
   ProposalObjection,
   ProposalParticipant,
+  Space,
 } from "@prisma/client";
 import { DateTime } from "luxon";
 import { UserLinkWithData } from "../../../../../components/UserButton";
@@ -140,7 +141,7 @@ function ProposalView({
       <AppLayout>
         <Container size="sm">
           <SpaceNavBar space={space} isMember={isMember} />
-          <ProposalInfo proposal={proposal} connectedSpaces={proposal.connectedSpaces} />
+          <ProposalInfo proposal={proposal} />
 
             
           <Container size="sm" className={classes.area}>
