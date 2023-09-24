@@ -109,7 +109,7 @@ export function AgendaConnector({ calendarEventId }:  { calendarEventId: string}
 
       }}
       filter={(value, item) =>
-        item.name.toLowerCase().includes(value && value.toLowerCase().trim())
+        typeof item.name === 'string' && typeof value === 'string' && item.name.toLowerCase().includes(value.toLowerCase().trim())
       }
     />
   );

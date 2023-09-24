@@ -81,7 +81,7 @@ export function SpaceConnector({ proposalId }:  { proposalId: string }) {
         connectSpaceMutation.mutate({ proposalId, spaceId: value })
       }}
       filter={(value, item) =>
-        item.name.toLowerCase().includes(value.toLowerCase().trim())
+        typeof item.name === 'string' && typeof value === 'string' && item.name.toLowerCase().includes(value.toLowerCase().trim())
       }
     />
   );
