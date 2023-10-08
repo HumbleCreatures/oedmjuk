@@ -4,6 +4,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { createStyles, Button, Group, Text, Title } from "@mantine/core";
+import logo from "../../public/oedmjuk_logo.svg";
+import Image from "next/image";
 
 const useStyles = createStyles((theme) => ({
   main: {
@@ -11,7 +13,13 @@ const useStyles = createStyles((theme) => ({
     background: theme.fn.linearGradient(180, theme.colors.earth[6], theme.colors.earth[9]),
   },
   greenSpan: {
-    color: theme.colors.earth[2],
+    color: theme.colors.earth[9],
+    fontWeight: 800,
+    display: 'inline-block',
+    fontSize: '5.5rem',
+    verticalAlign: 'middle',
+    lineHeight: 1,
+    paddingBottom: '0.5rem',
   },
   authContainer: {
     display: 'flex',
@@ -34,6 +42,19 @@ const useStyles = createStyles((theme) => ({
     marginBottom: theme.spacing.lg,
     color: theme.white,
   },
+  logoWrapper: {
+    backgroundColor: theme.colors.earth[9],
+    padding: theme.spacing.xs,
+    borderRadius: theme.radius.md,
+    display: 'inline-block',
+    marginRight: theme.spacing.sm,
+    
+  },
+  logoTitle: {
+    padding: 0,
+    margin: 0,
+  }
+  
 
 
   /*.card {
@@ -61,8 +82,18 @@ const Home: NextPage = () => {
       </Head>
       <main className={classes.main}>
         <div className={styles.container}>
-          <h1 className={styles.title}>
-            OEDMJUK <span className={classes.greenSpan}>APP</span>
+       
+          <h1 className={styles.logoTitle}>
+          <div className={classes.logoWrapper}>
+            
+            <Image
+        priority
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        src={logo}
+        alt="Oedmjuk"
+        height={60}
+      /></div>
+              <div className={classes.greenSpan}>OEDMJUK</div> 
           </h1>
           <div className={styles.cardRow}>
             <div

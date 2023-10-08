@@ -31,7 +31,24 @@ const useStyles = createStyles((theme) => ({
     },
     nameLogo: {
       display: 'inline-block',
-    }
+    },
+    logoWrapper: {
+      backgroundColor: theme.colors.earth[9],
+      padding: '0.35rem',
+      borderRadius: theme.radius.md,
+      display: 'inline-block',
+      marginRight: theme.spacing.sm,
+      
+    },
+    greenSpan: {
+      color: theme.colors.earth[9],
+      fontWeight: 800,
+      display: 'inline-block',
+      fontSize: '2.5rem',
+      verticalAlign: 'middle',
+      lineHeight: 1,
+      paddingBottom: '0.5rem',
+    },
 }));
 export default function AppLayout({
     children
@@ -59,13 +76,14 @@ export default function AppLayout({
                 mr="xl"
               />
             </MediaQuery>
-            <Image
+            <div className={classes.logoWrapper}><Image
       priority
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       src={logo}
       alt="Oedmjuk"
-      height={60}
-    /></Header>}
+      height={30}
+    /></div><div className={classes.greenSpan}>OEDMJUK</div>
+    </Header>}
         styles={(theme) => ({
           main: {  },
         })}
