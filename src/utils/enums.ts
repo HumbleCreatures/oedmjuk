@@ -60,6 +60,9 @@ export enum AccessRequestStepTypes {
     OnBehalfOfUserApproval = 'OnBehalfOfUser',
     OnBehalfOfSpaceApproval = 'OnBehalfOfSpace',
     RequesterApproval = 'RequesterApproval',
+    CalendarEvent = 'CalendarEvent',
+    AccessRequest = 'AccessRequest',
+    Feedback = 'Feedback',
 }
 
 export enum VoteValue {

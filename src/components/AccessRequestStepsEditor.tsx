@@ -106,6 +106,23 @@ const stepTypeList = [
   label: "On behalf of space approval",
   description: "A number of members of the on behalf of space need to approve this step.",
 }
+,
+{
+  value: AccessRequestStepTypes.CalendarEvent,
+  label: "Calendar event",
+  description: "A calendar event connected to the access request.",
+},
+{
+  value: AccessRequestStepTypes.AccessRequest,
+  label: "Access request",
+  description: "An access request that is connected to this access request.",
+}
+,
+{
+  value: AccessRequestStepTypes.Feedback,
+  label: "Feedback round",
+  description: "A feedback round connected with this access request.",
+}
 ]
 
 type FormType = {

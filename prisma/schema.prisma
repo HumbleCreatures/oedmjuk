@@ -237,27 +237,28 @@ model Comment {
 }
 
 model CalendarEvent {
-  id                    String                  @id @default(cuid())
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  title                 String
-  body                  String
-  startAt               DateTime
-  endAt                 DateTime
-  space                 Space                   @relation(fields: [spaceId], references: [id])
-  spaceId               String
-  creator               User                    @relation(fields: [creatorId], references: [id])
-  creatorId             String
-  spaceFeedItem         SpaceFeedItem[]
-  userCalendar          UserCalendar[]
-  calendarEventAttendee CalendarEventAttendee[]
-  proposals             Proposal[]
-  selections            Selection[]
-  dataIndices           DataIndex[]
-  feedbackRound         FeedbackRound?          @relation(fields: [feedbackRoundId], references: [id])
-  feedbackRoundId       String?
-  userFeedItems         UserFeedItem[]
-  accessRequests        AccessRequest[]
+  id                      String                       @id @default(cuid())
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  title                   String
+  body                    String
+  startAt                 DateTime
+  endAt                   DateTime
+  space                   Space                        @relation(fields: [spaceId], references: [id])
+  spaceId                 String
+  creator                 User                         @relation(fields: [creatorId], references: [id])
+  creatorId               String
+  spaceFeedItem           SpaceFeedItem[]
+  userCalendar            UserCalendar[]
+  calendarEventAttendee   CalendarEventAttendee[]
+  proposals               Proposal[]
+  selections              Selection[]
+  dataIndices             DataIndex[]
+  feedbackRound           FeedbackRound?               @relation(fields: [feedbackRoundId], references: [id])
+  feedbackRoundId         String?
+  userFeedItems           UserFeedItem[]
+  accessRequests          AccessRequest[]
+  connectedStepExecutions AccessRequestStepExecution[] @relation("accessRequestConnectedCalendarEvent")
 }
 
 model CalendarEventAttendee {
@@ -284,25 +285,25 @@ model UserCalendar {
 }
 
 model Proposal {
-  id             String                @id @default(cuid())
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  title          String
-  body           String
-  space          Space                 @relation(fields: [spaceId], references: [id])
-  spaceId        String
-  creator        User                  @relation(fields: [creatorId], references: [id])
-  creatorId      String
-  state          String                @default("ProposalCreated")
-  proposalType   String                @default("Internal")
+  id                    String                @id @default(cuid())
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  title                 String
+  body                  String
+  space                 Space                 @relation(fields: [spaceId], references: [id])
+  spaceId               String
+  creator               User                  @relation(fields: [creatorId], references: [id])
+  creatorId             String
+  state                 String                @default("ProposalCreated")
+  proposalType          String                @default("Internal")
   createdByExternalUser Boolean
-  votes          ProposalVote[]
-  participants   ProposalParticipant[]
-  objections     ProposalObjection[]
-  calendarEvents CalendarEvent[]
-  spaceFeedItem  SpaceFeedItem[]
-  userFeedItem   UserFeedItem[]
-  connectedSpaces Space[]    @relation("connectedSpaces")
+  votes                 ProposalVote[]
+  participants          ProposalParticipant[]
+  objections            ProposalObjection[]
+  calendarEvents        CalendarEvent[]
+  spaceFeedItem         SpaceFeedItem[]
+  userFeedItem          UserFeedItem[]
+  connectedSpaces       Space[]               @relation("connectedSpaces")
 }
 
 model ProposalParticipant {
@@ -356,21 +357,22 @@ model ProposalObjection {
 }
 
 model FeedbackRound {
-  id              String           @id @default(cuid())
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  creator         User             @relation(fields: [creatorId], references: [id])
-  creatorId       String
-  title           String
-  body            String
-  space           Space            @relation(fields: [spaceId], references: [id])
-  spaceId         String
-  state           String           @default("Created")
-  feedbackItem    FeedbackItem[]
-  feedbackColumns FeedbackColumn[]
-  spaceFeedItem   SpaceFeedItem[]
-  calendarEvent   CalendarEvent[]
-  UserFeedItem    UserFeedItem[]
+  id                      String                       @id @default(cuid())
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  creator                 User                         @relation(fields: [creatorId], references: [id])
+  creatorId               String
+  title                   String
+  body                    String
+  space                   Space                        @relation(fields: [spaceId], references: [id])
+  spaceId                 String
+  state                   String                       @default("Created")
+  feedbackItem            FeedbackItem[]
+  feedbackColumns         FeedbackColumn[]
+  spaceFeedItem           SpaceFeedItem[]
+  calendarEvent           CalendarEvent[]
+  UserFeedItem            UserFeedItem[]
+  connectedStepExecutions AccessRequestStepExecution[] @relation("accessRequestConnectedFeedbackRound")
 }
 
 model FeedbackColumn {
@@ -535,7 +537,7 @@ model AccessRequestStep {
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
   deletedAt                   DateTime?
-  stepType                    String 
+  stepType                    String
   name                        String
   description                 String?
   joinSpace                   Boolean?
@@ -545,54 +547,65 @@ model AccessRequestStep {
   approvalFromOnBehalfOfSpace Int?
   accessRequestType           AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
   accessRequestTypeId         String
+  connectedAccessRequest      Boolean?
+  connectedFeedbackRound      Boolean?
+  connectedCalendarEvent      Boolean?
   stepExecutions              AccessRequestStepExecution[]
   order                       Int
 }
 
 model AccessRequestStepExecution {
-  id                  String            @id @default(cuid())
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  log                 String?
-  stepFinished        Boolean           @default(false)
-  done                Boolean           @default(false)
-  failed              Boolean           @default(false)
-  denied              Boolean           @default(false)
-  executingUser       User?             @relation(fields: [executingUserId], references: [id])
-  executingUserId     String?
-  accessRequest       AccessRequest     @relation(fields: [accessRequestId], references: [id])
-  accessRequestId     String
-  accessRequestStep   AccessRequestStep @relation(fields: [accessRequestStepId], references: [id])
-  accessRequestStepId String
+  id                       String            @id @default(cuid())
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+  log                      String?
+  stepFinished             Boolean           @default(false)
+  done                     Boolean           @default(false)
+  failed                   Boolean           @default(false)
+  denied                   Boolean           @default(false)
+  skiped                   Boolean           @default(false)
+  executingUser            User?             @relation(fields: [executingUserId], references: [id])
+  executingUserId          String?
+  accessRequest            AccessRequest     @relation(fields: [accessRequestId], references: [id])
+  accessRequestId          String
+  accessRequestStep        AccessRequestStep @relation(fields: [accessRequestStepId], references: [id])
+  accessRequestStepId      String
+  connectedAccessRequest   AccessRequest?    @relation(name: "accessRequestConnectedAccessRequest", fields: [connectedAccessRequestId], references: [id])
+  connectedAccessRequestId String?
+  connectedFeedbackRound   FeedbackRound?    @relation(name: "accessRequestConnectedFeedbackRound", fields: [connectedFeedbackRoundId], references: [id])
+  connectedFeedbackRoundId String?
+  connectedCalendarEvent   CalendarEvent?    @relation(name: "accessRequestConnectedCalendarEvent", fields: [connectedCalendarEventId], references: [id])
+  connectedCalendarEventId String?
 }
 
 model AccessRequest {
-  id                     String                       @id @default(cuid())
-  readableId             String                       @unique
-  createdAt              DateTime                     @default(now())
-  updatedAt              DateTime                     @updatedAt
-  space                  Space                        @relation(fields: [spaceId], references: [id])
-  spaceId                String
-  creator                User                         @relation(name: "accessRequestCreator", fields: [creatorId], references: [id])
-  creatorId              String
-  state                  String                       @default("Created")
-  onBehalfOfUser         User?                        @relation(name: "accessRequestOnBehalfOfUser", fields: [onBehalfOfUserId], references: [id])
-  onBehalfOfUserId       String?
-  onBehalfOfSpace        Space?                       @relation(name: "accessRequestOnbehalfOfSpace", fields: [onBehalfOfSpaceId], references: [id])
-  onBehalfOfSpaceId      String?
-  userUrl                String?
-  objectUrl              String?
-  body                   String
-  accessRequestType      AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
-  accessRequestTypeId    String
-  accessRequestApproval  AccessRequestApproval[]
-  accessRequestObjection AccessRequestObjection[]
-  stepExecutions         AccessRequestStepExecution[]
-  accessRequestComments  AccessRequestComment[]
-  spaceFeedItem          SpaceFeedItem[]
-  userFeedItems          UserFeedItem[]
-  calendarEvent          CalendarEvent? @relation(fields: [calendarEventId], references: [id])
-  calendarEventId        String?
+  id                      String                       @id @default(cuid())
+  readableId              String                       @unique
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  space                   Space                        @relation(fields: [spaceId], references: [id])
+  spaceId                 String
+  creator                 User                         @relation(name: "accessRequestCreator", fields: [creatorId], references: [id])
+  creatorId               String
+  state                   String                       @default("Created")
+  onBehalfOfUser          User?                        @relation(name: "accessRequestOnBehalfOfUser", fields: [onBehalfOfUserId], references: [id])
+  onBehalfOfUserId        String?
+  onBehalfOfSpace         Space?                       @relation(name: "accessRequestOnbehalfOfSpace", fields: [onBehalfOfSpaceId], references: [id])
+  onBehalfOfSpaceId       String?
+  userUrl                 String?
+  objectUrl               String?
+  body                    String
+  accessRequestType       AccessRequestType            @relation(fields: [accessRequestTypeId], references: [id])
+  accessRequestTypeId     String
+  accessRequestApproval   AccessRequestApproval[]
+  accessRequestObjection  AccessRequestObjection[]
+  stepExecutions          AccessRequestStepExecution[]
+  accessRequestComments   AccessRequestComment[]
+  spaceFeedItem           SpaceFeedItem[]
+  userFeedItems           UserFeedItem[]
+  calendarEvent           CalendarEvent?               @relation(fields: [calendarEventId], references: [id])
+  calendarEventId         String?
+  connectedStepExecutions AccessRequestStepExecution[] @relation("accessRequestConnectedAccessRequest")
 }
 
 model AccessRequestComment {

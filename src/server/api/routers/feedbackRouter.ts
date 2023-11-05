@@ -402,6 +402,12 @@ export const feedbackRouter = createTRPCRouter({
         },
       });
     }),
+    getAllFeedbackRounds: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx, input }) => { 
+      return ctx.prisma.feedbackRound.findMany({});
+    }),
+
 });
 
 //Get my non placed feedback items.

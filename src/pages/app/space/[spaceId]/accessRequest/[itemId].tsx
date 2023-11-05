@@ -41,6 +41,9 @@ import { OnBehalfOfUserStepAction } from "../../../../../components/AccessReques
 import { RequesterStepAction } from "../../../../../components/AccessRequestSteps/RequesterStepAction";
 import { OnBehalfOfSpaceStepAction } from "../../../../../components/AccessRequestSteps/OnBehalfOfSpaceStepAction";
 import { AccessRequestStatusBadge } from "../../../../../components/AccessRequestStatusBadge";
+import { ConnectAccessRequestStepAction } from "../../../../../components/AccessRequestSteps/ConnectedAccessRequest";
+import { ConnectCalendarEventStepAction } from "../../../../../components/AccessRequestSteps/ConnectedCalendarEvent";
+import { ConnectFeedbackRoundStepAction } from "../../../../../components/AccessRequestSteps/ConnectedFeedbackRound";
 
 const useStyles = createStyles((theme) => ({
   area: {
@@ -355,6 +358,30 @@ function AccessRequestView({
             accessRequest={accessRequestResult.data}
           />
         )}
+        {state === AccessRequestStates.Approved && nextStep && 
+        nextStep.stepType === AccessRequestStepTypes.AccessRequest && (
+          <ConnectAccessRequestStepAction
+            step={nextStep}
+            accessRequest={accessRequestResult.data}
+          />
+        )}
+
+{state === AccessRequestStates.Approved && nextStep && 
+        nextStep.stepType === AccessRequestStepTypes.CalendarEvent && (
+          <ConnectCalendarEventStepAction
+            step={nextStep}
+            accessRequest={accessRequestResult.data}
+          />
+        )}
+
+{state === AccessRequestStates.Approved && nextStep && 
+        nextStep.stepType === AccessRequestStepTypes.Feedback && (
+          <ConnectFeedbackRoundStepAction
+            step={nextStep}
+            accessRequest={accessRequestResult.data}
+          />
+        )}
+
         {state === AccessRequestStates.Approved && nextStep &&
           nextStep.stepType ===
             AccessRequestStepTypes.OnBehalfOfUserApproval && (

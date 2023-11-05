@@ -9,7 +9,11 @@ import { feedbackRouter } from "./routers/feedbackRouter";
 import { dataIndexRouter } from "./routers/dataIndexRouter";
 import { bodyTemplateRouter } from "./routers/bodyTemplateRouter";
 import { accessRequestRouter } from "./routers/accessRequestRouter";
-
+import { connectAccessRequestRouter } from "./routers/accessRequestTypes/connectAccessRequestRouter";
+import { connectCalendarEventRouter } from "./routers/accessRequestTypes/connectCalendarEventRouter";
+import { connectFeedbackRoundRouter } from "./routers/accessRequestTypes/connectFeedbackRoundRouter";
+import { initTRPC } from '@trpc/server';
+const t = initTRPC.create();
 /**
  * This is the primary router for your server.
  *
@@ -25,7 +29,7 @@ export const appRouter = createTRPCRouter({
   feedback: feedbackRouter,
   dataIndex: dataIndexRouter,
   bodyTemplate: bodyTemplateRouter,
-  accessRequest: accessRequestRouter
+  accessRequest:  t.mergeRouters(accessRequestRouter, connectAccessRequestRouter, connectFeedbackRoundRouter, connectCalendarEventRouter)
 });
 
 // export type definition of API

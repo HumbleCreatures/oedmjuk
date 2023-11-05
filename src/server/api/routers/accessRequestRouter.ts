@@ -211,7 +211,7 @@ export const accessRequestRouter = createTRPCRouter({
         include: { 
           accessRequestType: {
             include: { 
-              steps: true
+              steps: { where: { deletedAt: null }}
             }
           },
           accessRequestApproval: true,
@@ -1127,8 +1127,11 @@ export const accessRequestRouter = createTRPCRouter({
       }
       return {stepExecutions, canInteract: false};
     }),
-    
-  
+    getAllAccessRequests: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx, input }) => { 
+      return ctx.prisma.accessRequest.findMany({ include: {accessRequestType: true } });
+    }),
 });
 
 async function ShouldFinishAccessRequest (userId:string,accessRequestId: string, prisma: PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>) {

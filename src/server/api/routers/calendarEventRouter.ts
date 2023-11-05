@@ -508,6 +508,11 @@ export const calendarEventRouter = createTRPCRouter({
         notAnswered,
       };
     }),
+    getAllCalendarEvents: protectedProcedure
+    .input(z.object({}))
+    .query(async ({ ctx, input }) => { 
+      return ctx.prisma.calendarEvent.findMany({});
+    }),
     getPossibleAgendaItems: protectedProcedure
     .input(z.object({ calendarEventId: z.string() }))
     .query(async ({ ctx, input }) => {
