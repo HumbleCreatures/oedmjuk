@@ -13,6 +13,7 @@ export const userRouter = createTRPCRouter({
   }),
   getUserFeed: protectedProcedure
   .query(({ ctx }) => { 
+    console.log(JSON.stringify(ctx.session?.user));
     return ctx.prisma.userFeedItem.findMany({
       where:{ userId: ctx.session?.user?.id },
       orderBy: { createdAt: 'desc' },

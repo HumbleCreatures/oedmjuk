@@ -11,6 +11,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
 import Credentials from "next-auth/providers/credentials";
+import { User } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types
@@ -39,7 +40,18 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  **/
 export const authOptions: NextAuthOptions = {
+  callbacks: {
+    session({ session, user, token }) {
+      if (session.user && user) {
+        session.user.id = user.id;
+      }
 
+      if (session.user && token?.sub) {  
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+  },
   adapter: PrismaAdapter(prisma),
   providers: [
     DiscordProvider({
@@ -76,6 +88,8 @@ export const authOptions: NextAuthOptions = {
             id: credentials.userId,
           },
         });
+
+        console.log(JSON.stringify(user))
 
         return user;
       }
