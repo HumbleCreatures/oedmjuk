@@ -112,7 +112,7 @@ const TemplateView = ({templateId}:{templateId: string}) => {
           <Text fz="sm" fw={500}>Template Body</Text>
 
               
-              <DynamicBlockEditor data={form.getInputProps('body').value ? JSON.parse(form.getInputProps('body').value as string) as OutputData : undefined} holder="blockeditor-container" onChange={(data:OutputData) => {
+              <DynamicBlockEditor data={form.getInputProps('body').value ? JSON.parse(form.getInputProps('body').value as string) as OutputData : undefined} holder="template-blockeditor-container" onChange={(data:OutputData) => {
             form.setFieldValue('body', JSON.stringify(data))}}  />
               </div>
           <Button type="submit" mt="sm">

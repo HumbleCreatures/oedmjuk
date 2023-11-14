@@ -19,6 +19,7 @@ export type BlockEditorInput = {
 export const BlockEditor = ({ data, onChange, holder, clearTrigger }: BlockEditorInput) => {
   //add a reference to editor
   const editorRef = useRef<EditorJS>();
+  console.log(holder);
 
   const [currentData, setCurrentData] = React.useState<OutputData | undefined>(undefined);
   useEffect(() => {
@@ -55,12 +56,18 @@ export const BlockEditor = ({ data, onChange, holder, clearTrigger }: BlockEdito
   }, []);
 
   useEffect(() => { 
-    if (editorRef.current && editorRef.current.render && data) {
+
+    console.log(data);
+    if (editorRef.current && data) {
+
       if(!currentData) {
         setCurrentData(data);
+      }
+
+      if(editorRef.current.render) {
         void editorRef.current.render(data);
       }
-      
+
     }
   }, [data, currentData]);
 
